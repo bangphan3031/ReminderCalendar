@@ -74,9 +74,6 @@ class AuthController extends Controller
         if(!Hash::check($request->password, $user->password, [])){
             return response()->json(['error' => 'Wrong password'], 401);
         }
-        if($user->email_verified_at == null){
-            return response()->json(['error' => 'Your email address is not verified'], 401);
-        }
 
         $credentials = $request->only('email', 'password');
 

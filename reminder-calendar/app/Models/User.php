@@ -20,19 +20,17 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
      * @var array<int, string>
      */
 
-     protected $table = 'users';
+    protected $table = 'users';
 
-     protected $fillable = [
-         'name',
-         'email',
-         'email_verified_at',
-         'password',
-         'phone',
-         'image',
-         'google_id',
-         'is_admin',
-         'refresh_token',
-     ];
+    protected $fillable = [
+        'name',
+        'email',
+        'email_verified_at',
+        'password',
+        'phone',
+        'image',
+        'google_id',
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -43,6 +41,8 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         'password',
         'remember_token',
         'refresh_token',
+        'is_admin',
+        'deleted_at',
     ];
 
     /**

@@ -67,6 +67,11 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+        //xoa nguoi dung (xoa mem)       
+    }
+
+    public function softDelete(string $id)
+    {
         //xoa nguoi dung (xoa mem)
         $user = User::find($id); // Retrieve the user with ID 1
         $user->delete(); // Soft delete the user record
