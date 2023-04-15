@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Calendar;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +35,11 @@ class UserController extends Controller
         $user->phone = $request->input('phone');
         $user->is_admin = 0;
         $user->save();
+        $calendar = new Calendar();
+        $calendar->user_id = $user->id;
+        $calendar->name = $user->name;
+        $calendar->color = 'blue';
+        $calendar->save();
         return response()->json([
             'message' => 'User created',
             'data' => $user,

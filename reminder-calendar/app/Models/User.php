@@ -30,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         'phone',
         'image',
         'google_id',
+        'is_admin'
     ];
 
     /**
@@ -63,4 +64,5 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
     {
         return [];
     }
+    
 }

@@ -6,10 +6,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class GoogleAuthController extends Controller
 {
     
+    public function __construct()
+    {
+        $this->middleware('web');
+    }
+
     public function redirect()
     {
         return Socialite::driver('google')->redirect();
@@ -17,71 +23,49 @@ class GoogleAuthController extends Controller
 
     public function callbackGoogle()
     {
-        try{
+        try {
             $google_user = Socialite::driver('google')->user();
             $user = User::where('email', $google_user->email)->first();
-
+        
             if(!$user){
                 $new_user = User::create([
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'image' => $user->avatar,
-                    'google_id' => $user->id,
+                    'name' => $google_user->getName(),
+                    'email' => $google_user->getEmail(),
+                    'image' => $google_user->getAvatar(),
+                    'google_id' => $google_user->getId(),
+                    'password' => \bcrypt('password'), // provide a default password value
+                    'phone' => 'null',
                     'is_admin' => 0,
                 ]);
-
-                Auth::login($new_user);
-
-                return redirect()->intended('home');
+        
+                // Generate JWT token for new user
+                $token = JWTAuth::attempt([
+                    'email' => $new_user->email,
+                    'password' => 'password',
+                ]);
+                return response()->json([
+                    'message' => 'Login successful',
+                    'access_token' => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => JWTAuth::factory()->getTTL() * 60,
+                ], 200);
+        
+                //return \redirect()->intended('home')->withCookie(cookie('jwt_token', $token));
             } else {
-
-                Auth::login($user);
-                return redirect()->intended('home');
+                // Generate JWT token for existing user
+                $token = JWTAuth::attempt([
+                    'email' => $user->email,
+                    'password' => 'password',
+                ]);
+                return response()->json([
+                    'message' => 'Login successful',
+                    'access_token' => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => JWTAuth::factory()->getTTL() * 60,
+                ], 200);
             }
         } catch (\Throwable $th) {
-            dd('Something went wrong!'. $th->getMessage());
+            \dd('Something went wrong!'. $th->getMessage());
         }
-
-        $existingUser = User::where('email', $user->email)->first();
-        if($existingUser){
-            auth()->login($existingUser, true);
-        } else {
-            User::create([
-                'name' => $user->name,
-                'email' => $user->email,
-                'image' => $user->avatar,
-                'google_id' => $user->id,
-                'is_admin' => 0,
-            ]);
-        }
-        return redirect()->to('home');
     }
-
-    // Redirect the user to the Google authentication page
-    // public function redirect()
-    // {
-    //     return Socialite::driver('google')->redirect();
-    // }
-
-    // Handle the Google authentication response
-    // public function handleGoogleCallback()
-    // {
-    //     $user = Socialite::driver('google')->user();
-        
-    //     // Check if the user already exists in your database
-    //     $existingUser = Employee::where('email', $user->getEmail())->first();
-    //     if ($existingUser) {
-    //         Auth::login($existingUser);
-    //     } else {
-    //         // Create a new user account
-    //         $newUser = new Employee();
-    //         $newUser->name = $user->getName();
-    //         $newUser->email = $user->getEmail();
-    //         $newUser->save();
-            
-    //         Auth::login($newUser);
-    //     }
-        
-    //     return redirect()->intended('/');
-    // }
 }

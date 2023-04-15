@@ -9,84 +9,32 @@ use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //hien thi tat ca nguoi dung
-        return User::all();
-        // $users = DB::table('users')->select('*')->where('deleted_at', null)->get();
-        // return $users;
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //tao nguoi dung
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //luu nguoi dung
-    }
-
-    /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function profile()
     {
-        //hien thi nguoi dung theo id
-        return User::find($id);
-        // $user = DB::table('users')->select('*')->where('id', $id)->get();
-        // return $user;
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //lay ra nguoi dung theo id de update
+        //hien thi thong tin nguoi dung dang dang nhap
+        return response()->json(auth()->user());
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        //cap nhat lai nguoi dung
+        //cap thong tin nguoi dung
+        $users = auth()->user();
+        $user = User::findOrFail($users->id);
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->phone = $request->input('phone');
+        $user->image = $request->input('image');
+        $user->save();
+
+        return response()->json([
+            'message' => 'User updated',
+            'data' => $user,
+        ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //xoa nguoi dung (xoa mem)       
-    }
-
-    public function softDelete(string $id)
-    {
-        //xoa nguoi dung (xoa mem)
-        $user = User::find($id); // Retrieve the user with ID 1
-        $user->delete(); // Soft delete the user record
-        return response()->json(
-            [
-                'message' => 'User deleted',
-            ], 200
-        );
-    }
-
-    public function showbin()
-    {
-        // Retrieve only soft-deleted users
-        $deletedUsers = User::onlyTrashed()->get();
-        // $deletedUsers = DB::table('users')->whereNotNull('deleted_at')->get();
-        return $deletedUsers;
-    }
 }

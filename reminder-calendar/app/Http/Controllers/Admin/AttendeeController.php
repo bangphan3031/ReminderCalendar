@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendee;
 use Illuminate\Http\Request;
+
 
 class AttendeeController extends Controller
 {
@@ -12,7 +14,9 @@ class AttendeeController extends Controller
      */
     public function index()
     {
-        //
+        //Hien thi thong tin tat ca attendee
+        $attendee = Attendee::all();
+        return response()->json($attendee);
     }
 
     /**
@@ -20,7 +24,15 @@ class AttendeeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //Tao moi attendee
+        $attendee = new Attendee();
+        $attendee->event_id = $request->input('event_id');
+        $attendee->user_id = $request->input('user_id');
+        $attendee->save();
+        return response()->json([
+            'message' => 'attendee created',
+            'data' => $attendee,
+        ], 200);
     }
 
     /**
@@ -28,7 +40,9 @@ class AttendeeController extends Controller
      */
     public function show(string $id)
     {
-        //
+        //Hien thi thong tin attendee theo id
+        $attendee = Attendee::findOrFail($id);
+        return response()->json($attendee);
     }
 
     /**
@@ -36,7 +50,15 @@ class AttendeeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        //Cap nhat attendee theo id
+        $attendee = Attendee::findOrFail($id);
+        $attendee->event_id = $request->input('event_id');
+        $attendee->user_id = $request->input('user_id');
+        $attendee->save();
+        return response()->json([
+            'message' => 'attendee updated',
+            'data' => $attendee,
+        ], 200);
     }
 
     /**
@@ -44,6 +66,12 @@ class AttendeeController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        //Xoa attendee theo id
+        $attendee = Attendee::findOrFail($id);
+        //Xoa mem
+        $attendee->delete();
+        //Xoa cung
+        //$calendar->forceDelete();
+        return response()->json(['message' => 'attendee deleted']);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Calendar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -26,20 +27,25 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'email|required|string',
             'name' => 'required|string',
-            'password' => 'required|string|min:6'
+            'password' => 'required|string|min:6|confirmed'
         ]);
 
         if($validator->fails()){
             return response()->json($validator->errors(),400);
         }
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'is_admin' => 0,
         ]);
+        $calendar = new Calendar();
+        $calendar->user_id = $user->id;
+        $calendar->name = $user->name;
+        $calendar->color = 'blue';
+        $calendar->save();
 
         $credential = $request->only('email', 'password');
 
@@ -113,12 +119,6 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60
         ]);
-    }
-
-    //get profile
-    public function profile()
-    {
-        return response()->json(auth()->user());
     }
     
 }
