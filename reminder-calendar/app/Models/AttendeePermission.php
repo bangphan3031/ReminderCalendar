@@ -17,6 +17,10 @@ class AttendeePermission extends Model
         'permission',
     ];
 
+    public function attendee(){
+        return $this->belongsTo(Attendee::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

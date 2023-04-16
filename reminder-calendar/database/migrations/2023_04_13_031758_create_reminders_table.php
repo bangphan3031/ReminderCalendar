@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('kind_of_time', ['days', 'hours', 'minutes']);
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
-            $table->foreign('event_id')->references('id')->on('events');
+            $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
         });
     }
 

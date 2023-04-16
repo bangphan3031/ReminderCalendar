@@ -23,6 +23,17 @@ class Event extends Model
         'status',
     ];
 
+    public function calendar(){
+        return $this->belongsTo(Calendar::class);
+    }
+
+    public function reminder(){
+        return $this->hasMany(Reminder::class);
+    }
+
+    public function attendee(){
+        return $this->hasMany(Attendee::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

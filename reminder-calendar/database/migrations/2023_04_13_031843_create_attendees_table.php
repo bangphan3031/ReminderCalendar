@@ -17,8 +17,8 @@ return new class extends Migration
             $table->unsignedInteger('user_id');           
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('event_id')->references('id')->on('events');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');
         });
     }
 

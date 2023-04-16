@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendee;
 use App\Models\Calendar;
 use App\Models\Event;
 use App\Models\Reminder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ReminderController extends Controller
@@ -26,7 +28,8 @@ class ReminderController extends Controller
                 'message' => 'Event not found',
             ], 404);
         }
-        $reminder = Reminder::whereIn('event_id', $event_id)->get();
+        $attendee_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
+        $reminder = Reminder::whereIn('event_id', $event_id)->orWhereIn('event_id', $attendee_id)->get();
         return response()->json([
             'message' => 'get reminder successful',
             'data' => $reminder,
@@ -197,4 +200,5 @@ class ReminderController extends Controller
         $reminder->delete();
         return response()->json(['message' => 'Event deleted']);
     }
+
 }

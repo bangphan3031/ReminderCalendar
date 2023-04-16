@@ -19,6 +19,10 @@ class Reminder extends Model
         'kind_of_time',
     ];
 
+    public function event(){
+        return $this->belongsTo(Event::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('permission', ['Modify event', 'Invite others', 'See attendees list']);
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
-            $table->foreign('attendee_id')->references('id')->on('attendees');
+            $table->foreign('attendee_id')->references('id')->on('attendees')->onDelete('cascade');
         });
     }
 

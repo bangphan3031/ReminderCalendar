@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\SendReminderController;
 use Laravel\Sanctum\Sanctum;
 
 /*
@@ -62,26 +63,29 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::get('/event/day/{date}', [EventController::class, 'getEventInDay']);
     Route::get('/event/calendar/{calendar_id}', [EventController::class, 'getEventWithCalendar']);
     Route::get('event', [EventController::class, 'getAllEvent']);
+    Route::get('event/upcoming', [EventController::class, 'getUpcomingEvent']);
+    Route::get('event/find/{keyword}', [EventController::class, 'getEventWithTitle']);
     Route::get('/event/{id}', [EventController::class, 'showEvent']);
     Route::post('/event', [EventController::class, 'createEvent']);
     Route::put('/event/{id}', [EventController::class, 'updateEvent']);
     Route::delete('/event/{id}', [EventController::class, 'deleteEvent']);
 
     //reminder api
-    Route::get('reminder', [ReminderController::class, 'getAllReminder']);
-    Route::get('reminder/{event_id}', [ReminderController::class, 'getReminderWithEvent']);
-    Route::post('reminder/{event_id}', [ReminderController::class, 'createReminder']);
-    Route::get('reminder/show/{id}', [ReminderController::class, 'showReminder']);
-    Route::put('reminder/{event_id}/{id}', [ReminderController::class, 'updateReminder']);
-    Route::delete('reminder/{id}', [ReminderController::class, 'deleteReminder']);
+    Route::get('/reminder', [ReminderController::class, 'getAllReminder']);
+    Route::get('/reminder/{event_id}', [ReminderController::class, 'getReminderWithEvent']);
+    Route::post('/reminder/{event_id}', [ReminderController::class, 'createReminder']);
+    Route::get('/reminder/show/{id}', [ReminderController::class, 'showReminder']);
+    Route::put('/reminder/{event_id}/{id}', [ReminderController::class, 'updateReminder']);
+    Route::delete('/reminder/{id}', [ReminderController::class, 'deleteReminder']);
 
     //attendee api
-    Route::get('attendee', [AttendeeController::class, 'getAllAttendee']);
-    Route::get('attendee/{event_id}', [AttendeeController::class, 'getAttendeeWithEvent']);
-    Route::post('attendee/{event_id}', [AttendeeController::class, 'addAttendee']);
-    Route::get('attendee/show/{id}', [AttendeeController::class, 'showAttendee']);
+    Route::get('/attendee', [AttendeeController::class, 'getAllAttendee']);
+    Route::get('/attendee/{event_id}', [AttendeeController::class, 'getAttendeeWithEvent']);
+    Route::post('/attendee/{event_id}', [AttendeeController::class, 'addAttendee']);
+    Route::get('/attendee/show/{id}', [AttendeeController::class, 'showAttendee']);
     //Route::put('attendee/{event_id}/{id}', [ReminderController::class, 'updateReminder']);
-    Route::delete('attendee/{id}', [AttendeeController::class, 'deleteAttendee']);
+    Route::delete('/attendee/{id}', [AttendeeController::class, 'deleteAttendee']);
 });
+Route::get('/sendReminder/{id}', [SendReminderController::class, 'sendReminder']);
 
 

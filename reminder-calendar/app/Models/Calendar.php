@@ -19,6 +19,14 @@ class Calendar extends Model
         'color',
     ];
 
+    public function uesr(){
+        return $this->belongsTo(User::class);
+    }
+
+    public function event(){
+        return $this->hasMany(Event::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

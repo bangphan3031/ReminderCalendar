@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('status', ['incomplete', 'complete'])->default('incomplete');
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
-            $table->foreign('calendar_id')->references('id')->on('calendars');
+            $table->foreign('calendar_id')->references('id')->on('calendars')->onDelete('cascade');
         });
     }
 

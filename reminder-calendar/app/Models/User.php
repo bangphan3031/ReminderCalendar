@@ -33,6 +33,14 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         'is_admin'
     ];
 
+    public function attendee(){
+        return $this->hasMany(Attendee::class);
+    }
+
+    public function calendar(){
+        return $this->hasMany(Calendar::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

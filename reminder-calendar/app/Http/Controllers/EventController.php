@@ -111,6 +111,53 @@ class EventController extends Controller
         ], 200);
     }
 
+    // Lay ra cac su kien sap dien ra (trong vong 3 ngay)
+    public function getUpcomingEvent()
+    {
+        $now = Carbon::now('Asia/Ho_Chi_Minh')->toDateTimeString();
+        $now3 = Carbon::now('Asia/Ho_Chi_Minh')->addDays(3)->toDateTimeString();
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        if (!$calendar_id) {
+            return response()->json([
+                'message' => 'Calendar not found',
+            ], 404);
+        }
+        $event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
+        $events_id = Event::whereIn('calendar_id', $calendar_id)
+                        ->orWhereIn('id', $event_id)
+                        ->pluck('id')->toArray();
+        $events_upcomming = Event::whereIn('id', $events_id)
+                                ->where('start_time', '>', $now)
+                                ->where('start_time', '<=', $now3)
+                                ->orderBy('start_time', 'asc')
+                                ->get();
+        return response()->json([
+            'message' => 'Get events successful',
+            'data' => $events_upcomming,
+        ], 200);
+    }
+
+    //Tim kiem event theo ten
+    public function getEventWithTitle($keyword)
+    {
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        if (!$calendar_id) {
+            return response()->json([
+                'message' => 'Calendar not found',
+            ], 404);
+        }
+        $event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
+        $events_id = Event::whereIn('calendar_id', $calendar_id)->orWhereIn('id', $event_id)->pluck('id')->toArray();
+        $result = Event::whereIn('id', $events_id)->where('title', 'like', '%'.$keyword.'%')->get();
+        return response()->json([
+            'message' => 'Get events successful',
+            'data' => $result,
+        ], 200);
+    }
+
+
     // Tao moi event
     public function createEvent(Request $request)
     {
@@ -234,4 +281,6 @@ class EventController extends Controller
         $event->delete();
         return response()->json(['message' => 'Event deleted']);
     }
+
+
 }

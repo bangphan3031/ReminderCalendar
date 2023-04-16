@@ -17,6 +17,18 @@ class Attendee extends Model
         'user_id',
     ];
 
+    public function event(){
+        return $this->belongsTo(Event::class);
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+
+    public function attendeePermission(){
+        return $this->hasMany(AttendeePermission::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
