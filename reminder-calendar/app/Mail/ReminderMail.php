@@ -35,16 +35,16 @@ class ReminderMail extends Mailable
 
     public function build()
     {
-        return $this->view('emails.reminder')
-                    ->subject($this->title)
-                    ->with([
-                        'title' => $this->title,
-                        'start_time' => $this->start_time,
-                        'end_time' => $this->end_time,
-                        'location' => $this->location,
-                        'description' => $this->description,
-                        'create_user' => $this->create_user,
-                    ]);
+        // return $this->view('emails.reminder')
+        //             ->subject($this->title)
+        //             ->with([
+        //                 'title' => $this->title,
+        //                 'start_time' => $this->start_time,
+        //                 'end_time' => $this->end_time,
+        //                 'location' => $this->location,
+        //                 'description' => $this->description,
+        //                 'create_user' => $this->create_user,
+        //             ]);
     }
 
     /**

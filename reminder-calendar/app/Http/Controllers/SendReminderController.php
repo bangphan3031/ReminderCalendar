@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendReminderJob;
 use App\Mail\ReminderMail;
 use App\Models\Attendee;
 use App\Models\Calendar;
@@ -43,13 +44,15 @@ class SendReminderController extends Controller
         $carbon_start_time = Carbon::parse($start_time);
         $carbon_time_to_send = $carbon_start_time->sub($reminder->time, $reminder->kind_of_time);
         $time_to_send = $carbon_time_to_send->format('Y-m-d H:i:s');
+        $delay = Carbon::parse(now())->diffInSeconds($time_to_send, false);
         
         if ($method === 'Email') {
             foreach ($email as $e) {
-                Mail::to($e)->send(
-                new ReminderMail($title, $start_time, $end_time, $location, $description, $create_user));
+                SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user)
+                ->onQueue('send-reminder-emails')
+                ->delay($delay);
             }
         }
-        return response()->json(['message' => 'Sended reminder'], 200);
+        return response()->json(['message' => 'Set to send email successful'], 200);
     }
 }
