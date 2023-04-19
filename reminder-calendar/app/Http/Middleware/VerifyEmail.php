@@ -21,7 +21,7 @@ class VerifyEmail
         // }
 
         $user = User::where('email', $request->email)->first();
-        if($user->email_verified_at == null){
+        if($user && !$user->hasVerifiedEmail()){
             return response()->json(['error' => 'Your email address is not verified.'], 401);
         }
     

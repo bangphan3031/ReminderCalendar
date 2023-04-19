@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -29,11 +30,17 @@ class AuthController extends Controller
             'name' => 'required|string',
             'password' => 'required|string|min:6|confirmed'
         ]);
-
+        
         if($validator->fails()){
             return response()->json($validator->errors(),400);
         }
 
+        $exist_user = User::where('email', $request->email)->first();
+        if($exist_user)
+        {
+            return response()->json(['error' => 'Email alradey exists'], 401);
+        }
+        
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -72,10 +79,10 @@ class AuthController extends Controller
         if($validator->fails()){
             return response()->json($validator->errors(),400);
         }
-
+        
         $user = User::where('email', $request->email)->first();
         if(!$user){
-            return response()->json(['error' => 'Email does not exist'], 401);
+            return response()->json(['error' => 'Email does not exists'], 401);
         }
         if(!Hash::check($request->password, $user->password, [])){
             return response()->json(['error' => 'Wrong password'], 401);
