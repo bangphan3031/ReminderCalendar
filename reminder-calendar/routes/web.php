@@ -20,5 +20,5 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 */
 
 Route::get('/', function () {
-    return view('/emails/reminder');
+    return view('/welcome');
 });

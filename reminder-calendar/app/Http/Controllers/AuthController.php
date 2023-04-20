@@ -26,19 +26,14 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'email|required|string',
-            'name' => 'required|string',
-            'password' => 'required|string|min:6|confirmed'
+            'email' => 'email|required|unique:users,email',
+            'name' => 'required',
+            'phone' => 'required|unique:users,phone',
+            'password' => 'required|min:6|confirmed'
         ]);
         
         if($validator->fails()){
             return response()->json($validator->errors(),400);
-        }
-
-        $exist_user = User::where('email', $request->email)->first();
-        if($exist_user)
-        {
-            return response()->json(['error' => 'Email alradey exists'], 401);
         }
         
         $user = User::create([
@@ -57,12 +52,12 @@ class AuthController extends Controller
         $credential = $request->only('email', 'password');
 
         // Generate a JWT token
-        $verifyToken = JWTAuth::attempt($credential);
+        $token = JWTAuth::attempt($credential);
 
         return response()->json(
             [
                 'message' => 'Register successfull',
-                'verifyToken' => $verifyToken,
+                'token' => $token,
             ],
             200
         );
@@ -82,10 +77,10 @@ class AuthController extends Controller
         
         $user = User::where('email', $request->email)->first();
         if(!$user){
-            return response()->json(['error' => 'Email does not exists'], 401);
+            return response()->json(['error' => 'Email does not exists'], 400);
         }
         if(!Hash::check($request->password, $user->password, [])){
-            return response()->json(['error' => 'Wrong password'], 401);
+            return response()->json(['error' => 'Wrong password'], 400);
         }
 
         $credentials = $request->only('email', 'password');
@@ -101,7 +96,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'message' => 'Login successfull',
-            'access_token' => $token,
+            'token' => $token,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
         ]);
@@ -122,7 +117,7 @@ class AuthController extends Controller
 
         // Return the new token in a JSON response
         return response()->json([
-            'access_token' => $newToken,
+            'token' => $newToken,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60
         ]);
