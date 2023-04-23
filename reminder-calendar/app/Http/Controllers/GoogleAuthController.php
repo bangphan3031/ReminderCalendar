@@ -43,20 +43,24 @@ class GoogleAuthController extends Controller
                     'email' => $new_user->email,
                     'password' => 'password',
                 ]);
+                // return redirect()->intended('http://localhost:3000/dashboard')->with([
+                //     'access_token' => $token
+                // ])->header('Access-Control-Allow-Origin', 'http://localhost:3000');
                 return response()->json([
                     'message' => 'Login successful',
                     'access_token' => $token,
                     'token_type' => 'bearer',
                     'expires_in' => JWTAuth::factory()->getTTL() * 60,
                 ], 200);
-        
-                //return \redirect()->intended('home')->withCookie(cookie('jwt_token', $token));
             } else {
                 // Generate JWT token for existing user
                 $token = JWTAuth::attempt([
                     'email' => $user->email,
                     'password' => 'password',
                 ]);
+                // return redirect()->intended('http://localhost:3000/dashboard')->with([
+                //     'access_token' => $token
+                // ])->header('Access-Control-Allow-Origin', 'http://localhost:3000');
                 return response()->json([
                     'message' => 'Login successful',
                     'access_token' => $token,

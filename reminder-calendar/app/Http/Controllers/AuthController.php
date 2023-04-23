@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UserVerification;
 use App\Models\Calendar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -48,19 +50,37 @@ class AuthController extends Controller
         $calendar->name = $user->name;
         $calendar->color = 'blue';
         $calendar->save();
+        if($user) {
+            try{
+                Mail::mailer('smtp')->to($user->email)->send(new UserVerification($user));
+
+                return response()->json(
+                    [
+                        'message' => 'Register successfull, verify your email address to login',
+                    ], 200
+                );
+            } catch (\Exception $err){
+
+                return response()->json(
+                    [
+                        'message' => 'Could not send email verification, please try again',
+                    ], 500
+                );
+            }
+        }
 
         $credential = $request->only('email', 'password');
 
-        // Generate a JWT token
-        $token = JWTAuth::attempt($credential);
+        // // Generate a JWT token
+        // $token = JWTAuth::attempt($credential);
 
-        return response()->json(
-            [
-                'message' => 'Register successfull',
-                'token' => $token,
-            ],
-            200
-        );
+        // return response()->json(
+        //     [
+        //         'message' => 'Register successfull',
+        //         'token' => $token,
+        //     ],
+        //     200
+        // );
     }
 
     //login

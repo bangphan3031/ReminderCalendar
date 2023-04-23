@@ -19,18 +19,24 @@ class EmailVerificationController extends Controller
         $request->user()->sendEmailVerificationNotification();
         return ['status' => 'verification-link-send'];
     }
-    public function verify(EmailVerificationRequest $request)
+    public function verify($user_id, Request $request)
     {
-        if($request->user()->hasVerifiedEmail()){
-            return [
-                'message' => 'Email already verified'
-            ];
+        if(!$request->hasValidSignature()) {
+            return response()->json(["msg" => "Invalid/Expierd url provider"], 401);
         }
-        if($request->user()->markEmailAsVerified()){
-            event(new Verified($request->user()));
+        $user = User::findOrFail($user_id);
+
+        if(!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        } else {
+            // return response()->json([
+            //     'message' => 'Email already verified'
+            // ], 400);
+            return redirect()->to('http://localhost:3000/email-verified')->with('fail', 'Email already verified');
         }
-        return [
-            'message' => 'Email has been verified'
-        ];
+        // return response()->json([
+        //     'message' => 'Email verified successfully'
+        // ], 200);
+        return redirect()->to('http://localhost:3000/email-verified')->with('success', 'Email verified successfully');
     }
 }

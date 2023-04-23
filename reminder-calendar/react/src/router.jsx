@@ -1,12 +1,15 @@
 import {Navigate, createBrowserRouter} from "react-router-dom";
 import NotFound from "./views/NotFound";
 import Register from "./views/Register";
-import Users from "./views/Users";
 import DefautltLayout from "./components/DefaultLayout";
 import GuestLayout from "./components/GuestLayout";
 import Dashboard from "./views/Dashboard"
 import { Children } from "react";
-import Login from "./views/login";
+import Login from "./views/Login";
+import EmailVerification from "./views/EmailVerification";
+import EmailVerified from "./views/EmailVerified";
+import Profile from "./views/Profile";
+import BasicExample from "./views/BasicExample";
 
 
 const router = createBrowserRouter([
@@ -16,18 +19,19 @@ const router = createBrowserRouter([
         children: [
             {
                 path: '/',
-                element: <Navigate to="/users" />
+                element: <Navigate to="/dashboard" />
             },
             {
                 path: '/dashboard',
                 element: <Dashboard />
             },
             {
-                path: '/users',
-                element: <Users />
+                path: '/account/profile',
+                element: <Profile />
             },
         ]
     },
+    //
     {
         path: '/',
         element: <GuestLayout />,
@@ -37,14 +41,26 @@ const router = createBrowserRouter([
                 element: <Login />
             },
             {
-                path: '/register',
+                path: '/signup',
                 element: <Register />
             },
+            {
+                path: '/email-verified',
+                element: <EmailVerified />
+            },
+            {
+                path: '/email-verify',
+                element: <EmailVerification />
+            }
         ]
     },
     {
         path: '/*',
         element: <NotFound />
+    },
+    {
+        path: '/example',
+        element: <BasicExample />
     },
 ])
 

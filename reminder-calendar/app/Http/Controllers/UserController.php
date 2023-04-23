@@ -23,18 +23,28 @@ class UserController extends Controller
     public function update(Request $request)
     {
         //cap thong tin nguoi dung
-        $users = auth()->user();
-        $user = User::findOrFail($users->id);
+        $user = User::findOrFail(auth()->user()->id);
         $user->name = $request->input('name');
         $user->email = $request->input('email');
         $user->phone = $request->input('phone');
-        $user->image = $request->input('image');
         $user->save();
 
         return response()->json([
             'message' => 'User updated',
             'data' => $user,
         ], 200);
+    }
+    public function uploadImage(Request $request)
+    {
+        $user = User::findOrFail(auth()->user()->id);
+        if($request->has('image')){
+            $image = $request->file('image');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $image->move('uploads/', $filename);
+            $user->image = $filename;
+            $user->save();
+            return response()->json(['image' => asset('uploads/'.$filename)], 200);
+        }
     }
 
 }

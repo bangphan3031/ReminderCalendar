@@ -29,18 +29,18 @@ export default function Login() {
         }
       })
   }
-  const handleGoogleLogin = ev  => {
-    ev.preventDefault()
+  // const handleGoogleLogin = ev  => {
+  //   ev.preventDefault()
     
-    axiosClient.get('/auth/google')
-      .then(({data}) => {
-        setUser(data.user);
-        setToken(data.token);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
+  //   axiosClient.get('/auth/google')
+  //     .then(({data}) => {
+  //       setUser(data.user);
+  //       setToken(data.token);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // };
 
   return (
     <div className="login-signup-form animated fadeInDown">
@@ -57,10 +57,10 @@ export default function Login() {
           <input ref={emailRef} type="email" placeholder="Email"/>
           <input ref={passwordRef} type="password" placeholder="Password"/>
           <button className="btn btn-block" onClick={onSubmit}>Login</button>
-          <button className="btn-google" onClick={handleGoogleLogin}>
+          {/* <button className="btn-google" onClick={handleGoogleLogin}>
             <i className="fab fa-google"></i> Sign in with Google
-          </button>
-          <p className="message">Not registered? <Link to="/register">Create an account</Link></p>
+          </button> */}
+          <p className="message">Not registered?<Link to="/register">Create an account</Link></p>
         </form>
       </div>
     </div>

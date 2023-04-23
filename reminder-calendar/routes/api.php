@@ -29,9 +29,9 @@ use Laravel\Sanctum\Sanctum;
 // });
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('email/verification-notification', [EmailVerificationController::class, 'sendVerificationEmail']);
-Route::get('verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
-Route::post('/login', [AuthController::class, 'login'])->middleware('verified');
-Route::get('auth/google', [GoogleAuthController::class, 'redirect']);
+Route::get('verify-email/{id}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
+Route::post('/login', [AuthController::class, 'login'])->middleware('verified')->name('login');
+Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('loginGoogle');
 Route::get('auth/google/callback', [GoogleAuthController::class, 'callbackGoogle']);
 
 
@@ -48,6 +48,8 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [UserController::class, 'profile']);
     Route::put('/profile', [UserController::class, 'update']);
+    Route::put('/profile/upload', [UserController::class, 'uploadImage']);
+    Route::post('/profile/upload', [UserController::class, 'uploadImage']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
 
     //calendar api

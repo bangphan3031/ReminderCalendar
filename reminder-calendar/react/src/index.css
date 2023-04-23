@@ -71,17 +71,6 @@ input:focus {
     background-color: #b72424;
 }
 
-.btn-logout {
-    text-decoration: none;
-    padding: 0.75rem 1.5rem;
-    color: #212121;
-    transition: all 0.3s;
-    border-radius: 6px;
-}
-.btn-logout:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
 .btn:hover,
 .btn:active,
 .btn:focus {
@@ -138,9 +127,8 @@ table > tbody > tr > td {
     border-radius: 0.5rem;
 }
 
-/* Login/Signup forms*/
 
-.login-signup-form {
+login-signup-form {
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -175,7 +163,6 @@ table > tbody > tr > td {
     text-decoration: none;
 }
 
-/* Login/Signup form */
 
 
 #defaultLayout {
@@ -206,7 +193,7 @@ table > tbody > tr > td {
 }
 
 #defaultLayout header {
-    height: 80px;
+    height: 50px;
     padding: 2rem 3rem;
     background-color: white;
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
@@ -240,4 +227,13 @@ table > tbody > tr > td {
         opacity: 1;
         transform: translateY(0);
     }
+} 
+
+img.rounded-circle {
+    border-radius: 50%;
 }
+
+.my-dropdown-menu {
+    display: flex;
+    flex-direction: column;
+  }

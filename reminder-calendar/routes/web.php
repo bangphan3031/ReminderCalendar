@@ -20,5 +20,5 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 */
 
 Route::get('/', function () {
-    return view('/welcome');
+    return view('/login');
 });
