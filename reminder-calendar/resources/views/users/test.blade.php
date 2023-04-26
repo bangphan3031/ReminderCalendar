@@ -21,7 +21,7 @@
     <hr>
     
     <div>
-        <a href="{{ route('loginGoogle') }}" class="btn btn-google">Login with Google</a>
+        <a href="{{ url('auth/google') }}" class="btn btn-google">Login with Google</a>
     </div>
     
     @if (session('message'))

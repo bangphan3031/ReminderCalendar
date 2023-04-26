@@ -3,8 +3,11 @@ import '../css/Profile.css';
 import { useEffect } from "react";
 import axiosClient from '../axios-client';
 import { useNavigate } from 'react-router-dom';
+import { useStateContext } from "../contexts/ContextProvider";
 
 export default function Profile() {
+  const {token} = useStateContext()
+    if (token) {
     const navigate = useNavigate();
 
     const [name, setName] = useState('');
@@ -47,7 +50,7 @@ export default function Profile() {
         axiosClient.put('/profile', payload)
             .then(response => {
                 alert('Cập nhật thành công.');
-                navigate('/dashboard');
+                navigate('/');
                 window.location.reload();
             })
         .catch(error => {
@@ -90,4 +93,7 @@ export default function Profile() {
       </form>
     </div>
   );
+    } else {
+      <Outlet />
+    }
 }

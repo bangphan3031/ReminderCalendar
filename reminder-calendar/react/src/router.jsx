@@ -3,8 +3,6 @@ import NotFound from "./views/NotFound";
 import Register from "./views/Register";
 import DefautltLayout from "./components/DefaultLayout";
 import GuestLayout from "./components/GuestLayout";
-import Dashboard from "./views/Dashboard"
-import { Children } from "react";
 import Login from "./views/Login";
 import EmailVerification from "./views/EmailVerification";
 import EmailVerified from "./views/EmailVerified";
@@ -17,18 +15,10 @@ const router = createBrowserRouter([
         path: '/',
         element: <DefautltLayout />,
         children: [
-            {
-                path: '/',
-                element: <Navigate to="/dashboard" />
-            },
-            {
-                path: '/dashboard',
-                element: <Dashboard />
-            },
-            {
-                path: '/account/profile',
-                element: <Profile />
-            },
+            // {
+            //     path: '/account/profile',
+            //     element: <Profile />
+            // }
         ]
     },
     //
@@ -61,6 +51,10 @@ const router = createBrowserRouter([
     {
         path: '/example',
         element: <BasicExample />
+    },
+    {
+        path: '/account/profile',
+        element: <Profile />
     },
 ])
 

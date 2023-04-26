@@ -18,7 +18,15 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-Route::get('/', function () {
-    return view('/login');
+Route::get('/home', function () {
+    return view('/welcome');
 });
+Route::get('/', function () {
+    return view('/users/login');
+});
+Route::get('/register', function () {
+    return view('/users/register');
+})->name('register.page');
+Route::get('/login', function () {
+    return view('/users/login');
+})->name('login.page');
