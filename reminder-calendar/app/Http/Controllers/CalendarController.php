@@ -12,7 +12,8 @@ class CalendarController extends Controller
     public function getCalendar()
     {
         $user = auth()->user();
-        $calendars = Calendar::where('user_id', $user->id)->select('name', 'color')->get();
+        
+        $calendars = Calendar::where('user_id', $user->id)->get();
         return response()->json([
             'message' => 'get calendar successful',
             'data' => $calendars,

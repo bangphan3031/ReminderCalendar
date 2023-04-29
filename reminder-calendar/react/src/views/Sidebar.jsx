@@ -1,13 +1,20 @@
-import React from 'react'
-import plus from '../assets/plus.png'
+import React, { useContext, useEffect } from 'react';
+import SmallCalendar from './SmallCalendar';
+import MyCalendar from './MyCalendar'
+import CreateButton from './CreateButton';
 
 export default function Sidebar() {
+
   return (
     <aside>
-      <button className='create btn btn-outline-secondary border mt-3 px-2 py-2 rounded-pill d-flex align-items-center'>
-        <img src={plus} alt="create_event" className='plus' />
-        <span className='px-3 fw-bold'> Create </span>
-      </button>
+      <CreateButton />
+      <div className='small-calendar mt-3'>
+        <SmallCalendar />
+      </div>     
+      <div className='my-calendar mt-3'>
+        <MyCalendar />
+      </div>  
     </aside>
   )
 }
+

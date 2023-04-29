@@ -11,9 +11,6 @@ import { FaUser, FaSignOutAlt, FaChevronLeft, FaChevronRight } from 'react-icons
 export default function Header() {
     const [selectedValue, setSelectedValue] = useState(localStorage.getItem("selectedValue") || "Month");
     const {user, token, setUser, setToken} = useStateContext()
-    if(!token) {
-        return <Navigate to="/login" />
-    }
 
     const onLogout = ev => {
         ev.preventDefault()
@@ -22,8 +19,11 @@ export default function Header() {
           .then(() => {
             setUser({})
             setToken(null)
+            localStorage.removeItem("selectedValue")
         })
+        .catch(error => console.log(error));
     }
+
     useEffect(() => {
     localStorage.setItem("selectedValue", selectedValue);
     }, [selectedValue]);
@@ -34,9 +34,14 @@ export default function Header() {
             setUser(data)
         })
     }, [])
+
+    if(!token) {
+        return <Navigate to="/login" />
+    }
+
     return (
-        <header className="px-1 py-1 d-flex align-items-center border">
-            <img src={logo} alt="calendar" class="logo" />
+        <header className="px-1 py-1 d-flex align-items-center border-bottom">
+            <img src={logo} alt="calendar" className="logo" />
             <h4 className="mt-1 text-primary"> Calendar </h4>
             <button className="today btn btn-outline-secondary">
                 Today

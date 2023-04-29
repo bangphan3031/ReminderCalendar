@@ -9,9 +9,9 @@ export default function Day({ day, rowIdx }) {
   }
   return (
     <div>
-      <div className='d-flex flex-column align-items-center'>
+      <div className='d-flex flex-column align-items-center' style={{ height: "135px" }}>
         {rowIdx === 0 && 
-          <p className='small mt-1'>{day.format('ddd').toUpperCase()}</p>
+          <p className='small mt-1'>{day.format('ddd')}</p>
         }
         <p className={`small p-1 text-center ${getCurrentDayClass()}`}>{day.format('DD')}</p>
         </div>

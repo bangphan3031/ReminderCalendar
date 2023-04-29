@@ -7,7 +7,7 @@ import Login from "./views/Login";
 import EmailVerification from "./views/EmailVerification";
 import EmailVerified from "./views/EmailVerified";
 import Profile from "./views/Profile";
-import BasicExample from "./views/BasicExample";
+import CreateCalendar from "./views/CreateCalendar";
 
 
 const router = createBrowserRouter([
@@ -15,10 +15,10 @@ const router = createBrowserRouter([
         path: '/',
         element: <DefautltLayout />,
         children: [
-            // {
-            //     path: '/account/profile',
-            //     element: <Profile />
-            // }
+            {
+                path: '/calendar/create',
+                element: <CreateCalendar />
+            }
         ]
     },
     //
@@ -47,10 +47,6 @@ const router = createBrowserRouter([
     {
         path: '/*',
         element: <NotFound />
-    },
-    {
-        path: '/example',
-        element: <BasicExample />
     },
     {
         path: '/account/profile',
