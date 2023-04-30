@@ -4,13 +4,14 @@ import { Navigate,} from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
 import { useEffect } from "react";
 import axiosClient from "../axios-client";
-import '../index.css';
 import { Dropdown} from 'react-bootstrap'
 import { FaUser, FaSignOutAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import moment from 'moment';
 
 export default function Header() {
     const [selectedValue, setSelectedValue] = useState(localStorage.getItem("selectedValue") || "Month");
     const {user, token, setUser, setToken} = useStateContext()
+    const [currentMonth, setCurrentMonth] = useState(moment());
 
     const onLogout = ev => {
         ev.preventDefault()
@@ -35,6 +36,21 @@ export default function Header() {
         })
     }, [])
 
+    // Bấm vào nút "Today"
+    const handleTodayClick = () => {
+        setCurrentMonth(moment());
+    }
+    
+    // Bấm vào nút "ChevronLeft"
+    const handlePrevMonthClick = () => {
+        setCurrentMonth(currentMonth.clone().subtract(1, "month"));
+    }
+    
+    // Bấm vào nút "ChevronRight"
+    const handleNextMonthClick = () => {
+        setCurrentMonth(currentMonth.clone().add(1, "month"));
+    }
+
     if(!token) {
         return <Navigate to="/login" />
     }
@@ -43,13 +59,13 @@ export default function Header() {
         <header className="px-1 py-1 d-flex align-items-center border-bottom">
             <img src={logo} alt="calendar" className="logo" />
             <h4 className="mt-1 text-primary"> Calendar </h4>
-            <button className="today btn btn-outline-secondary">
+            <button className="today btn btn-outline-secondary" onClick={handleTodayClick}>
                 Today
             </button>
-            <button className="chevronleft btn btn-outline-secondary rounded-5 border-0">
+            <button className="chevronleft btn btn-outline-secondary rounded-5 border-0" onClick={handlePrevMonthClick}>
                 <FaChevronLeft /> 
             </button>
-            <button className="btn btn-outline-secondary rounded-5 border-0">
+            <button className="btn btn-outline-secondary rounded-5 border-0" onClick={handleNextMonthClick}>
                 <FaChevronRight /> 
             </button>
             <Dropdown className="dropdown-time">

@@ -63,21 +63,26 @@ header .btn:hover {
     height: 100%;
     }
 }
-.create-calendar header {
-    background-color: #e8e8e8;
-}
-.create-calendar {
-    background-color: #fff;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
 .close {
     margin-left: auto;
 }
-.create-calendar {
+.create-calendar header, .event-detail header {
+    background-color: #e8e8e8;
+}
+.create-calendar, .event-detail {
+    background-color: #fff;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 999;
+}
+.create-calendar {
+    width: 400px;
+}
+.event-detail {
+    width: 500px;
 }
 .calendar-data {
     height: 260px;
@@ -97,4 +102,16 @@ header .btn:hover {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+.calendar-color {
+    border-radius: 30%;
+    width: 20px;
+    height: 20px;
+    margin-top: 3px;
+}
+.event-time {
+    margin-top: 2px;
+}
+.calendar-name {
+    margin-top: 3px;
 }

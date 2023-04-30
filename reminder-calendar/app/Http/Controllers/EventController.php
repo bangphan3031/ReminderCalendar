@@ -98,16 +98,16 @@ class EventController extends Controller
     {
         $user = auth()->user();
         $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
-        if (!$calendar_id) {
-            return response()->json([
-                'message' => 'Calendar not found',
-            ], 404);
-        }
-        $event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
-        $events = Event::whereIn('calendar_id', $calendar_id)->orWhereIn('id', $event_id)->get();
+        $a_event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
+        $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $events = Event::whereIn('events.id', $a_event_id)
+                ->orWhereIn('events.id', $event_id)
+                ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+                ->select('events.*', 'calendars.color', 'calendars.name')
+                ->get();
         return response()->json([
             'message' => 'Get events successful',
-            'data' => $events,
+            'data' => $events
         ], 200);
     }
 

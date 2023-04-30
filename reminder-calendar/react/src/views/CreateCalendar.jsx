@@ -38,7 +38,7 @@ export default function CreateCalendar(props) {
 
     return (
         <div className="create-calendar justify-content-center align-items-center w-100">
-            <form className="create-calendar rounded-3 w-25" onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
+            <form className="create-calendar rounded-3" onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
                 <header className="px-3 py-1 d-flex align-items-center">
                     <FaCalendarAlt/>
                     <b className='m-1'>Create new calendar</b>

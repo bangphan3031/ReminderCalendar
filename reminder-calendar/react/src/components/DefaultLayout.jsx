@@ -1,11 +1,12 @@
 import React, { useContext, useState } from "react";
-import { getMonth} from '../util'
 import Header from "../views/Header";
 import Sidebar from "../views/Sidebar";
-import Month from "../views/Month";
+import Event from "../views/Event";
+import moment from 'moment';
 
 export default function DefautltLayout() {
-    const [currentMonth, setCurrentMonth] = useState(getMonth())
+    const [currentMonth, setCurrentMonth] = useState(moment())
+
     
     return (
         <React.Fragment>
@@ -18,7 +19,8 @@ export default function DefautltLayout() {
                         <Sidebar />
                     </div>
                     <div className="col">
-                        <Month month={currentMonth} />
+                        <Event />
+                        {/* <Month month={currentMonth} /> */}
                     </div>
                 </div>
             </div>
