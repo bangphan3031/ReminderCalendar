@@ -48,7 +48,7 @@ class AuthController extends Controller
         $calendar = new Calendar();
         $calendar->user_id = $user->id;
         $calendar->name = $user->name;
-        $calendar->color = 'blue';
+        $calendar->color = '#0000FF';
         $calendar->save();
         if($user) {
             try{

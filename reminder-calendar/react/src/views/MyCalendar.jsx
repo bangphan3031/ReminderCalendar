@@ -3,10 +3,13 @@ import axiosClient from '../axios-client';
 import { Form } from 'react-bootstrap';
 import { FaTrash, FaPlus, FaEdit } from 'react-icons/fa';
 import CreateCalendar from './CreateCalendar';
+import EditCalendar from './EditCalendar';
 
-export default function Calendar(props) {
+export default function MyCalendar(props) {
   const [data, setData] = useState([]);
   const [showCreateCalendar, setShowCreateCalendar] = useState(false);
+  const [showEditCalendar, setShowEditCalendar] = useState(false);
+  const [editingCalendar, setEditingCalendar] = useState(null);
 
   const [checkedBoxes, setCheckedBoxes] = useState(
     JSON.parse(localStorage.getItem("checkedBoxes")) || {}
@@ -16,8 +19,14 @@ export default function Calendar(props) {
     setShowCreateCalendar(true);
   };
 
-  const handleCloseCreateCalendar = () => {
+  const handleEditCalendarClick = (calendarId) => {
+    setEditingCalendar(calendarId);
+    setShowEditCalendar(true);
+  };
+
+  const handleClose = () => {
     setShowCreateCalendar(false);
+    setShowEditCalendar(false);
   };
 
   const handleDeleteCalendar = (calendarId) => {
@@ -59,7 +68,13 @@ export default function Calendar(props) {
 
   return (
     <div>
-      {showCreateCalendar && <CreateCalendar onClose={handleCloseCreateCalendar} />}
+      {showCreateCalendar && <CreateCalendar onClose={handleClose} />}
+      {showEditCalendar && (
+        <EditCalendar 
+          id={editingCalendar}
+          onClose={handleClose}
+        />
+      )}
       <div className='calendar'>
         <div className="row align-items-center">
           <div className="col mt-2">
@@ -91,6 +106,7 @@ export default function Calendar(props) {
             </div>
             <div className='col-auto'>
               <button 
+                onClick={() => handleEditCalendarClick(calendar.id)}
                 className="btn btn-outline-secondary rounded-5 border-0 ">
                 <FaEdit size={15}/> 
               </button>

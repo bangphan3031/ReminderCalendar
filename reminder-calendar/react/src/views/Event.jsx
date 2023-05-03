@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axiosClient from '../axios-client';
-import { FaTimes, FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { FaTimes, FaCalendarAlt, FaClock, FaEdit } from 'react-icons/fa';
 
 const localizer = momentLocalizer(moment);
 
@@ -80,6 +80,9 @@ const Event = () => {
                 <div className="event-detail justify-content-center align-items-center w-100">
                     <div className="event-detail rounded-3">
                         <header className="px-3 py-1 d-flex align-items-center">
+                            <button title='Edit' className='edit btn btn-outline-secondary border-0 rounded-5'>
+                                <FaEdit />
+                            </button>
                             <button
                                 onClick={handleCloseEventDetail}
                                 title='Close'

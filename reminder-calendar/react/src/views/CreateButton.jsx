@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import plus from '../assets/plus.png';
-import CreateCalendar from './CreateCalendar';
+import CreateEvent from './CreateEvent';
 
 export default function CreateButton(props) {
     const [showCreateEvent, setShowCreateEvent] = useState(false);
@@ -15,7 +15,7 @@ export default function CreateButton(props) {
 
     return (
         <div>
-            {showCreateEvent && <CreateCalendar onClose={handleCloseCreateEvent} />}
+            {showCreateEvent && <CreateEvent onClose={handleCloseCreateEvent} />}
             <button 
                 onClick={handleCreateEventClick} 
                 className='create btn btn-outline-secondary border mt-3 px-2 py-2 rounded-pill d-flex align-items-center'

@@ -66,10 +66,10 @@ header .btn:hover {
 .close {
     margin-left: auto;
 }
-.create-calendar header, .event-detail header {
+.create-calendar header, .event-detail header, .create-event header  {
     background-color: #e8e8e8;
 }
-.create-calendar, .event-detail {
+.create-calendar, .event-detail, .create-event {
     background-color: #fff;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     position: fixed;
@@ -81,8 +81,15 @@ header .btn:hover {
 .create-calendar {
     width: 400px;
 }
+.create-event {
+    width: 500px;
+}
 .event-detail {
     width: 500px;
+}
+.create-event .input-time {
+    width: 200px;
+    margin: 5px;
 }
 .calendar-data {
     height: 260px;
