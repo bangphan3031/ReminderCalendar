@@ -47,6 +47,7 @@ Route::group(['middleware'=>'auth:api'], function($router){
 Route::group(['middleware'=>'auth:api'], function($router){
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [UserController::class, 'profile']);
+    Route::get('/user', [UserController::class, 'getAllUser']);
     Route::put('/profile', [UserController::class, 'update']);
     Route::put('/profile/upload', [UserController::class, 'uploadImage']);
     Route::post('/profile/upload', [UserController::class, 'uploadImage']);

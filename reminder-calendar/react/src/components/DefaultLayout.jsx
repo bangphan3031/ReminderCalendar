@@ -2,12 +2,14 @@ import React, { useContext, useState } from "react";
 import Header from "../views/Header";
 import Sidebar from "../views/Sidebar";
 import Event from "../views/Event";
-import moment from 'moment';
 
 export default function DefautltLayout() {
-    const [currentMonth, setCurrentMonth] = useState(moment())
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
-    
+    const handleDateClick = (date) => {
+        setSelectedDate(date);
+    };
+
     return (
         <React.Fragment>
             <div className="container-fluid h-100">
@@ -16,10 +18,10 @@ export default function DefautltLayout() {
                 </div>
                 <div className="row">
                     <div className="col-1" style={{ width: "290px" }}>
-                        <Sidebar />
+                        <Sidebar onDateClick={handleDateClick} selectedDate={selectedDate}/>
                     </div>
                     <div className="col">
-                        <Event />
+                        <Event selectedDate={selectedDate}/>
                         {/* <Month month={currentMonth} /> */}
                     </div>
                 </div>

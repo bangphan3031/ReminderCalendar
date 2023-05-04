@@ -3,8 +3,10 @@ import { FaTimes, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaAlignLeft, FaCalenda
 import axiosClient from '../axios-client';
 import { Dropdown} from 'react-bootstrap'
 import moment from 'moment'
+import { Link } from 'react-router-dom';
 
 export default function CreateEvent(props) {
+    const {selectedDate} = props;
     const [calendars, setCalendars] = useState([]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
@@ -14,6 +16,18 @@ export default function CreateEvent(props) {
     const endTimeRef = useRef();
     const locationRef = useRef();
     const descriptionRef = useRef();
+
+    const date = moment(selectedDate).format('YYYY-MM-DD');
+    const dateTime = moment(selectedDate).format('YYYY-MM-DDThh:mm');
+
+    const [formData, setFormData] = useState({
+        title: '',
+        is_all_day: true,
+        start_time: date,
+        end_time: date,
+        location: '',
+        description: ''
+    });
 
     useEffect(() => {
         axiosClient.get('/calendar')
@@ -40,13 +54,29 @@ export default function CreateEvent(props) {
 
     const handleAllDayChange = () => {
         if (allDayRef.current.checked) {
-            startTimeRef.current.type = 'date';
-            endTimeRef.current.type = 'date';
+            setFormData({
+                ...formData,
+                is_all_day: true,
+                start_time: date,
+                end_time: date
+            });
+            startTimeRef.current.setAttribute('type', 'date');
+            startTimeRef.current.value = date;
+            endTimeRef.current.setAttribute('type', 'date');
+            endTimeRef.current.value = date;
         } else {
-            startTimeRef.current.type = 'datetime-local';
-            endTimeRef.current.type = 'datetime-local';
+            setFormData({
+                ...formData,
+                is_all_day: false,
+                start_time: dateTime,
+                end_time: dateTime
+            });
+            startTimeRef.current.setAttribute('type', 'datetime-local');
+            startTimeRef.current.value = dateTime;
+            endTimeRef.current.setAttribute('type', 'datetime-local');
+            endTimeRef.current.value = dateTime;
         }
-      };
+    };
 
     const onSubmit = (ev) => {
         ev.preventDefault()
@@ -98,6 +128,8 @@ export default function CreateEvent(props) {
                     <div className="col-1"></div>
                     <div className="col">
                         <input ref={titleRef} type="text" name='title' placeholder='Add title' required
+                            value={formData.title}
+                            onChange={(event) => setFormData({...formData, title: event.target.value})}
                             className='form-control border-0 border-bottom text-xl font-semibold pb-2 w-100'
                         />
                     </div>
@@ -113,7 +145,7 @@ export default function CreateEvent(props) {
                             defaultChecked
                             onChange={handleAllDayChange}
                         />
-                        <label className='form-check-label all-day-checkbox' htmlFor='all-day-checkbox'>
+                        <label className='form-check-label all-day-checkbox-event' htmlFor='all-day-checkbox'>
                             All day
                         </label>
                     </div>
@@ -122,10 +154,14 @@ export default function CreateEvent(props) {
                     <div className="col-1 pt-2"><FaClock/></div>
                     <div className="col d-flex">
                         <input ref={startTimeRef} type='date' name='start_time' required
+                            value={formData.start_time}
+                            onChange={(event) => setFormData({...formData, start_time: event.target.value})}
                             className='input-time form-control border-0 border-bottom'
                         />
                         <p className='pt-1'>_</p>
                         <input ref={endTimeRef} type='date' name='end_time' required
+                            value={formData.end_time}
+                            onChange={(event) => setFormData({...formData, end_time: event.target.value})}
                             className='input-time form-control border-0 border-bottom'
                         />
                     </div>
@@ -134,6 +170,8 @@ export default function CreateEvent(props) {
                     <div className="col-1 pt-1"><FaMapMarkerAlt/></div>
                     <div className="col">
                         <input ref={locationRef} name='location' placeholder='Location'
+                            value={formData.location}
+                            onChange={(event) => setFormData({...formData, location: event.target.value})}
                             className='form-control border-0 border-bottom text-xl w-100'
                         />
                     </div>
@@ -142,6 +180,8 @@ export default function CreateEvent(props) {
                     <div className="col-1 pt-1"><FaAlignLeft/></div>
                     <div className="col">
                         <textarea ref={descriptionRef} name='description' placeholder='Description'
+                            value={formData.description}
+                            onChange={(event) => setFormData({...formData, description: event.target.value})}
                             className='form-control border-0 border-bottom text-xl w-100'
                         />
                     </div>
@@ -149,11 +189,11 @@ export default function CreateEvent(props) {
                 <div className="row p-3 pt-3">
                     <div className="col-1 pt-1"><FaCalendarDay/></div>
                     <div className="col">
-                        <Dropdown className="dropdown-time">
-                            <Dropdown.Toggle className='border-0' variant="outline-secondary" id="dropdown-secondary"> 
+                        <Dropdown className="dropdown-calendar">
+                            <Dropdown.Toggle className='border-0' variant="outline-secondary"> 
                                 {selectedCalendar ? selectedCalendar.name : 'Select a calendar'}
                             </Dropdown.Toggle>
-                            <Dropdown.Menu className="dropdown-menu">
+                            <Dropdown.Menu className="dropdown-calendar-menu">
                                 {calendars.map(calendar => (
                                     <Dropdown.Item 
                                     key={calendar.id}
@@ -169,7 +209,12 @@ export default function CreateEvent(props) {
                 <div className="row p-3 d-flex justify-content-end">
                     <div className="col-1"></div>
                     <div className="col-auto">
+                    {/* <Link to="/edit-event">
                         <button className='btn btn-secondary mx-2 fw-bold' type='button'>More option</button>
+                    </Link> */}
+                    <Link to={`/create-event?title=${formData.title}&allday=${formData.is_all_day}&start=${formData.start_time}&end=${formData.end_time}&location=${formData.location}&description=${formData.description}`}>
+                        <button className='btn btn-secondary mx-2 fw-bold' type='button'>More option</button>
+                    </Link>
                         <button className='btn btn-secondary mx-2 fw-bold' type='submit'>Lưu</button>
                     </div>
                 </div>

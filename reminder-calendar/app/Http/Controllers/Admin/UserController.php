@@ -38,7 +38,7 @@ class UserController extends Controller
         $calendar = new Calendar();
         $calendar->user_id = $user->id;
         $calendar->name = $user->name;
-        $calendar->color = 'blue';
+        $calendar->color = '#0d6efd';
         $calendar->save();
         return response()->json([
             'message' => 'User created',

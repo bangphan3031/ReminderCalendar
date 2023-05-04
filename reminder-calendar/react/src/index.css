@@ -15,6 +15,7 @@
     width: 2.5rem;
     height: 2.5rem;
 }
+
 aside .create:hover {
     background-color: #dedcdc65;
     color: rgba(0, 0, 0, 0.758);
@@ -68,6 +69,8 @@ header .btn:hover {
 }
 .create-calendar header, .event-detail header, .create-event header  {
     background-color: #e8e8e8;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 .create-calendar, .event-detail, .create-event {
     background-color: #fff;
@@ -103,6 +106,11 @@ header .btn:hover {
     background-color: #dedcdc65;
     color: black;
 }
+.all-day-checkbox {
+    margin-left: -10px;
+    margin-top: 10px;
+    margin-bottom: -12px;
+}
 .calendar-lable {
     font-size: 15px;
     width: 120px;
@@ -116,9 +124,152 @@ header .btn:hover {
     height: 20px;
     margin-top: 3px;
 }
+.dropdown-calendar {
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+.edit-event-form {
+    overflow-x: hidden;
+}
+.event-detail-form {
+    height: 508px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.edit-calendar .title-event-input {
+    font-size: 25px;
+}
+.edit-calendar .icons {
+    margin-left: 10px;
+}
+.edit-calendar .cancel-button {
+    margin-left: 0px;
+    margin-top: 6px;
+    padding: 2px 10px 7px;
+    font-size: 20px;
+}
+.edit-calendar .cancel-button:hover {
+    color: #575757;
+    background-color: #f5f5f5;
+}
+.button-close-reminder {
+    margin-left: 10px;
+}
+.edit-calendar .reminder-select, 
+.edit-calendar .reminder-time {
+    border: none;
+    background-color: #f5f5f5;  
+}
+.edit-calendar .reminder-time {
+    width: 70px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.edit-calendar .button-close-reminder {
+    border-radius: 50%;
+    margin-top: 3px;
+    padding: 1px 7px 3px;
+    color: #8b8b8b;
+}
+.edit-calendar .button-close-reminder:hover {
+    background-color: #f5f5f5;
+    color: #3f3f3fd6;
+}
+.attendee-list-lable {
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: -10px;
+    font-weight: bold;
+}
 .event-time {
     margin-top: 2px;
 }
+.edit-calendar .event-input {
+    background-color: #f5f5f5;
+    color: #3f3f3f;
+}
+.edit-calendar .event-input-area {
+    background-color: #f5f5f5;
+    color: #3f3f3f;
+    height: 150px;
+}
+.edit-calendar .event-input:focus {
+    background-color: #f5f5f5;
+    border-bottom: #0d6efd;
+}
+.edit-calendar .calendar-dropdown-toggle {
+    color: #3f3f3f;
+}
+.lable-to {
+    margin: 0px 10px 8px 10px;
+    font-size: 17px;
+}
 .calendar-name {
     margin-top: 3px;
+}
+.submit-event-button {
+    margin-top: 25px;
+    width: 80px;
+}
+.event-detail-lable {
+    color: #0d6efd;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+.attendee-lable {
+    color: #0d6efd;
+    font-weight: bold;
+    margin-top: 129.5px;
+    margin-left: 5px;
+}
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropdown input {
+    width: 300px;
+    border: none;
+    background-color: #f5f5f5;
+}
+.user-list {
+    position: absolute;
+    z-index: 1;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    cursor: pointer;
+    padding-left: 10px;
+}
+.user-list > div:hover {
+    background-color: #f5f5f5;
+}  
+.attendee-list {
+    width: 300px;
+    padding-left: 10px;
+}
+.attendee-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 10px;
+    margin-left: -10px;
+}
+.attendee-list li:hover {
+    background-color: #f5f5f5;
+}
+.attendee-list li button {
+    padding: 1px 6px 3px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: auto;
+}
+.attendee-list li button:hover {
+    color: #353434;
+    background-color: #eeeeee;
+}
+.add-attendee .attendee-list {
+    height: 300px; /* chiều cao mặc định */
+    overflow: auto; /* cho phép cuộn */
 }

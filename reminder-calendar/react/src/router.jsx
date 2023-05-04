@@ -7,19 +7,18 @@ import Login from "./views/Login";
 import EmailVerification from "./views/EmailVerification";
 import EmailVerified from "./views/EmailVerified";
 import Profile from "./views/Profile";
-import CreateCalendar from "./views/CreateCalendar";
+import EditEvent from "./views/EditEvent";
+import CreateEvent from "./views/CreateEventDetail";
+import withAuth from "./components/Auth"
 
+const ProtectedProfile = withAuth(Profile);
+const ProtectedEditEvent = withAuth(EditEvent);
+const ProtectedCreateEvent = withAuth(CreateEvent);
 
 const router = createBrowserRouter([
     {
         path: '/',
         element: <DefautltLayout />,
-        children: [
-            {
-                path: '/calendar/create',
-                element: <CreateCalendar />
-            }
-        ]
     },
     //
     {
@@ -45,13 +44,20 @@ const router = createBrowserRouter([
         ]
     },
     {
+        path: '/account/profile',
+        element: <ProtectedProfile />
+    },
+    {
+        path: '/edit-event',
+        element: <ProtectedEditEvent  />
+    },
+    {
+        path: '/create-event',
+        element: <ProtectedCreateEvent  />
+    },
+    {
         path: '/*',
         element: <NotFound />
     },
-    {
-        path: '/account/profile',
-        element: <Profile />
-    },
 ])
-
 export default router;

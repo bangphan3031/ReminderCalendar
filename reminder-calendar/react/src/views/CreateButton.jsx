@@ -3,6 +3,7 @@ import plus from '../assets/plus.png';
 import CreateEvent from './CreateEvent';
 
 export default function CreateButton(props) {
+    const {selectedDate} = props;
     const [showCreateEvent, setShowCreateEvent] = useState(false);
 
     const handleCreateEventClick = () => {
@@ -15,7 +16,7 @@ export default function CreateButton(props) {
 
     return (
         <div>
-            {showCreateEvent && <CreateEvent onClose={handleCloseCreateEvent} />}
+            {showCreateEvent && <CreateEvent onClose={handleCloseCreateEvent} selectedDate={selectedDate}/>}
             <button 
                 onClick={handleCreateEventClick} 
                 className='create btn btn-outline-secondary border mt-3 px-2 py-2 rounded-pill d-flex align-items-center'

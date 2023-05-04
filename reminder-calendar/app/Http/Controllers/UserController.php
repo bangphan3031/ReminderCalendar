@@ -17,6 +17,12 @@ class UserController extends Controller
         return response()->json(auth()->user());
     }
 
+    public function getAllUser()
+    {
+        $users = User::select('id', 'name', 'email')->where('id', '<>', auth()->user()->id)->get();
+        return response()->json($users);
+    }
+
     /**
      * Update the specified resource in storage.
      */

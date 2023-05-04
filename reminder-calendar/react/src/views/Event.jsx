@@ -3,10 +3,12 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axiosClient from '../axios-client';
 import { FaTimes, FaCalendarAlt, FaClock, FaEdit } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const localizer = momentLocalizer(moment);
 
-const Event = () => {
+const Event = (props) => {
+    const { selectedDate } = props;
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [myEventsList, setMyEventsList] = useState([]);
     const [showEventDetail , setShowEventDetail] = useState(false);
@@ -42,6 +44,10 @@ const Event = () => {
         };
     };
 
+    const handleNavigate = (date, view) => {
+        // Xử lý ngày mới tại đây
+    }
+
     const handleSelectEvent  = event => {
         setSelectedEvent(event);
         setShowEventDetail(true);
@@ -72,6 +78,8 @@ const Event = () => {
             startAccessor="start"
             endAccessor="end"
             style={{ height: '100%' }}
+            date={selectedDate}
+            onNavigate={handleNavigate}
             onSelectEvent={handleSelectEvent}
             eventPropGetter={eventStyleGetter}
         />
@@ -80,9 +88,11 @@ const Event = () => {
                 <div className="event-detail justify-content-center align-items-center w-100">
                     <div className="event-detail rounded-3">
                         <header className="px-3 py-1 d-flex align-items-center">
-                            <button title='Edit' className='edit btn btn-outline-secondary border-0 rounded-5'>
-                                <FaEdit />
-                            </button>
+                            <Link to="/edit-event">
+                                <button title='Edit' className='edit btn btn-outline-secondary border-0 rounded-5'>
+                                    <FaEdit />
+                                </button>
+                            </Link>
                             <button
                                 onClick={handleCloseEventDetail}
                                 title='Close'
