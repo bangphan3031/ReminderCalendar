@@ -46,12 +46,14 @@ class SendReminderController extends Controller
         $time_to_send = $carbon_time_to_send->format('Y-m-d H:i:s');
         $delay = Carbon::parse(now())->diffInSeconds($time_to_send, false);
         
-        if ($method === 'Email') {
+        if ($method === 'Email' && $reminder->send !== 1) {
             foreach ($email as $e) {
                 SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user)
                 ->onQueue('send-reminder-emails')
                 ->delay($delay);
             }
+            $reminder->send = 1;
+            $reminder->save();
         }
         return response()->json(['message' => 'Set to send email successful'], 200);
     }

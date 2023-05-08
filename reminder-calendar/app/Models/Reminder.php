@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Reminder extends Model
 {
@@ -31,4 +32,16 @@ class Reminder extends Model
     protected $hidden = [
         'deleted_at',
     ];
+
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     static::deleted(function ($reminder) {
+    //         $jobIds = DB::table('jobs')->where('payload', 'like', '%'.$reminder->id.'%')->pluck('id')->toArray();
+    //         foreach ($jobIds as $jobId) {
+    //             \Illuminate\Support\Facades\Queue::delete($jobId);
+    //         }
+    //     });
+    // }
 }

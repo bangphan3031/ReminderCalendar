@@ -240,8 +240,8 @@ class EventController extends Controller
             ], 404);
         }
 
-        $event = Event::where('calendar_id', $calendar->id)->find($id);
-        if(!$calendar) {
+        $event = Event::find($id);
+        if(!$event) {
             return response()->json([
                 'message' => 'Event not found',
             ], 404);
@@ -254,7 +254,6 @@ class EventController extends Controller
         $event->end_time = $request->end_time;
         $event->location = $request->location;
         $event->description = $request->description;
-        $event->status = $request->status;
         $event->save();
         return response()->json([
             'message' => 'Event updated',

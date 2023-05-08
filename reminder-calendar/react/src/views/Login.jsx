@@ -3,14 +3,15 @@ import axiosClient from "../axios-client.js";
 import {createRef} from "react";
 import {useStateContext} from "../contexts/ContextProvider.jsx";
 import { useState } from "react";
-import { Container, Col, Row, Button, Form, InputGroup, FormControl} from 'react-bootstrap';
+import '../css/example.css'
 import { FaGoogle } from "react-icons/fa";
+import logo from '../assets/TamNhuLogo.jpg';
 
 export default function Login() {
   const emailRef = createRef()
   const passwordRef = createRef()
   const { setUser, setToken } = useStateContext()
-  const [message, setMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState('');
 
   const onSubmit = ev => {
     ev.preventDefault()
@@ -19,16 +20,14 @@ export default function Login() {
       email: emailRef.current.value,
       password: passwordRef.current.value,
     }
+    
     axiosClient.post('/login', payload)
       .then(({data}) => {
         setUser(data.user)
         setToken(data.token);
       })
-      .catch((err) => {
-        const response = err.response;
-        if (response && response.status === 400) {
-          setMessage(response.data.message)
-        }
+      .catch((error) => {
+        setErrorMessage(error.response.data.error);
       })
   }
   const handleGoogleLogin = ev  => {
@@ -45,62 +44,53 @@ export default function Login() {
   };
 
   return (
-    <Container fluid className="p-3 my-5 h-custom">
-
-      <Row>
-
-        <Col xs='10' md='6' className="d-flex align-items-center">
-          <img src="https://www.psd.ca/uploads/calendarbanner5.png" className="img-fluid"/>
-        </Col>
-
-        <Col xs='10' md='6'>
-
-          <div className="d-flex flex-row align-items-center justify-content-center">
-
-            <Button type="button" className="mt-3 mb-3 btn-google btn"
-                variant="outline-danger"
-                onClick={handleGoogleLogin}
-              ><FaGoogle /> Log in with Google
-            </Button>
-
+    <div className="login-page">
+      <div className="container d-flex justify-content-center align-items-center min-vh-100">
+        <div className="row border rounded-4 p-3 bg-white shadow box-area">
+          <div className="left-content col-md-6 rounded-3 d-flex justify-content-center align-items-center flex-column left-box"> 
           </div>
-
-          <div className="divider d-flex align-items-center my-4">
-            <p className="text-center fw-bold mx-3 mb-0">Or</p>
-          </div>
-
-          <Form.Group className="mb-4" onSubmit={onSubmit}>
-            <Form.Label>Email address</Form.Label>
-            <InputGroup>
-              <FormControl ref={emailRef} type="email" placeholder="Email" />
-            </InputGroup>
-          </Form.Group>
-
-          <Form.Group className="mb-4">
-            <Form.Label>Password</Form.Label>
-            <InputGroup>
-              <FormControl ref={passwordRef} type="password" placeholder="Password" 
-                onKeyDown={(ev) => {
+          <div className="col-6 right-box">
+            <div className="row align-items-center">
+              <div className="header-text mb-5 text-center">
+                <h2>Sign In</h2>
+              </div>
+              <div className="error-message">
+                {errorMessage && <p>{errorMessage}</p>}
+              </div>
+              <div className="input-group mb-3">
+                <input ref={emailRef} type="email" className="form-control form-control-lg bg-light fs-6" placeholder="Email" required/>
+              </div>
+              <div className="input-group mb-2">
+                <input type="password" ref={passwordRef}
+                  onKeyDown={(ev) => {
                   if (ev.key === 'Enter') {
                     onSubmit(ev);
                   }
-                }} 
-              />
-            </InputGroup>
-          </Form.Group>
-
-          <div className="d-flex justify-content-between mb-4">
-            <Form.Check type='checkbox' id='flexCheckDefault' label='Remember me' />
-            <a href="!#">Forgot password?</a>
+                  }}  
+                  className="form-control form-control-lg bg-light fs-6" placeholder="Password" required/>
+              </div>
+              <div className="input-group mb-5 d-flex justify-content-between">
+                <div className="form-check">
+                  <input type="checkbox" className="form-check-input"/>
+                  <label htmlFor="formCheck" className="form-check-lable text-secondary"><small>Remember me</small></label>
+                </div>
+                <div className="forgot">
+                  <small><a href="#">Forgot Password</a></small>
+                </div>
+              </div>
+              <div className="input-group mb-3">
+                <button onClick={onSubmit} className="btn btn-lg btn-primary w-100 fs-6 fw-bold">Login</button>
+              </div>
+              <div className="input-group mb-3">
+                <button type="button" onClick={handleGoogleLogin} className="btn btn-lg btn-outline-danger w-100 fs-6 fw-bold"><FaGoogle/><small> Login with Google</small></button>
+              </div>
+              <div className="row">
+                <small>Don't have an account? <Link to="/signup" className="link-primary fw-bold text-decoration-none">Sign up</Link></small>
+              </div>
+            </div>
           </div>
-          <div className='text-center text-md-start mt-4 pt-2 btn-primary'>
-            <Button size='lg' onClick={onSubmit}>Login</Button>
-            <p className="small fw-bold mt-2 pt-1 mb-2">Don't have an account? <Link to="/signup" className="link-danger">Signup</Link></p>
-          </div>
-
-        </Col>
-
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import axiosClient from '../axios-client';
 
 export default function EditCalendar(props) {
 
-    const {id} = props;
+    const { calendar } = props;
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [color, setColor] = useState('');
@@ -14,20 +14,14 @@ export default function EditCalendar(props) {
     };
 
     useEffect(() => {
-        axiosClient.get(`/calendar/${id}`)
-          .then(response => {
-            setName(response.data.data.name);
-            setDescription(response.data.data.description);
-            setColor(response.data.data.color);
-          })
-          .catch(error => {
-            console.log(error);
-          });
-    }, [id]);
+        setName(calendar.name);
+        setDescription(calendar.description);
+        setColor(calendar.color);
+    }, [calendar]);
 
     const handleSubmit = (event) => {
         event.preventDefault()
-        axiosClient.put(`/calendar/${id}`, {
+        axiosClient.put(`/calendar/${calendar.id}`, {
           name: name,
           description: description,
           color: color,

@@ -37,12 +37,13 @@ class AuthController extends Controller
         if($validator->fails()){
             return response()->json($validator->errors(),400);
         }
-        
+        $defaultAvatar = 'default.png';
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
+            'image' => $defaultAvatar,
             'is_admin' => 0,
         ]);
         $calendar = new Calendar();

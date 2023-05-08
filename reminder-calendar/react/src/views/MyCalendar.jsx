@@ -19,8 +19,8 @@ export default function MyCalendar(props) {
     setShowCreateCalendar(true);
   };
 
-  const handleEditCalendarClick = (calendarId) => {
-    setEditingCalendar(calendarId);
+  const handleEditCalendarClick = (calendar) => {
+    setEditingCalendar(calendar);
     setShowEditCalendar(true);
   };
 
@@ -71,7 +71,7 @@ export default function MyCalendar(props) {
       {showCreateCalendar && <CreateCalendar onClose={handleClose} />}
       {showEditCalendar && (
         <EditCalendar 
-          id={editingCalendar}
+          calendar={editingCalendar}
           onClose={handleClose}
         />
       )}
@@ -106,7 +106,7 @@ export default function MyCalendar(props) {
             </div>
             <div className='col-auto'>
               <button 
-                onClick={() => handleEditCalendarClick(calendar.id)}
+                onClick={() => handleEditCalendarClick(calendar)}
                 className="btn btn-outline-secondary rounded-5 border-0 ">
                 <FaEdit size={15}/> 
               </button>

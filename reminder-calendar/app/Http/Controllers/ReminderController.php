@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Reminder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Validator;
 
 class ReminderController extends Controller
@@ -120,6 +121,7 @@ class ReminderController extends Controller
             'method' => $request->method,
             'time' => $request->time,
             'kind_of_time' => $request->kind_of_time,
+            'send' => 0
         ]);
         return response()->json([
             'message' => 'Reminder created',
@@ -197,8 +199,17 @@ class ReminderController extends Controller
                 'message' => 'Reminder not found',
             ], 404);
         }
+
+        // $jobIds = DB::table('jobs')->where('payload', 'like', '%'.$id.'%')->pluck('id')->toArray();
+        // foreach ($jobIds as $jobId) {
+        //     Queue::connection()->getRedis()->del("queues:{$this->connection}:delayed", "queues:{$this->connection}:reserved:$jobId");
+        //     Queue::connection()->getRedis()->lrem("queues:{$this->connection}:reserved", 0, $jobId);
+        // }
+
         $reminder->delete();
-        return response()->json(['message' => 'Event deleted']);
+
+        return response()->json(['message' => 'Reminder deleted']);
+        
     }
 
 }

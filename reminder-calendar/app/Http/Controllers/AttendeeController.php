@@ -50,7 +50,7 @@ class AttendeeController extends Controller
                 'message' => 'Event not found',
             ], 404);
         }
-        $attendee = Attendee::where('event_id', $event->id)->get('user_id');
+        $attendee = Attendee::where('event_id', $event->id)->get();
         return response()->json([
             'message' => 'get attendee successful',
             'data' => $attendee,

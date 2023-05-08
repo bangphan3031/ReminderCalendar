@@ -27,12 +27,14 @@ class UserController extends Controller
     public function store(Request $request)
     {
         //Tao moi user
+        $defaultAvatar = 'default.png';
         $user = new User();
         $user->name = $request->input('name');
         $user->email = $request->input('email');
         $user->email_verified_at = now();
         $user->password = Hash::make($request->password);
         $user->phone = $request->input('phone');
+        $user->image = $defaultAvatar;
         $user->is_admin = 0;
         $user->save();
         $calendar = new Calendar();

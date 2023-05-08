@@ -1,68 +1,43 @@
-body {
-    background-color: #f8f9fa;
-    font-family: Arial, sans-serif;
+.login-page, .register-page, .profile-page {
+  background-image: url('https://www.psd.ca/uploads/calendarbanner5.png');
+  background-size: cover;
+  background-position: center;
+}
+.box-area {
+  width: 900px;
+}
+.left-content {
+  background-image: url('https://thumbs.dreamstime.com/b/calendar-deadline-event-reminder-notification-schedule-appointment-important-date-concept-vector-illustration-stock-158781882.jpg');
+  background-size: cover;
+  background-position: center;
+}
+.right-box {
+  padding: 12px 30px 44px 40px;
+}
+.right-box-register {
+  padding: 0px 30px 0px 40px;
+}
+::placeholder {
+  font-size: 16px;
+}
+.profile-button {
+  margin: 10px 10px 10px 10px;
+}
+.profile-icon {
+  font-size: 25px;
+}
+.profile-button:hover {
+  background-color: #f0f0f0;
+}
+@media only screen and (max-width: 760px) {
+  .box-area {
+    margin: 0 10px;
   }
-  
-  .container {
-    max-width: 400px;
-    margin: 0 auto;
-    margin-top: 50px;
-    border-radius: 5px;
-    background-color: #ffffff;
-    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
+  .left-box {
+    height: 100px;
+    overflow: hidden;
+  }
+  .right-box {
     padding: 20px;
   }
-  
-  h2 {
-    text-align: center;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  input[type="email"],
-  input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-  
-  .checkbox-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-  
-  .checkbox-group label {
-    margin-bottom: 0;
-    margin-left: 10px;
-  }
-  
-  .btn-google {
-    background-color: #dd4b39;
-    color: white;
-  }
-  
-  .btn-google:hover {
-    background-color: #c23321;
-    color: white;
-  }
-  
-  .btn-signup {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .btn-signup:hover {
-    background-color: #0062cc;
-    color: white;
-  }
-  
+}

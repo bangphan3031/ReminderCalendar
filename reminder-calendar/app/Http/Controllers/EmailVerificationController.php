@@ -32,11 +32,11 @@ class EmailVerificationController extends Controller
             // return response()->json([
             //     'message' => 'Email already verified'
             // ], 400);
-            return redirect()->to('http://localhost:3000/email-verified')->with('fail', 'Email already verified');
+            return redirect()->to('http://localhost:3000/email-verify')->with('fail', 'Email already verified');
         }
         // return response()->json([
         //     'message' => 'Email verified successfully'
         // ], 200);
-        return redirect()->to('http://localhost:3000/email-verified')->with('success', 'Email verified successfully');
+        return redirect()->to('http://localhost:3000/email-verify')->with('success', 'Email verified successfully');
     }
 }

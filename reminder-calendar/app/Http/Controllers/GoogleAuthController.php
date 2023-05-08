@@ -49,7 +49,7 @@ class GoogleAuthController extends Controller
                     'email' => $user->email,
                     'password' => 'password',
                 ]);
-                return redirect()->to('http://localhost:8000/home');
+                // return redirect()->to('http://localhost:8000/home');
                 return response()->json([
                     'message' => 'Login successful',
                     'access_token' => $token,

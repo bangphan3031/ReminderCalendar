@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('method', ['Email', 'Sms', 'Zalo']);
             $table->tinyInteger('time');
             $table->enum('kind_of_time', ['days', 'hours', 'minutes']);
+            $table->boolean('send')->default(false);
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
             $table->foreign('event_id')->references('id')->on('events')->onDelete('cascade');

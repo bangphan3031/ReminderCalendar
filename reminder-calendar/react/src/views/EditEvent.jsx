@@ -3,12 +3,15 @@ import { FaTimes, FaBell, FaClock, FaMapMarkerAlt, FaAlignLeft, FaCalendarDay} f
 import axiosClient from '../axios-client';
 import { Dropdown} from 'react-bootstrap'
 import moment from 'moment'
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-export default function EditEvent() {
+export default function EditEvent(props) {
     const navigate = useNavigate();
+    const location = useLocation();
     const [calendars, setCalendars] = useState([]);
     const [reminders, setReminders] = useState([]);
+    const [deletedReminders, setDeletedReminders] = useState([]);
+    const [addedReminders, setAddedReminders] = useState([]);
     const [users, setUsers] = useState([]);
     const [showUserList, setShowUserList] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState('');
@@ -24,19 +27,77 @@ export default function EditEvent() {
     const locationRef = useRef();
     const descriptionRef = useRef();
 
+    const searchParams = new URLSearchParams(location.search);
+    const event_id = searchParams.get('id');
+
+    const [formData, setFormData] = useState({
+        title: '',
+        is_all_day: '',
+        start_time: '',
+        end_time: '',
+        location: '',
+        description: '',
+    });
+
+    useEffect(() => {
+        axiosClient.get(`/event/${event_id}`)
+            .then(response => {
+                setFormData({
+                    title: response.data.data.title,
+                    is_all_day: response.data.data.is_all_day,
+                    start_time: moment(response.data.data.start_time).format('YYYY-MM-DD'),
+                    end_time: moment(response.data.data.end_time).format('YYYY-MM-DD'),
+                    location: response.data.data.location,
+                    description: response.data.data.description
+                });
+                setSelectedCalendarId(response.data.data.calendar_id)
+            })
+            .catch(error => {
+            console.log(error);
+            });
+    }, []);  
+
+    useEffect(() => {
+        axiosClient.get(`/reminder/${event_id}`)
+          .then(response => {
+                setReminders(response.data.data);
+          })
+          .catch(error => {
+                console.log(error);
+          });
+    }, [event_id]);
+
+    useEffect(() => {
+        axiosClient.get(`/user/${event_id}`)
+            .then(response => {
+                setAttendeeList(response.data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }, [event_id]);
+
     useEffect(() => {
         axiosClient.get('/calendar')
             .then(response => {
                 setCalendars(response.data.data);
-                if (!selectedCalendar && !selectedCalendarId) {
-                    setSelectedCalendar(response.data.data[0]);
-                    setSelectedCalendarId(response.data.data[0].id);
-                }
             })
             .catch(error => {
             console.log(error);
         });
-    }, []);    
+    }, []);   
+
+    useEffect(() => {
+        if (selectedCalendarId != null) {
+          axiosClient.get(`/calendar/${selectedCalendarId}`)
+            .then(response => {
+                setSelectedCalendar(response.data.data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        }
+    }, [selectedCalendarId]);  
 
     useEffect(() => {
         axiosClient.get('/user')
@@ -55,11 +116,20 @@ export default function EditEvent() {
           kind_of_time: 'minutes',
         };
         setReminders([...reminders, newReminder]);
+        setAddedReminders([...addedReminders, newReminder]);
     };
+    // console.log('reminder', reminders)
+    // console.log('add', addedReminders)
 
     const handleDeleteReminderClick = (index) => {
+        const reminderToDelete = reminders[index];
         const newReminders = reminders.filter((_, i) => i !== index);
         setReminders(newReminders);
+        if (addedReminders.some(r => r === reminderToDelete)) {
+            const updatedAddedReminders = addedReminders.filter(r => r !== reminderToDelete);
+            setAddedReminders(updatedAddedReminders);
+        }
+        setDeletedReminders([...deletedReminders, reminderToDelete.id]);
     };
 
     const handleCloseClick = () => {
@@ -115,7 +185,7 @@ export default function EditEvent() {
             startTimeRef.current.type = 'datetime-local';
             endTimeRef.current.type = 'datetime-local';
         }
-      };
+    };
 
     const onSubmit = (ev) => {
         ev.preventDefault()
@@ -130,19 +200,33 @@ export default function EditEvent() {
             description: descriptionRef.current.value,
             calendar_id: selectedCalendarId
         }
-        // axiosClient.post('/event', payload)
-        //     .then(response => {
-        //         alert('Thêm mới công việc thành công')
-        //         window.location.reload()
-        //     })
-        //     .catch(error => {
-        //         console.error(error);
-        //         alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
-        //     });
-        console.log(payload)
-        console.log(attendeeList)
-        console.log(reminders)
-    // Gửi các giá trị form đến API hoặc hệ thống lưu trữ dữ liệu của bạn để tạo sự kiện mới.
+        axiosClient.put(`/event/${event_id}`, payload)
+            .then(response => {
+                alert('Cập nhật công việc thành công')
+                navigate(-1)
+            })
+            .catch(error => {
+                console.log(error);
+            });
+            deletedReminders.forEach((id) => {
+                axiosClient.delete(`/reminder/${id}`)
+                .then(response => {
+                    alert('Xóa reminder thành công')
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            });
+            const reminderPromises = addedReminders.map(async (reminder) => {
+                try {
+                    const response = await axiosClient.post(`/reminder/${event_id}`, reminder);
+                    console.log(response.data);
+                    alert('Thêm reminder thành công')
+                } catch (error) {
+                    console.log(error);
+                }
+            });
+
     };
 
     const handleKeyDown = (ev) => {
@@ -161,6 +245,7 @@ export default function EditEvent() {
                             <div className="col-1">
                                 <div>
                                     <button
+                                        type='button'
                                         onClick={handleCloseClick}
                                         title='Cancel event create'
                                         className='cancel-button btn btn-outline-secondary border-0 rounded-5'
@@ -172,6 +257,8 @@ export default function EditEvent() {
                             <div className="col">
                                 <div>
                                     <input ref={titleRef} type="text" name='title' placeholder='Add title' required
+                                        value={formData.title}
+                                        onChange={(event) => setFormData({...formData, title: event.target.value})}
                                         className='title-event-input form-control border-0 border-bottom'
                                     />
                                 </div>
@@ -203,12 +290,16 @@ export default function EditEvent() {
                             </div>
                             <div className="col d-flex">
                                 <input ref={startTimeRef} type='date' name='start_time' required
+                                    value={formData.start_time}
+                                    onChange={(event) => setFormData({...formData, start_time: event.target.value})}
                                     className='event-input input-time form-control border-0 border-bottom'
                                 />
                                 <div>
                                     <p className='lable-to pt-2'>to</p>
                                 </div>
                                 <input ref={endTimeRef} type='date' name='end_time' required
+                                    value={formData.end_time}
+                                    onChange={(event) => setFormData({...formData, end_time: event.target.value})}
                                     className='event-input input-time form-control border-0 border-bottom'
                                 />
                             </div>
@@ -226,8 +317,10 @@ export default function EditEvent() {
                                         <FaMapMarkerAlt/>   
                                     </div>
                                 </div>
-                                <div className="col">
+                                <div className="col pt-1">
                                     <input ref={locationRef} name='location' placeholder='Add location'
+                                        value={formData.location}
+                                        onChange={(event) => setFormData({...formData, location: event.target.value})}
                                         className='event-input form-control border-0 border-bottom text-xl w-100'
                                     />
                                 </div>
@@ -250,7 +343,7 @@ export default function EditEvent() {
                             </div>
                             <div>
                                 {reminders.map((reminder, index) => (
-                                    <div className="row p-3 pt-0" key={index}>
+                                    <div className="row p-3 pt-0" key={reminder.id}>
                                         <div className="col-1 pt-1"></div>
                                         <div className="col-7">
                                             <div className="input-group">
@@ -264,9 +357,9 @@ export default function EditEvent() {
                                                             setReminders(newReminders);
                                                         }}
                                                     >
-                                                        <option value="email">Email</option>
-                                                        <option value="zalo">Zalo</option>
-                                                        <option value="sms">SMS</option>
+                                                        <option value="Email">Email</option>
+                                                        <option value="Zalo">Zalo</option>
+                                                        <option value="Sms">Sms</option>
                                                     </select>
                                                 </div>
                                                 <div>
@@ -343,6 +436,8 @@ export default function EditEvent() {
                                 </div>
                                 <div className="col">
                                     <textarea ref={descriptionRef} name='description' placeholder='Add description'
+                                        value={formData.description}
+                                        onChange={(event) => setFormData({...formData, description: event.target.value})}
                                         className='event-input-area form-control border-0 border-bottom text-xl w-100'
                                     />
                                 </div>
@@ -361,7 +456,7 @@ export default function EditEvent() {
                             </div>
                         </div> 
                         <div className="row">
-                            <div className="col-11 add-attendee">
+                            <div className="col-11 pt-1 add-attendee">
                                 <div className='dropdown'>
                                     <input type="text" placeholder='Add attendee' 
                                         className='form-control'

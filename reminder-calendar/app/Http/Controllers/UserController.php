@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendee;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,13 @@ class UserController extends Controller
     {
         $users = User::select('id', 'name', 'email')->where('id', '<>', auth()->user()->id)->get();
         return response()->json($users);
+    }
+
+    public function getUserWithEventId($event_id)
+    {
+        $user_id = Attendee::where('event_id', $event_id)->pluck('user_id')->toArray();
+        $user = User::select('id', 'name', 'email')->whereIn('id', $user_id)->get();
+        return response()->json($user);
     }
 
     /**

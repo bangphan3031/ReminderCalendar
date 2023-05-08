@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import {useRef, useState} from "react";
 import axiosClient from "../axios-client"
 import {useStateContext} from "../contexts/ContextProvider"
+import logo from '../assets/TamNhuLogo.jpg';
 
 export default function Register() {
 
@@ -10,7 +11,7 @@ export default function Register() {
     const phoneRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmationRef = useRef();
-    const [errors, setErrors] = useState(null)
+    const [errorMessage, setErrorMessage] = useState('');
 
     const {setUser, setToken} = useStateContext()
 
@@ -25,38 +26,64 @@ export default function Register() {
         }
         axiosClient.post('/register', payload)
             .then(({data}) => {
-                setUser(data.user)
-                setToken(data.token)
+                alert('Đăng ký thành công! Vui lòng xác thực tài khoản email để có thể đăng nhập.')
             })
-            .catch(err => {
-                const response = err.response;
-                if(response && response.status === 400 ) {
-                    setErrors(response.data.co)
-                }
+            .catch(error => {
+                setErrorMessage(error.response.data.error);
             })
     }
 
     return (
-        <div className="login-signup-form animated fadeInDown">
-            <div className="form">
-                <form onSubmit={onSubmit}>
-                    <h1 className="title">Signup</h1>
-                    {errors && <div className="alert" >
-                            {Object.keys(errors).map(key => (
-                                <p key={key}>{errors[key][0]}</p>
-                            ))}
+        <div className="register-page">
+            <div className="container d-flex justify-content-center align-items-center min-vh-100">
+                <div className="row border rounded-4 p-3 bg-white shadow box-area">
+                <div className="col-6 right-box-register">
+                    <div className="row align-items-center">
+                    <div className="header-text mb-3 text-center">
+                        {/* <img src={logo} className="img-fluid" width={100}/> */}
+                        <h2>Sign Up</h2>
+                    </div>
+                    <div className="error-message">
+                        {errorMessage && <p>{errorMessage}</p>}
+                    </div>
+                    <div className="input-group mb-3">
+                        <input ref={nameRef} type="text" className="form-control form-control-lg bg-light fs-6" placeholder="Name" required/>
+                    </div>
+                    <div className="input-group mb-3">
+                        <input ref={emailRef} type="email" className="form-control form-control-lg bg-light fs-6" placeholder="Email" required/>
+                    </div>
+                    <div className="input-group mb-3">
+                        <input ref={phoneRef} type="text" className="form-control form-control-lg bg-light fs-6" placeholder="Phone number" required/>
+                    </div>
+                    <div className="input-group mb-3">
+                        <input ref={passwordRef} type="password" className="form-control form-control-lg bg-light fs-6" placeholder="Password" required/>
+                    </div>
+                    <div className="input-group mb-1">
+                        <input type="password" ref={passwordConfirmationRef}
+                        onKeyDown={(ev) => {
+                        if (ev.key === 'Enter') {
+                            onSubmit(ev);
+                        }
+                        }}  
+                        className="form-control form-control-lg bg-light fs-6" placeholder="Comfirm Password" required/>
+                    </div>
+                    <div className="input-group mb-4 d-flex justify-content-between">
+                        <div className="form-check">
+                        <input type="checkbox" className="form-check-input"/>
+                        <label htmlFor="formCheck" className="form-check-lable text-secondary"><small>I agree all statements in <Link to="#" className="link-primary fw-bold text-decoration-none">Terms of service</Link></small></label>
                         </div>
-                    }
-                    <input ref={nameRef} placeholder="Full name" type="text" />
-                    <input ref={emailRef} placeholder="Email" type="email" />
-                    <input ref={phoneRef} placeholder="Phone" type="phone" />
-                    <input ref={passwordRef} placeholder="Password" type="password" />
-                    <input ref={passwordConfirmationRef} placeholder="Password Confirmation" type="password" />
-                    <button className="btn btn-block">Signup</button>
-                    <p className="message">
-                        Allready Registered? <Link to="/login">Sign in</Link>
-                    </p>
-                </form>
+                    </div>
+                    <div className="input-group mb-3">
+                        <button onClick={onSubmit} className="btn btn-lg btn-primary w-100 fs-6 fw-bold">Register</button>
+                    </div>
+                    <div className="row">
+                        <small>Have already an account? <Link to="/login" className="link-primary fw-bold text-decoration-none">Sign in</Link></small>
+                    </div>
+                    </div>
+                </div>
+                <div className="left-content col-md-6 rounded-3 d-flex justify-content-center align-items-center flex-column left-box"> 
+                </div>
+                </div>
             </div>
         </div>
     )

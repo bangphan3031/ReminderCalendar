@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axiosClient from '../axios-client';
-import { FaTimes, FaCalendarAlt, FaClock, FaEdit } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { FaTimes, FaCalendarAlt, FaClock, FaEdit, FaTrash } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import EditEvent from './EditEvent';
 
 const localizer = momentLocalizer(moment);
 
-const Event = (props) => {
-    const { selectedDate } = props;
+export default function Event(props) {
+    const navigate = useNavigate();
+    const [selectedDate, setSelectedDate] = useState(props.selectedDate);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [myEventsList, setMyEventsList] = useState([]);
     const [showEventDetail , setShowEventDetail] = useState(false);
@@ -16,6 +18,7 @@ const Event = (props) => {
     const formatEvents = (events) => {
         return events.map(event => ({
             id: event.id,
+            calendar_id: event.calendar_id,
             title: event.title,
             all_day: event.is_all_day,
             start: new Date(event.start_time),
@@ -44,13 +47,31 @@ const Event = (props) => {
         };
     };
 
-    const handleNavigate = (date, view) => {
-        // Xử lý ngày mới tại đây
-    }
+    useEffect(() => {
+        setSelectedDate(props.selectedDate);
+    }, [props.selectedDate]);
 
-    const handleSelectEvent  = event => {
+    const handleNavigate = (date, view) => {
+        setSelectedDate(date);
+    };
+
+    const handleSelectEvent = event => {
         setSelectedEvent(event);
         setShowEventDetail(true);
+    };
+
+    const handleDeleteCalendar = (id) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
+          axiosClient.delete(`/event/${id}`)
+            .then(response => {
+                setMyEventsList(myEventsList.filter(event => event.id !== id));
+                setShowEventDetail(false);
+                alert('Xóa thành công')
+            })
+            .catch(error => {
+              console.log(error);
+            });
+        }
     };
     
     const handleCloseEventDetail  = () => {
@@ -83,21 +104,25 @@ const Event = (props) => {
             onSelectEvent={handleSelectEvent}
             eventPropGetter={eventStyleGetter}
         />
-        {showEventDetail && selectedEvent && (
+        {selectedEvent && showEventDetail && (
             <div>
                 <div className="event-detail justify-content-center align-items-center w-100">
                     <div className="event-detail rounded-3">
                         <header className="px-3 py-1 d-flex align-items-center">
-                            <Link to="/edit-event">
-                                <button title='Edit' className='edit btn btn-outline-secondary border-0 rounded-5'>
+                            <Link to={`/edit-event?id=${selectedEvent.id}`}>
+                                <button title='Edit' 
+                                    className='edit btn btn-outline-secondary border-0 rounded-5'>
                                     <FaEdit />
                                 </button>
                             </Link>
-                            <button
+                            <button title='delete' 
+                                className='delete btn btn-outline-secondary border-0 rounded-5'
+                                onClick={() => handleDeleteCalendar(selectedEvent.id)}>
+                                <FaTrash />
+                            </button>
+                            <button title='Close'
                                 onClick={handleCloseEventDetail}
-                                title='Close'
-                                className='close btn btn-outline-secondary border-0 rounded-5'
-                            >
+                                className='close btn btn-outline-secondary border-0 rounded-5'>
                                 <FaTimes />
                             </button>
                         </header>
@@ -130,4 +155,3 @@ const Event = (props) => {
     );
 };
 
-export default Event;

@@ -158,6 +158,8 @@ export default function CreateEventDetail() {
                 try {
                     const response = await axiosClient.post(`/reminder/${eventId}`, reminder);
                     console.log(response.data);
+                    const sendReminderResponse = await axiosClient.get(`/sendReminder/${response.data.data.id}`);
+                    console.log(sendReminderResponse.data);
                 } catch (error) {
                     console.log(error);
                 }
@@ -198,6 +200,7 @@ export default function CreateEventDetail() {
                             <div className="col-1">
                                 <div>
                                     <button
+                                        type='button'
                                         onClick={handleCloseClick}
                                         title='Cancel event create'
                                         className='cancel-button btn btn-outline-secondary border-0 rounded-5'
@@ -269,7 +272,7 @@ export default function CreateEventDetail() {
                                         <FaMapMarkerAlt/>   
                                     </div>
                                 </div>
-                                <div className="col">
+                                <div className="col pt-1">
                                     <input ref={locationRef} name='location' placeholder='Add location'
                                         value={formData.location}
                                         onChange={(event) => setFormData({...formData, location: event.target.value})}
@@ -408,7 +411,7 @@ export default function CreateEventDetail() {
                             </div>
                         </div> 
                         <div className="row">
-                            <div className="col-11 add-attendee">
+                            <div className="col-11 pt-1 add-attendee">
                                 <div className='dropdown'>
                                     <input type="text" placeholder='Add attendee' 
                                         className='form-control'
