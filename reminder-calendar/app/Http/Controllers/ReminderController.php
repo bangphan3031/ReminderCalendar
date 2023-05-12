@@ -199,18 +199,17 @@ class ReminderController extends Controller
             ], 404);
         }
 
-        // $reminder->delete();
-
+        $reminder->delete();
+        $reminder_id = "rmd".$id;
         $jobIds = DB::table('jobs')
             ->where('queue', 'send-reminder-emails')
-            ->where('payload', 'like', "%34%")
+            ->where('payload', 'like', "%$reminder_id%")
             ->pluck('id');
         foreach ($jobIds as $jobId) {
             DB::table('jobs')->where('id', $jobId)->delete();
         }
         
-        //return response()->json(['message' => 'Reminder deleted']);
-        return $jobIds;
+        return response()->json(['message' => 'Reminder deleted']);
         
     }
 

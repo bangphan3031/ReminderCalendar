@@ -28,21 +28,31 @@ export default function CreateEventDetail() {
     const searchParams = new URLSearchParams(location.search);
     const [formData, setFormData] = useState({
         title: searchParams.get('title'),
-        is_all_day: searchParams.get('allday'),
+        is_all_day: searchParams.get('allday') === 'true',
         start_time: searchParams.get('start'),
         end_time: searchParams.get('end'),
         location: searchParams.get('location'),
         description: searchParams.get('description'),
     });
 
+    const dt_start = moment(searchParams.get('start')).format('YYYY-MM-DDTHH:mm');
+    const dt_end = moment(searchParams.get('end')).format('YYYY-MM-DDTHH:mm');
+    const d_start = moment(formData.start_time).format('YYYY-MM-DD');
+    const d_end = moment(formData.end_time).format('YYYY-MM-DD');
+
+    console.log(d_start)
+    console.log(dt_start);
+
     const [isAllDay, setIsAllDay] = useState(formData.is_all_day);
+    const [inputType, setInputType] = useState('date');
 
     useEffect(() => {
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          is_all_day: isAllDay,
-        }));
-      }, [isAllDay]);
+        if (!isAllDay) {
+          setInputType('datetime-local');
+        } else {
+          setInputType('date');
+        }
+    }, [isAllDay]);
 
     useEffect(() => {
         axiosClient.get('/calendar')
@@ -128,12 +138,30 @@ export default function CreateEventDetail() {
     };
 
     const handleAllDayChange = () => {
-        if (allDayRef.current.checked) {
+        const isChecked = allDayRef.current.checked;
+        setIsAllDay(isChecked);
+        if (isChecked) {
+            setFormData({
+                ...formData,
+                is_all_day: true,
+                start_time: d_start,
+                end_time: d_end
+            });
             startTimeRef.current.setAttribute('type', 'date');
+            startTimeRef.current.value = d_start;
             endTimeRef.current.setAttribute('type', 'date');
+            endTimeRef.current.value = d_end;
         } else {
+            setFormData({
+                ...formData,
+                is_all_day: false,
+                start_time: dt_start,
+                end_time: dt_end
+            });
             startTimeRef.current.setAttribute('type', 'datetime-local');
+            startTimeRef.current.value = dt_start;
             endTimeRef.current.setAttribute('type', 'datetime-local');
+            endTimeRef.current.value = dt_end;
         }
     };
 
@@ -228,7 +256,7 @@ export default function CreateEventDetail() {
                                         type='checkbox' 
                                         className='form-check-input' 
                                         style={{fontSize: 15.5, marginLeft: 10, marginRight: 5}}
-                                        defaultChecked
+                                        checked={isAllDay}
                                         onChange={handleAllDayChange}
                                     />
                                     <label className='form-check-label' htmlFor='all-day-checkbox'>
@@ -244,7 +272,7 @@ export default function CreateEventDetail() {
                                 </div>
                             </div>
                             <div className="col d-flex">
-                                <input ref={startTimeRef} type='date' name='start_time' required
+                                <input ref={startTimeRef} type={inputType} name='start_time' required
                                     value={formData.start_time}
                                     onChange={(event) => setFormData({...formData, start_time: event.target.value})}
                                     className='event-input input-time form-control border-0 border-bottom'
@@ -252,7 +280,7 @@ export default function CreateEventDetail() {
                                 <div>
                                     <p className='lable-to pt-2'>to</p>
                                 </div>
-                                <input ref={endTimeRef} type='date' name='end_time' required
+                                <input ref={endTimeRef} type={inputType} name='end_time' required
                                     value={formData.end_time}
                                     onChange={(event) => setFormData({...formData, end_time: event.target.value})}
                                     className='event-input input-time form-control border-0 border-bottom'

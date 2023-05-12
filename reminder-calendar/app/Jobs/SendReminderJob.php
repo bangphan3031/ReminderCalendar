@@ -27,7 +27,7 @@ class SendReminderJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct($email, $title, $start_time, $end_time, $location, $description, $create_user, $id)
+    public function __construct($email, $title, $start_time, $end_time, $location, $description, $create_user, $reminder_id)
     {
         //
         $this->email = $email;
@@ -37,7 +37,7 @@ class SendReminderJob implements ShouldQueue
         $this->location = $location;
         $this->description = $description;
         $this->create_user = $create_user;
-        $this->id = $id;
+        $this->id = $reminder_id;
     }
 
     /**

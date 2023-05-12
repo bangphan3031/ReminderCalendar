@@ -32,6 +32,7 @@ class SendReminderController extends Controller
         $phone = User::whereIn('id', $user_id)->pluck('phone')->toArray();
 
         //lay cac thong tin de gui nhac nho
+        $reminder_id = "rmd".$id;
         $title = $event->title;
         $start_time = $event->start_time;
         $end_time = $event->end_time;
@@ -48,7 +49,7 @@ class SendReminderController extends Controller
         
         if ($method === 'Email' && $reminder->send !== 1) {
             foreach ($email as $e) {
-                SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user, $id)
+                SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user, $reminder_id)
                 ->onQueue('send-reminder-emails')
                 ->delay($delay);
             }

@@ -60,7 +60,7 @@ export default function Event(props) {
         setShowEventDetail(true);
     };
 
-    const handleDeleteCalendar = (id) => {
+    const handleDeleteEvent = (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
           axiosClient.delete(`/event/${id}`)
             .then(response => {
@@ -77,6 +77,20 @@ export default function Event(props) {
     const handleCloseEventDetail  = () => {
         setShowEventDetail(false);
     };
+
+    let formatTime = '';
+    if (selectedEvent) {
+        const allday = selectedEvent.all_day;
+        const startTime = moment(selectedEvent.start).format('DD-MM-YYYY');
+        const endTime = moment(selectedEvent.end).format('DD-MM-YYYY');
+        formatTime = allday && startTime == endTime 
+        ? moment(selectedEvent.start).format('DD-MM-YYYY')
+        : allday && startTime != endTime
+            ? moment(selectedEvent.start).format('DD-MM-YYYY') + " - " + moment(selectedEvent.end).format('DD-MM-YYYY')
+            : !allday && startTime == endTime
+            ? startTime + ", " + moment(selectedEvent.start).format('h:mm a') + " - " + moment(selectedEvent.end).format('h:mm a')
+            : moment(selectedEvent.start).format('DD-MM-YYYY, h:mm a') + " - " + moment(selectedEvent.end).format('DD-MM-YYYY, h:mm a');
+    }
     
     useEffect(() => {
         const fetchEvents = async () => {
@@ -117,7 +131,7 @@ export default function Event(props) {
                             </Link>
                             <button title='delete' 
                                 className='delete btn btn-outline-secondary border-0 rounded-5'
-                                onClick={() => handleDeleteCalendar(selectedEvent.id)}>
+                                onClick={() => handleDeleteEvent(selectedEvent.id)}>
                                 <FaTrash />
                             </button>
                             <button title='Close'
@@ -138,7 +152,9 @@ export default function Event(props) {
                         <div className="row p-3 pt-0">
                             <div className="col-1"><FaClock /></div>
                             <div className="col">
-                            <p className='event-time'>{moment(selectedEvent.start).format('DD-MM-YYYY, h:mm a')} - {moment(selectedEvent.end).format('DD-MM-YYYY, h:mm a')}</p>
+                                <p className='event-time'>
+                                    {formatTime}
+                                </p>
                             </div>
                         </div>
                         <div className="row p-3">
