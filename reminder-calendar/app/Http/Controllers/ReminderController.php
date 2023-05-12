@@ -8,7 +8,6 @@ use App\Models\Event;
 use App\Models\Reminder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Validator;
 
 class ReminderController extends Controller
@@ -200,15 +199,18 @@ class ReminderController extends Controller
             ], 404);
         }
 
-        // $jobIds = DB::table('jobs')->where('payload', 'like', '%'.$id.'%')->pluck('id')->toArray();
-        // foreach ($jobIds as $jobId) {
-        //     Queue::connection()->getRedis()->del("queues:{$this->connection}:delayed", "queues:{$this->connection}:reserved:$jobId");
-        //     Queue::connection()->getRedis()->lrem("queues:{$this->connection}:reserved", 0, $jobId);
-        // }
+        // $reminder->delete();
 
-        $reminder->delete();
-
-        return response()->json(['message' => 'Reminder deleted']);
+        $jobIds = DB::table('jobs')
+            ->where('queue', 'send-reminder-emails')
+            ->where('payload', 'like', "%34%")
+            ->pluck('id');
+        foreach ($jobIds as $jobId) {
+            DB::table('jobs')->where('id', $jobId)->delete();
+        }
+        
+        //return response()->json(['message' => 'Reminder deleted']);
+        return $jobIds;
         
     }
 

@@ -48,7 +48,7 @@ class SendReminderController extends Controller
         
         if ($method === 'Email' && $reminder->send !== 1) {
             foreach ($email as $e) {
-                SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user)
+                SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user, $id)
                 ->onQueue('send-reminder-emails')
                 ->delay($delay);
             }

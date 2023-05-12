@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import '../css/Profile.css';
 import { useEffect } from "react";
+import "../css/Profile.css"
 import axiosClient from '../axios-client';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaBackward } from "react-icons/fa";
@@ -137,7 +137,7 @@ export default function Profile() {
                 Change profile picture
                 <input type="file" accept="image/*" onChange={handleImageChange} />
               </label>
-           </div>
+            </div>
           </div>
         </div>
       </div>

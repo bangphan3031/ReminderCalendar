@@ -6,10 +6,31 @@
 .box-area {
   width: 900px;
 }
+.verify-page {
+  background-color: #ececec;
+}
+.box-area-verify {
+  width: 900px;
+  height: 500px;
+}
 .left-content {
   background-image: url('https://thumbs.dreamstime.com/b/calendar-deadline-event-reminder-notification-schedule-appointment-important-date-concept-vector-illustration-stock-158781882.jpg');
   background-size: cover;
   background-position: center;
+}
+.profile-picture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.profile-picture img {
+width: 13rem;
+height: 13rem;
+border-radius: 50%;
+object-fit: cover;
+margin-bottom: 1rem;
 }
 .right-box {
   padding: 12px 30px 44px 40px;

@@ -22,11 +22,12 @@ class SendReminderJob implements ShouldQueue
     protected $location;
     protected $description;
     protected $create_user;
+    protected $id;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($email, $title, $start_time, $end_time, $location, $description, $create_user)
+    public function __construct($email, $title, $start_time, $end_time, $location, $description, $create_user, $id)
     {
         //
         $this->email = $email;
@@ -36,6 +37,7 @@ class SendReminderJob implements ShouldQueue
         $this->location = $location;
         $this->description = $description;
         $this->create_user = $create_user;
+        $this->id = $id;
     }
 
     /**
@@ -51,6 +53,7 @@ class SendReminderJob implements ShouldQueue
             'location' => $this->location,
             'description' => $this->description,
             'create_user' => $this->create_user,
+            'id' => $this->id,
         ];
         Mail::send('emails.reminder', $data, function($message) {
             $message->to($this->email)
