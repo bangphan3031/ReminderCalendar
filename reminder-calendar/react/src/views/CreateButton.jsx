@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import plus from '../assets/plus.png';
+import plus from '../assets/plus-icon.png';
 import CreateEvent from './CreateEvent';
 
 export default function CreateButton(props) {

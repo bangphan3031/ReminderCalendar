@@ -5,13 +5,15 @@ import axiosClient from '../axios-client';
 import { FaTimes, FaCalendarAlt, FaClock, FaEdit, FaTrash } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import EditEvent from './EditEvent';
+import EventDetail from './EventDetail';
+import UpcomingEvent from './UpcomingEvent';
 
 const localizer = momentLocalizer(moment);
 
 export default function Event(props) {
     const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState(props.selectedDate);
-    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [selectedEvent, setSelectedEvent] = useState();
     const [myEventsList, setMyEventsList] = useState([]);
     const [showEventDetail , setShowEventDetail] = useState(false);
 
@@ -26,7 +28,7 @@ export default function Event(props) {
             location: event.location,
             description: event.description,
             color: event.color,
-            calendar_name: event.name,
+            name: event.name,
         }));
     };
     
@@ -76,21 +78,8 @@ export default function Event(props) {
     
     const handleCloseEventDetail  = () => {
         setShowEventDetail(false);
+        setSelectedEvent(null)
     };
-
-    let formatTime = '';
-    if (selectedEvent) {
-        const allday = selectedEvent.all_day;
-        const startTime = moment(selectedEvent.start).format('DD-MM-YYYY');
-        const endTime = moment(selectedEvent.end).format('DD-MM-YYYY');
-        formatTime = allday && startTime == endTime 
-        ? moment(selectedEvent.start).format('DD-MM-YYYY')
-        : allday && startTime != endTime
-            ? moment(selectedEvent.start).format('DD-MM-YYYY') + " - " + moment(selectedEvent.end).format('DD-MM-YYYY')
-            : !allday && startTime == endTime
-            ? startTime + ", " + moment(selectedEvent.start).format('h:mm a') + " - " + moment(selectedEvent.end).format('h:mm a')
-            : moment(selectedEvent.start).format('DD-MM-YYYY, h:mm a') + " - " + moment(selectedEvent.end).format('DD-MM-YYYY, h:mm a');
-    }
     
     useEffect(() => {
         const fetchEvents = async () => {
@@ -106,7 +95,7 @@ export default function Event(props) {
     }, []);
 
     return (
-        <div style={{ height: '90vh' }}>
+        <div style={{ height: '91vh'}}>
         <Calendar
             localizer={localizer}
             events={myEventsList}
@@ -119,54 +108,12 @@ export default function Event(props) {
             eventPropGetter={eventStyleGetter}
         />
         {selectedEvent && showEventDetail && (
-            <div>
-                <div className="event-detail justify-content-center align-items-center w-100">
-                    <div className="event-detail rounded-3">
-                        <header className="px-3 py-1 d-flex align-items-center">
-                            <Link to={`/edit-event?id=${selectedEvent.id}`}>
-                                <button title='Edit' 
-                                    className='edit btn btn-outline-secondary border-0 rounded-5'>
-                                    <FaEdit />
-                                </button>
-                            </Link>
-                            <button title='delete' 
-                                className='delete btn btn-outline-secondary border-0 rounded-5'
-                                onClick={() => handleDeleteEvent(selectedEvent.id)}>
-                                <FaTrash />
-                            </button>
-                            <button title='Close'
-                                onClick={handleCloseEventDetail}
-                                className='close btn btn-outline-secondary border-0 rounded-5'>
-                                <FaTimes />
-                            </button>
-                        </header>
-                        <div className="row p-3">
-                            <div className="col-1">
-                                <div className='calendar-color' style={{ backgroundColor: selectedEvent.color}}></div>
-                            </div>
-                            <div className="col">
-                                <h5>{selectedEvent.title}</h5>
-                                {selectedEvent.description && <p>{selectedEvent.description}</p>}
-                            </div>
-                        </div>
-                        <div className="row p-3 pt-0">
-                            <div className="col-1"><FaClock /></div>
-                            <div className="col">
-                                <p className='event-time'>
-                                    {formatTime}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="row p-3">
-                            <div className="calendar-icon col-1"><FaCalendarAlt /></div>
-                            <div className="col" >
-                                <div className='calendar-name'>{selectedEvent.calendar_name}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-         )}
+            <EventDetail 
+                selectedEvent={selectedEvent} 
+                handleCloseEventDetail={handleCloseEventDetail} 
+                handleDeleteEvent={handleDeleteEvent} 
+            />
+        )}
         </div>
     );
 };

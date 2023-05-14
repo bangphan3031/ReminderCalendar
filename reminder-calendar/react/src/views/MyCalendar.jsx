@@ -78,10 +78,11 @@ export default function MyCalendar(props) {
       <div className='calendar'>
         <div className="row align-items-center">
           <div className="col mt-2">
-            <h6>My calendars</h6>
+            <h6 className='text-primary'>My calendars</h6>
           </div>
           <div className="col-auto">
             <button onClick={handleCreateCalendarClick} 
+              title='Create new calendar'
               className="btn-plus btn btn-outline-secondary rounded-5 border-0">
               <FaPlus />
             </button>
@@ -90,9 +91,9 @@ export default function MyCalendar(props) {
       </div>
       <div className='calendar-data'>
         {data.map(calendar => (
-          <div key={calendar.id} className='row align-items-center'>
+          <div key={calendar.id} className='row align-items-center custom-height'>
             <div className='col'>
-              <Form.Check className='mt-2'>
+              <Form.Check className='mt-0'>
                 <Form.Check.Input 
                   type='checkbox'
                   style={{backgroundColor: checkedBoxes[calendar.id] ? calendar.color : 'white', borderColor: calendar.color, fontSize: 15.5}}
@@ -107,13 +108,15 @@ export default function MyCalendar(props) {
             <div className='col-auto'>
               <button 
                 onClick={() => handleEditCalendarClick(calendar)}
-                className="btn btn-outline-secondary rounded-5 border-0 ">
-                <FaEdit size={15}/> 
+                title='Edit'
+                className="calendar-data-icons-1 btn btn-outline-secondary rounded-5 border-0 ">
+                <FaEdit/> 
               </button>
               <button 
                 onClick={() => handleDeleteCalendar(calendar.id)}
-                className="btn btn-outline-secondary rounded-5 border-0 ">
-                <FaTrash size={15}/> 
+                title='Delete'
+                className="calendar-data-icons-2 btn btn-outline-secondary rounded-5 border-0 ">
+                <FaTrash/> 
               </button>
             </div>  
           </div>

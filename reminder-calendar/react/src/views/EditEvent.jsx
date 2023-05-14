@@ -19,6 +19,9 @@ export default function EditEvent(props) {
     const [selectedUser, setSelectedUser] = useState([null]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
+    const [isAllDay, setIsAllDay] = useState(null);
+    const [timeStart, setTimeStart] = useState(null);
+    const [timeEnd, setTimeEnd] = useState(null);
     const userListRef = useRef(null);
     const titleRef = useRef();
     const allDayRef = useRef();
@@ -32,7 +35,7 @@ export default function EditEvent(props) {
 
     const [formData, setFormData] = useState({
         title: '',
-        is_all_day: '',
+        is_all_day: true,
         start_time: '',
         end_time: '',
         location: '',
@@ -42,20 +45,39 @@ export default function EditEvent(props) {
     useEffect(() => {
         axiosClient.get(`/event/${event_id}`)
             .then(response => {
+                const allDay = response.data.data.is_all_day == 1 ? true : false;
                 setFormData({
                     title: response.data.data.title,
-                    is_all_day: response.data.data.is_all_day,
-                    start_time: moment(response.data.data.start_time).format('YYYY-MM-DD'),
-                    end_time: moment(response.data.data.end_time).format('YYYY-MM-DD'),
+                    is_all_day: allDay,
+                    start_time: allDay ? moment(response.data.data.start_time).format('YYYY-MM-DD') : response.data.data.start_time,
+                    end_time: allDay ? moment(response.data.data.end_time).format('YYYY-MM-DD') : response.data.data.end_time,
                     location: response.data.data.location,
                     description: response.data.data.description
                 });
                 setSelectedCalendarId(response.data.data.calendar_id)
+                setTimeStart(response.data.data.start_time)
+                setTimeEnd(response.data.data.start_time)
+                setIsAllDay(allDay)
             })
             .catch(error => {
             console.log(error);
             });
     }, []);  
+
+    const dt_start = moment(timeStart).format('YYYY-MM-DDTHH:mm');
+    const dt_end = moment(timeEnd).format('YYYY-MM-DDTHH:mm');
+    const d_start = moment(formData.start_time).format('YYYY-MM-DD');
+    const d_end = moment(formData.end_time).format('YYYY-MM-DD');
+
+    const [inputType, setInputType] = useState('date');
+
+    useEffect(() => {
+        if (!isAllDay) {
+          setInputType('datetime-local');
+        } else {
+          setInputType('date');
+        }
+    }, [isAllDay]);
 
     useEffect(() => {
         axiosClient.get(`/reminder/${event_id}`)
@@ -118,8 +140,6 @@ export default function EditEvent(props) {
         setReminders([...reminders, newReminder]);
         setAddedReminders([...addedReminders, newReminder]);
     };
-    // console.log('reminder', reminders)
-    // console.log('add', addedReminders)
 
     const handleDeleteReminderClick = (index) => {
         const reminderToDelete = reminders[index];
@@ -133,7 +153,7 @@ export default function EditEvent(props) {
     };
 
     const handleCloseClick = () => {
-        navigate(-1);
+        navigate('/');
     };
 
     const handleUserClick = (user) => {
@@ -178,12 +198,30 @@ export default function EditEvent(props) {
     };
 
     const handleAllDayChange = () => {
-        if (allDayRef.current.checked) {
-            startTimeRef.current.type = 'date';
-            endTimeRef.current.type = 'date';
+        const isChecked = allDayRef.current.checked;
+        setIsAllDay(isChecked);
+        if (isChecked) {
+            setFormData({
+                ...formData,
+                is_all_day: true,
+                start_time: d_start,
+                end_time: d_end
+            });
+            startTimeRef.current.setAttribute('type', 'date');
+            startTimeRef.current.value = d_start;
+            endTimeRef.current.setAttribute('type', 'date');
+            endTimeRef.current.value = d_end;
         } else {
-            startTimeRef.current.type = 'datetime-local';
-            endTimeRef.current.type = 'datetime-local';
+            setFormData({
+                ...formData,
+                is_all_day: false,
+                start_time: dt_start,
+                end_time: dt_end
+            });
+            startTimeRef.current.setAttribute('type', 'datetime-local');
+            startTimeRef.current.value = dt_start;
+            endTimeRef.current.setAttribute('type', 'datetime-local');
+            endTimeRef.current.value = dt_end;
         }
     };
 
@@ -273,7 +311,7 @@ export default function EditEvent(props) {
                                         type='checkbox' 
                                         className='form-check-input' 
                                         style={{fontSize: 15.5, marginLeft: 10, marginRight: 5}}
-                                        defaultChecked
+                                        checked={isAllDay}
                                         onChange={handleAllDayChange}
                                     />
                                     <label className='form-check-label' htmlFor='all-day-checkbox'>
@@ -289,7 +327,7 @@ export default function EditEvent(props) {
                                 </div>
                             </div>
                             <div className="col d-flex">
-                                <input ref={startTimeRef} type='date' name='start_time' required
+                                <input ref={startTimeRef} type={inputType} name='start_time' required
                                     value={formData.start_time}
                                     onChange={(event) => setFormData({...formData, start_time: event.target.value})}
                                     className='event-input input-time form-control border-0 border-bottom'
@@ -297,7 +335,7 @@ export default function EditEvent(props) {
                                 <div>
                                     <p className='lable-to pt-2'>to</p>
                                 </div>
-                                <input ref={endTimeRef} type='date' name='end_time' required
+                                <input ref={endTimeRef} type={inputType} name='end_time' required
                                     value={formData.end_time}
                                     onChange={(event) => setFormData({...formData, end_time: event.target.value})}
                                     className='event-input input-time form-control border-0 border-bottom'
@@ -412,16 +450,19 @@ export default function EditEvent(props) {
                                 </div>
                                 <div className="col">
                                     <Dropdown className="dropdown-calendar">
-                                        <Dropdown.Toggle className='calendar-dropdown-toggle border-0' variant="outline-secondary" id="dropdown-secondary"> 
-                                            {selectedCalendar ? selectedCalendar.name : 'Select a calendar'}
+                                        <Dropdown.Toggle className='calendar-dropdown-toggle border-0 d-flex' variant="outline-secondary" id="dropdown-secondary"> 
+                                            <div className='calendar-color-event' style={{backgroundColor: selectedCalendar ? selectedCalendar.color : ''}}></div>
+                                            <span className='ms-1'>{selectedCalendar ? selectedCalendar.name : 'Select a calendar'}</span>
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu className="dropdown-menu">
                                             {calendars.map(calendar => (
                                                 <Dropdown.Item 
                                                     key={calendar.id}
                                                     onClick={() => handleCalendarChange(calendar)}
-                                                    active={selectedCalendarId === calendar.id}> 
-                                                    {calendar.name}
+                                                    active={selectedCalendarId === calendar.id}
+                                                    className='d-flex'> 
+                                                    <div className='calendar-color-event' style={{ backgroundColor: calendar.color}}></div>
+                                                    <span className='ms-1'>{calendar.name}</span>
                                                 </Dropdown.Item>
                                             ))}
                                         </Dropdown.Menu>

@@ -190,16 +190,19 @@ export default function CreateEvent(props) {
                     <div className="col-1 pt-1"><FaCalendarDay/></div>
                     <div className="col">
                         <Dropdown className="dropdown-calendar">
-                            <Dropdown.Toggle className='border-0' variant="outline-secondary"> 
-                                {selectedCalendar ? selectedCalendar.name : 'Select a calendar'}
+                            <Dropdown.Toggle className='border-0 d-flex' variant="outline-secondary"> 
+                                <div className='calendar-color-event' style={{backgroundColor: selectedCalendar ? selectedCalendar.color : ''}}></div>
+                                <span className='ms-1'>{selectedCalendar ? selectedCalendar.name : 'Select a calendar'}</span>
                             </Dropdown.Toggle>
                             <Dropdown.Menu className="dropdown-calendar-menu">
                                 {calendars.map(calendar => (
                                     <Dropdown.Item 
-                                    key={calendar.id}
-                                    onClick={() => handleCalendarChange(calendar)}
-                                    active={selectedCalendarId === calendar.id}> 
-                                    {calendar.name}
+                                        key={calendar.id}
+                                        onClick={() => handleCalendarChange(calendar)}
+                                        active={selectedCalendarId === calendar.id}
+                                        className='d-flex'>
+                                        <div className='calendar-color-event' style={{ backgroundColor: calendar.color}}></div>
+                                        <span className='ms-1'>{calendar.name}</span>
                                     </Dropdown.Item>
                                 ))}
                             </Dropdown.Menu>

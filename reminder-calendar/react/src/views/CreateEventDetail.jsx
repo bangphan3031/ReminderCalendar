@@ -40,9 +40,6 @@ export default function CreateEventDetail() {
     const d_start = moment(formData.start_time).format('YYYY-MM-DD');
     const d_end = moment(formData.end_time).format('YYYY-MM-DD');
 
-    console.log(d_start)
-    console.log(dt_start);
-
     const [isAllDay, setIsAllDay] = useState(formData.is_all_day);
     const [inputType, setInputType] = useState('date');
 
@@ -93,7 +90,7 @@ export default function CreateEventDetail() {
     };
 
     const handleCloseClick = () => {
-        navigate(-1);
+        navigate('/');
     };
 
     const handleUserClick = (user) => {
@@ -395,16 +392,19 @@ export default function CreateEventDetail() {
                                 </div>
                                 <div className="col">
                                     <Dropdown className="dropdown-calendar">
-                                        <Dropdown.Toggle className='calendar-dropdown-toggle border-0' variant="outline-secondary" id="dropdown-secondary"> 
-                                            {selectedCalendar ? selectedCalendar.name : 'Select a calendar'}
+                                        <Dropdown.Toggle className='calendar-dropdown-toggle border-0 d-flex' variant="outline-secondary" id="dropdown-secondary"> 
+                                            <div className='calendar-color-event' style={{backgroundColor: selectedCalendar ? selectedCalendar.color : ''}}></div>
+                                            <span className='ms-1'>{selectedCalendar ? selectedCalendar.name : 'Select a calendar'}</span>
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu className="dropdown-menu">
                                             {calendars.map(calendar => (
                                                 <Dropdown.Item 
                                                     key={calendar.id}
                                                     onClick={() => handleCalendarChange(calendar)}
-                                                    active={selectedCalendarId === calendar.id}> 
-                                                    {calendar.name}
+                                                    active={selectedCalendarId === calendar.id}
+                                                    className='d-flex'>
+                                                    <div className='calendar-color-event' style={{ backgroundColor: calendar.color}}></div>
+                                                    <span className='ms-1'>{calendar.name}</span>
                                                 </Dropdown.Item>
                                             ))}
                                         </Dropdown.Menu>

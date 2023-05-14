@@ -48,6 +48,7 @@ class UserController extends Controller
             'data' => $user,
         ], 200);
     }
+    
     public function uploadImage(Request $request)
     {
         $user = User::findOrFail(auth()->user()->id);

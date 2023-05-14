@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import SmallCalendar from './SmallCalendar';
 import MyCalendar from './MyCalendar'
 import CreateButton from './CreateButton';
+import UpcomingEvent from './UpcomingEvent';
 
 export default function Sidebar(props) {
 
@@ -19,6 +20,9 @@ export default function Sidebar(props) {
       </div>     
       <div className='my-calendar mt-3'>
         <MyCalendar />
+      </div>  
+      <div className='upcoming-event mt-3'>
+        <UpcomingEvent />
       </div>  
     </aside>
   )

@@ -118,20 +118,16 @@ class EventController extends Controller
         $now3 = Carbon::now('Asia/Ho_Chi_Minh')->addDays(3)->toDateTimeString();
         $user = auth()->user();
         $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
-        if (!$calendar_id) {
-            return response()->json([
-                'message' => 'Calendar not found',
-            ], 404);
-        }
-        $event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
-        $events_id = Event::whereIn('calendar_id', $calendar_id)
-                        ->orWhereIn('id', $event_id)
-                        ->pluck('id')->toArray();
-        $events_upcomming = Event::whereIn('id', $events_id)
-                                ->where('start_time', '>', $now)
-                                ->where('start_time', '<=', $now3)
-                                ->orderBy('start_time', 'asc')
-                                ->get();
+        $a_event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
+        $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $events_upcomming = Event::whereIn('events.id', $a_event_id)
+                ->orWhereIn('events.id', $event_id)    
+                ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+                ->select('events.*', 'calendars.color', 'calendars.name')
+                ->where('events.start_time', '>', $now)
+                ->where('events.start_time', '<=', $now3)
+                ->orderBy('start_time', 'asc')
+                ->get();
         return response()->json([
             'message' => 'Get events successful',
             'data' => $events_upcomming,
