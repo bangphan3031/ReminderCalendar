@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axiosClient from '../axios-client';
 import moment from 'moment';
 import EventDetail from './EventDetail';
+import { AppContext } from '../contexts/AppContext'
 
 function getTimeRemaining(start_time) {
     const now = moment();
@@ -26,8 +27,15 @@ function getTimeRemaining(start_time) {
 }
 
 export default function UpcomingEvent(props) {
-    const [showEventDetail , setShowEventDetail] = useState(false);
-    const [selectedEvent, setSelectedEvent] = useState(null);
+    const { 
+        reloadEvent, 
+        showEventDetails, 
+        handleShowEventDetails, 
+        handleCloseEventDetails, 
+        handleDeleteSuccess,
+        selectedEvent, 
+        setSelectedEvent
+    } = useContext(AppContext);
     const [remainingTimes, setRemainingTimes] = useState({});
     const [myEventsList, setMyEventsList] = useState([]);
     const [data, setData] = useState([]);
@@ -47,6 +55,10 @@ export default function UpcomingEvent(props) {
     }, [data]);
 
     useEffect(() => {
+        console.log(reloadEvent)
+    }, [reloadEvent]);
+
+    useEffect(() => {
         axiosClient.get('/event/upcoming')
         .then(response => {
             setData(response.data.data);
@@ -55,36 +67,26 @@ export default function UpcomingEvent(props) {
         .catch(error => {
             console.log(error);
         });
-    }, []);
+    }, [reloadEvent]);
 
     const handleSelectEvent = event => {
         setSelectedEvent(event);
-        setShowEventDetail(true);
+        handleShowEventDetails();
     };
 
     const handleDeleteEvent = (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
           axiosClient.delete(`/event/${id}`)
             .then(response => {
-                setMyEventsList(myEventsList.filter(event => event.id !== id));
-                setData(data.filter(event => event.id !== id));
-                setShowEventDetail(false);
                 alert('Xóa thành công')
+                handleDeleteSuccess();
+                handleCloseEventDetails();
             })
             .catch(error => {
               console.log(error);
             });
         }
     };
-
-    const handleCloseEventDetail  = () => {
-        setShowEventDetail(false);
-        setSelectedEvent(null)
-    };
-
-    useEffect(() => {
-        console.log(selectedEvent);
-    }, [selectedEvent]);
 
     return (
         <div>
@@ -101,7 +103,7 @@ export default function UpcomingEvent(props) {
                     onClick={() => handleSelectEvent(event)}>
                     <div className='col-7 d-flex'>
                         <div className='event-color' style={{ backgroundColor: event.color}}></div>
-                        <span className='ms-1'>{event.title}</span>
+                        <span className='ms-1 upcoming-event-title'>{event.title}</span>
                     </div> 
                     <div className='col-5'>
                         <span className='ms-2'>{getTimeRemaining(event.start_time)}</span>
@@ -109,10 +111,9 @@ export default function UpcomingEvent(props) {
                 </div>
                 ))}
             </div>
-            {selectedEvent && showEventDetail && (
+            {selectedEvent && showEventDetails && (
             <EventDetail 
                 selectedEvent={selectedEvent} 
-                handleCloseEventDetail={handleCloseEventDetail} 
                 handleDeleteEvent={handleDeleteEvent} 
             />
              )}

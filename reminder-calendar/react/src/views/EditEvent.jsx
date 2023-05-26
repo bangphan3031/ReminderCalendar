@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FaTimes, FaBell, FaClock, FaMapMarkerAlt, FaAlignLeft, FaCalendarDay} from 'react-icons/fa';
 import axiosClient from '../axios-client';
 import { Dropdown} from 'react-bootstrap'
 import moment from 'moment'
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AppContext } from '../contexts/AppContext';
 
 export default function EditEvent(props) {
+    const { selectedEvent, handleCreateSuccess, handleCloseEventDetails, setEventList } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
     const [calendars, setCalendars] = useState([]);
@@ -19,6 +21,7 @@ export default function EditEvent(props) {
     const [selectedUser, setSelectedUser] = useState([null]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
+    const [editEvent, setEditEvent] = useState(false);
     const [isAllDay, setIsAllDay] = useState(null);
     const [timeStart, setTimeStart] = useState(null);
     const [timeEnd, setTimeEnd] = useState(null);
@@ -40,29 +43,25 @@ export default function EditEvent(props) {
         end_time: '',
         location: '',
         description: '',
-    });
+    }); 
 
     useEffect(() => {
-        axiosClient.get(`/event/${event_id}`)
-            .then(response => {
-                const allDay = response.data.data.is_all_day == 1 ? true : false;
-                setFormData({
-                    title: response.data.data.title,
-                    is_all_day: allDay,
-                    start_time: allDay ? moment(response.data.data.start_time).format('YYYY-MM-DD') : response.data.data.start_time,
-                    end_time: allDay ? moment(response.data.data.end_time).format('YYYY-MM-DD') : response.data.data.end_time,
-                    location: response.data.data.location,
-                    description: response.data.data.description
-                });
-                setSelectedCalendarId(response.data.data.calendar_id)
-                setTimeStart(response.data.data.start_time)
-                setTimeEnd(response.data.data.start_time)
-                setIsAllDay(allDay)
-            })
-            .catch(error => {
-            console.log(error);
+        if(selectedEvent) {
+            const allDay = selectedEvent.is_all_day == 1 ? true : false;
+            setFormData({
+                title: selectedEvent.title,
+                is_all_day: allDay,
+                start_time: allDay ? moment(selectedEvent.start).format('YYYY-MM-DD') : moment(selectedEvent.start).format('YYYY-MM-DDTHH:mm'),
+                end_time: allDay ? moment(selectedEvent.end).format('YYYY-MM-DD') : moment(selectedEvent.end).format('YYYY-MM-DDTHH:mm'),
+                location: selectedEvent.location,
+                description: selectedEvent.description
             });
-    }, []);  
+            setSelectedCalendarId(selectedEvent.calendar_id)
+            setTimeStart(selectedEvent.start)
+            setTimeEnd(selectedEvent.start)
+            setIsAllDay(allDay)
+        }
+    }, [selectedEvent]);
 
     const dt_start = moment(timeStart).format('YYYY-MM-DDTHH:mm');
     const dt_end = moment(timeEnd).format('YYYY-MM-DDTHH:mm');
@@ -110,16 +109,10 @@ export default function EditEvent(props) {
     }, []);   
 
     useEffect(() => {
-        if (selectedCalendarId != null) {
-          axiosClient.get(`/calendar/${selectedCalendarId}`)
-            .then(response => {
-                setSelectedCalendar(response.data.data);
-            })
-            .catch(error => {
-                console.log(error);
-            });
+        if (selectedEvent != null) {
+            setSelectedCalendar(selectedEvent);
         }
-    }, [selectedCalendarId]);  
+    }, [selectedEvent]);  
 
     useEffect(() => {
         axiosClient.get('/user')
@@ -238,10 +231,21 @@ export default function EditEvent(props) {
             description: descriptionRef.current.value,
             calendar_id: selectedCalendarId
         }
+        setEditEvent(true); 
         axiosClient.put(`/event/${event_id}`, payload)
             .then(response => {
                 alert('Cập nhật công việc thành công')
-                navigate(-1)
+                setEditEvent(false); 
+                handleCloseEventDetails()
+                setEventList((prevEventList) =>
+                    prevEventList.map((event) => {
+                    if (event.id === event_id) {
+                        return response.data; // Sử dụng dữ liệu trả về từ server làm event mới
+                    }
+                    return event;
+                    })
+                );
+                navigate('/')
             })
             .catch(error => {
                 console.log(error);
@@ -250,22 +254,33 @@ export default function EditEvent(props) {
                 axiosClient.delete(`/reminder/${id}`)
                 .then(response => {
                     alert('Xóa reminder thành công')
+                    setEditEvent(false); 
                 })
                 .catch(error => {
                     console.log(error);
+                    setEditEvent(false);
                 });
             });
             const reminderPromises = addedReminders.map(async (reminder) => {
                 try {
                     const response = await axiosClient.post(`/reminder/${event_id}`, reminder);
                     console.log(response.data);
-                    alert('Thêm reminder thành công')
+                    const sendReminderResponse = await axiosClient.get(`/sendReminder/${response.data.data.id}`);
+                    console.log(sendReminderResponse.data);
+                    setEditEvent(false); 
                 } catch (error) {
                     console.log(error);
+                    setEditEvent(false);
                 }
             });
 
     };
+
+    useEffect(() => {
+        if (!editEvent) {
+            handleCreateSuccess(); 
+        }
+    }, [editEvent]);
 
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {

@@ -48,11 +48,11 @@
 </head>
 <body>
 	<div class="container">
-		<h1>Tiêu đề công việc: {{$title}}</h1>
+		<h1>Nhắc nhở công việc</h1>
+		<h2>Tiêu đề công việc: {{$title}}</h2>
 		<p class="time">Thời gian: Từ {{ $start_time }} đến {{ $end_time }}</p>
 		<p class="location">Địa điểm: {{ $location }}</p>
 		<p class="description">Mô tả công việc: {{ $description }}</p>
-        <p class="description">Người tạo: {{ $create_user->email }}</p>
 		<a href="#" class="button">Xác nhận</a>
 	</div>
 </body>

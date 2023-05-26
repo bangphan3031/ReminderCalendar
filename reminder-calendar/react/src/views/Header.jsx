@@ -9,9 +9,7 @@ import { FaUser, FaSignOutAlt, FaChevronLeft, FaChevronRight } from 'react-icons
 import moment from 'moment';
 
 export default function Header() {
-    const [selectedValue, setSelectedValue] = useState(localStorage.getItem("selectedValue") || "Month");
     const {user, token, setUser, setToken} = useStateContext()
-    const [currentMonth, setCurrentMonth] = useState(moment());
 
     const onLogout = ev => {
         ev.preventDefault()
@@ -26,22 +24,16 @@ export default function Header() {
     }
 
     useEffect(() => {
-    localStorage.setItem("selectedValue", selectedValue);
-    }, [selectedValue]);
-
-    useEffect(() => {
         axiosClient.get('/profile')
         .then(({data}) => {
             setUser(data)
         })
     }, [])
 
-
     if(!token) {
         return <Navigate to="/login" />
     }
     
-
     return (
         <header className="px-1 py-1 d-flex align-items-center border-bottom">
             <img src={logo} alt="calendar" className="logo" />

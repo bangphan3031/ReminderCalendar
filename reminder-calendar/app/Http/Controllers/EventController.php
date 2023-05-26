@@ -86,7 +86,10 @@ class EventController extends Controller
                 'message' => 'Calendar not found',
             ], 404);
         }
-        $events = Event::where('calendar_id', $calendar->id)->get();
+        $events = Event::where('calendar_id', $calendar->id)
+                ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+                ->select('events.*', 'calendars.color', 'calendars.name')
+                ->get();
         return response()->json([
             'message' => 'Get events successful',
             'data' => $events,
@@ -202,7 +205,10 @@ class EventController extends Controller
                 'message' => 'Calendar not found',
             ], 404);
         }
-        $event = Event::whereIn('calendar_id', $calendar_id)->find($id);
+        $event = Event::whereIn('calendar_id', $calendar_id)
+                ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+                ->select('events.*', 'calendars.color', 'calendars.name')
+                ->find($id);
         if(!$event) {
             return response()->json([
                 'message' => 'Event not found',

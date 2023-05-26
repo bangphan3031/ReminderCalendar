@@ -2,9 +2,16 @@ import React, { useContext, useState } from "react";
 import Header from "../views/Header";
 import Sidebar from "../views/Sidebar";
 import Event from "../views/Event";
+import { useStateContext } from "../contexts/ContextProvider";
+import { Navigate } from "react-router-dom";
 
 export default function DefautltLayout() {
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const {user, token, setUser, setToken} = useStateContext()
+
+    if(!token) {
+        return <Navigate to="/login" />
+    }
 
     const handleDateClick = (date) => {
         setSelectedDate(date);

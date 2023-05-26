@@ -1,21 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axiosClient from '../axios-client';
-import { FaTimes, FaCalendarAlt, FaClock, FaEdit, FaTrash } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
-import EditEvent from './EditEvent';
 import EventDetail from './EventDetail';
-import UpcomingEvent from './UpcomingEvent';
+import { AppContext } from '../contexts/AppContext';
 
 const localizer = momentLocalizer(moment);
 
 export default function Event(props) {
+    const { 
+        reloadEvent, 
+        resetReloadEvent, 
+        handleDeleteSuccess, 
+        handleShowEventDetails, 
+        handleCloseEventDetails, 
+        showEventDetails,
+        selectedEvent, 
+        eventList,
+        removeEvent,
+        handleSelectedEvent,
+        setEventList
+    } = useContext(AppContext);
     const navigate = useNavigate();
+    const [isReload, setIsReload] = useState(false);
+    const [selectedValue, setSelectedValue] = useState(localStorage.getItem('selectedValue') || 'month');
     const [selectedDate, setSelectedDate] = useState(props.selectedDate);
-    const [selectedEvent, setSelectedEvent] = useState();
     const [myEventsList, setMyEventsList] = useState([]);
-    const [showEventDetail , setShowEventDetail] = useState(false);
 
     const formatEvents = (events) => {
         return events.map(event => ({
@@ -49,6 +60,11 @@ export default function Event(props) {
         };
     };
 
+    const handleViewChange = (view) => {
+        setSelectedValue(view);
+        localStorage.setItem('selectedValue', view);
+    };
+
     useEffect(() => {
         setSelectedDate(props.selectedDate);
     }, [props.selectedDate]);
@@ -58,16 +74,28 @@ export default function Event(props) {
     };
 
     const handleSelectEvent = event => {
-        setSelectedEvent(event);
-        setShowEventDetail(true);
+        handleSelectedEvent({
+            id: event.id,
+            calendar_id: event.calendar_id,
+            title: event.title,
+            start_time: event.start,
+            end_time: event.end,
+            is_all_day: event.all_day,
+            location: event.location,
+            description: event.description,
+            color: event.color,
+            name: event.name,
+        });
+        handleShowEventDetails();
     };
 
     const handleDeleteEvent = (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
           axiosClient.delete(`/event/${id}`)
             .then(response => {
-                setMyEventsList(myEventsList.filter(event => event.id !== id));
-                setShowEventDetail(false);
+                removeEvent(id)
+                handleCloseEventDetails();
+                handleDeleteSuccess();
                 alert('Xóa thành công')
             })
             .catch(error => {
@@ -75,29 +103,38 @@ export default function Event(props) {
             });
         }
     };
-    
-    const handleCloseEventDetail  = () => {
-        setShowEventDetail(false);
-        setSelectedEvent(null)
-    };
-    
+
     useEffect(() => {
-        const fetchEvents = async () => {
-        try {
-            const response = await axiosClient.get('/event');
-            const formattedEvents = formatEvents(response.data.data);
-            setMyEventsList(formattedEvents);
-        } catch (error) {
-            console.log(error);
-        }
-        };
-        fetchEvents();
-    }, []);
+        localStorage.setItem("selectedValue", selectedValue);
+    }, [selectedValue]);
+    
+    // useEffect(() => {
+    //     const fetchEvents = async () => {
+    //     try {
+    //         const response = await axiosClient.get('/event');
+    //         const formattedEvents = formatEvents(response.data.data);
+    //         setMyEventsList(formattedEvents);
+    //         resetReloadEvent();
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    //     };
+    //     fetchEvents();
+    // }, [reloadEvent]);
+
+    useEffect(() => {
+        //const storedEventList = localStorage.getItem('eventList');
+        const formattedEvents = formatEvents(eventList);
+        setMyEventsList(formattedEvents)
+        resetReloadEvent()
+    }, [reloadEvent]);
 
     return (
         <div style={{ height: '91vh'}}>
         <Calendar
             localizer={localizer}
+            view={selectedValue}
+            onView={(view) => handleViewChange(view)}
             events={myEventsList}
             startAccessor="start"
             endAccessor="end"
@@ -107,10 +144,8 @@ export default function Event(props) {
             onSelectEvent={handleSelectEvent}
             eventPropGetter={eventStyleGetter}
         />
-        {selectedEvent && showEventDetail && (
+        {showEventDetails && (
             <EventDetail 
-                selectedEvent={selectedEvent} 
-                handleCloseEventDetail={handleCloseEventDetail} 
                 handleDeleteEvent={handleDeleteEvent} 
             />
         )}

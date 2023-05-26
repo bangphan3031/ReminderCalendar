@@ -1,15 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FaTimes, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaAlignLeft, FaCalendarDay} from 'react-icons/fa';
 import axiosClient from '../axios-client';
 import { Dropdown} from 'react-bootstrap'
 import moment from 'moment'
 import { Link } from 'react-router-dom';
+import { AppContext } from '../contexts/AppContext';
 
 export default function CreateEvent(props) {
     const {selectedDate} = props;
     const [calendars, setCalendars] = useState([]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
+    const [addingEvent, setAddingEvent] = useState(false);
+    const {reloadEvent, handleCreateSuccess, addEventList} = useContext(AppContext);
     const titleRef = useRef();
     const allDayRef = useRef();
     const startTimeRef = useRef();
@@ -91,17 +94,37 @@ export default function CreateEvent(props) {
             description: descriptionRef.current.value,
             calendar_id: selectedCalendarId
         }
+        setAddingEvent(true); 
         axiosClient.post('/event', payload)
             .then(response => {
-                alert('Thêm mới công việc thành công')
-                window.location.reload()
+            const id = response.data.data.id;
+            axiosClient.get(`/event/${id}`)
+                .then(response => {
+                    addEventList(response.data.data);
+                    handleCreateSuccess();
+                    props.onClose();
+                    alert('Thêm mới công việc thành công')
+                    setAddingEvent(false); 
+                })
+                .catch(error => {
+                    console.error(error);
+                    setAddingEvent(false);
+                    alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
+                });
             })
             .catch(error => {
                 console.error(error);
+                setAddingEvent(false); 
                 alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
             });
-    // Gửi các giá trị form đến API hoặc hệ thống lưu trữ dữ liệu của bạn để tạo sự kiện mới.
+
     };
+
+    useEffect(() => {
+        if (!addingEvent) {
+            handleCreateSuccess(); 
+        }
+    }, [addingEvent]);
 
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {

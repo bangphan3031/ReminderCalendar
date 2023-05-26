@@ -28,7 +28,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'email|required|unique:users,email',
+            'email' => 'required|email|unique:users,email',
             'name' => 'required',
             'phone' => 'required|unique:users,phone',
             'password' => 'required|min:6|confirmed'
@@ -98,10 +98,10 @@ class AuthController extends Controller
         
         $user = User::where('email', $request->email)->first();
         if(!$user){
-            return response()->json(['error' => 'Email does not exists'], 400);
+            return response()->json(['email' => 'Email does not exists'], 400);
         }
         if(!Hash::check($request->password, $user->password, [])){
-            return response()->json(['error' => 'Wrong password'], 400);
+            return response()->json(['password' => 'Wrong password'], 400);
         }
 
         $credentials = $request->only('email', 'password');

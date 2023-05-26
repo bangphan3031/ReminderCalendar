@@ -1,18 +1,23 @@
-import React, { useRef } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { FaTimes, FaCalendarAlt } from 'react-icons/fa';
 import axiosClient from '../axios-client';
+import Loading from './Loading';
+import { AppContext } from '../contexts/AppContext';
 
 export default function CreateCalendar(props) {
     const nameRef = useRef();
     const descriptionRef = useRef();
     const colorRef = useRef();
+    const { setLoading, setSuccess } = useContext(AppContext);
 
     const handleCloseClick = () => {
         props.onClose();
     };
 
-    const handleSubmit = (ev, onSuccess ) => {
+    const handleSubmit = (ev) => {
         ev.preventDefault(); 
+        props.onClose();
+        setLoading(true);
         const payload = {
             name: nameRef.current.value,
             description: descriptionRef.current.value,
@@ -21,10 +26,15 @@ export default function CreateCalendar(props) {
       
         axiosClient.post('/calendar', payload)
             .then(response => {
-                alert('Thêm mới lịch thành công')
-                window.location.reload()
+                setSuccess(true)
+                setLoading(false);
+                props.onSuccess();
+                setTimeout(() => {
+                    setSuccess(false);
+                }, 3000);
             })
             .catch(error => {
+                setLoading(false);
                 console.error(error);
                 alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
             });
@@ -37,6 +47,7 @@ export default function CreateCalendar(props) {
     };
 
     return (
+        <div>
         <div className="create-calendar justify-content-center align-items-center w-100">
             <form className="create-calendar rounded-3" onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
                 <header className="px-3 py-1 d-flex align-items-center">
@@ -82,6 +93,7 @@ export default function CreateCalendar(props) {
                     </div>
                 </div>
             </form>
+        </div>
         </div>
     );
 }

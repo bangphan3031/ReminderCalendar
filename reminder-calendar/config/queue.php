@@ -73,6 +73,16 @@ return [
 
     ],
 
+    'queues' => [
+        'default' => [
+            'driver' => 'database',
+            'table' => 'jobs',
+            'queue' => 'send-reminders',
+            'retry_after' => 90,
+        ],
+        // Các hàng đợi khác...
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Failed Queue Jobs

@@ -11,7 +11,10 @@ export default function Register() {
     const phoneRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmationRef = useRef();
-    const [errorMessage, setErrorMessage] = useState('');
+    const [erName, setErName] = useState('');
+    const [erEmail, setErEmail] = useState('');
+    const [erPassword, setErPassword] = useState('');
+    const [erPhone, setErPhone] = useState('');
 
     const {setUser, setToken} = useStateContext()
 
@@ -29,7 +32,10 @@ export default function Register() {
                 alert('Đăng ký thành công! Vui lòng xác thực tài khoản email để có thể đăng nhập.')
             })
             .catch(error => {
-                setErrorMessage(error.response.data.error);
+                setErName(error.response.data.name);
+                setErEmail(error.response.data.email);
+                setErPhone(error.response.data.phone);
+                setErPassword(error.response.data.password);
             })
     }
 
@@ -43,22 +49,31 @@ export default function Register() {
                         {/* <img src={logo} className="img-fluid" width={100}/> */}
                         <h2>Sign Up</h2>
                     </div>
-                    <div className="error-message">
-                        {errorMessage && <p>{errorMessage}</p>}
-                    </div>
-                    <div className="input-group mb-3">
+                    <div className="input-group">
                         <input ref={nameRef} type="text" className="form-control form-control-lg bg-light fs-6" placeholder="Name" required/>
                     </div>
-                    <div className="input-group mb-3">
+                    <div className="error-message-register">
+                        {erName && <p>{erName}</p>}
+                    </div>
+                    <div className="input-group mt-3">
                         <input ref={emailRef} type="email" className="form-control form-control-lg bg-light fs-6" placeholder="Email" required/>
                     </div>
-                    <div className="input-group mb-3">
+                    <div className="error-message-register">
+                        {erEmail && <p>{erEmail}</p>}
+                    </div>
+                    <div className="input-group mt-3">
                         <input ref={phoneRef} type="text" className="form-control form-control-lg bg-light fs-6" placeholder="Phone number" required/>
                     </div>
-                    <div className="input-group mb-3">
+                    <div className="error-message-register">
+                        {erPhone && <p>{erPhone}</p>}
+                    </div>
+                    <div className="input-group mt-3">
                         <input ref={passwordRef} type="password" className="form-control form-control-lg bg-light fs-6" placeholder="Password" required/>
                     </div>
-                    <div className="input-group mb-1">
+                    <div className="error-message-register">
+                        {erPassword && <p>{erPassword}</p>}
+                    </div>
+                    <div className="input-group mt-3">
                         <input type="password" ref={passwordConfirmationRef}
                         onKeyDown={(ev) => {
                         if (ev.key === 'Enter') {
@@ -67,7 +82,7 @@ export default function Register() {
                         }}  
                         className="form-control form-control-lg bg-light fs-6" placeholder="Comfirm Password" required/>
                     </div>
-                    <div className="input-group mb-4 d-flex justify-content-between">
+                    <div className="input-group mb-4 d-flex justify-content-between mt-1">
                         <div className="form-check">
                         <input type="checkbox" className="form-check-input"/>
                         <label htmlFor="formCheck" className="form-check-lable text-secondary"><small>I agree all statements in <Link to="#" className="link-primary fw-bold text-decoration-none">Terms of service</Link></small></label>

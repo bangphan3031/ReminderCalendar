@@ -21,11 +21,8 @@ class SendReminderController extends Controller
         $reminder = Reminder::find($id);
         $event = Event::find($reminder->event_id);
         $calendar = Calendar::find($event->calendar_id);
-        $user = User::where('id', $calendar->user_id)->pluck('id')->toArray();
-        $attendee = Attendee::where('event_id', $reminder->event_id)->pluck('user_id')->toArray();
+        $user_id = User::where('id', $calendar->user_id)->pluck('id')->toArray();
 
-        //lay ra mang user id bao gom id user tao reminder va id user tham du
-        $user_id = array_merge($user, $attendee);
         //lay ra email de gui nhac nho theo id
         $email = User::whereIn('id', $user_id)->pluck('email')->toArray();
         //lay ra so dien thoai de gui nhac nho theo id
@@ -49,13 +46,22 @@ class SendReminderController extends Controller
         
         if ($method === 'Email' && $reminder->send !== 1) {
             foreach ($email as $e) {
-                SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user, $reminder_id)
-                ->onQueue('send-reminder-emails')
+                SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user, $reminder_id, $method)
+                ->onQueue('send-reminders')
                 ->delay($delay);
             }
             $reminder->send = 1;
             $reminder->save();
         }
-        return response()->json(['message' => 'Set to send email successful'], 200);
+        if ($method === 'Sms' && $reminder->send !== 1) {
+            foreach ($phone as $p) {
+                SendReminderJob::dispatch($p, $title, $start_time, $end_time, $location, $description, $create_user, $reminder_id, $method)
+                ->onQueue('send-reminders')
+                ->delay($delay);
+            }
+            $reminder->send = 1;
+            $reminder->save();
+        }
+        return response()->json(['message' => 'Set to send reminder successful'], 200);
     }
 }
