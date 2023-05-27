@@ -20,15 +20,14 @@ export default function MyCalendar(props) {
     setLoading, 
     success, setSuccess, 
     deleted, setDeleted, 
-    eventList, 
-    setEventList, 
-    addEvent, 
-    removeEventsByCalendarId, 
-    handleDeleteSuccess,
     handleShowEventDetails, 
-    setSelectedEvent
+    setSelectedEvent,
+    
   } = useContext(AppContext);
+  
+  const [selectedCalendars, setSelectedCalendars] = useState([]);
   const [events, setEvents] = useState([]);
+  const [eventListVisible, setEventListVisible] = useState({});
   const [buttonStates, setButtonStates] = useState(() => {
     const initialButtonStates = {};
     data.forEach(calendar => {
@@ -36,7 +35,6 @@ export default function MyCalendar(props) {
     });
     return initialButtonStates;
   });
-  const [eventListVisible, setEventListVisible] = useState({});
 
   const [checkedBoxes, setCheckedBoxes] = useState(() => {
     try {
@@ -127,6 +125,8 @@ export default function MyCalendar(props) {
     axiosClient.get('/calendar')
       .then(response => {
         setData(response.data.data);
+        const calendarId = response.data.data.map(calendar => calendar.id);
+        setSelectedCalendars(calendarId);
         setReloadCalendar(false);
       })
       .catch(error => {
@@ -134,43 +134,28 @@ export default function MyCalendar(props) {
       });
   }, [reloadCalendar]);
 
-  const [cancelTokenSource, setCancelTokenSource] = useState(null);
+  useEffect(() => {
+    // Lưu giá trị vào localStorage khi selectedCalendars thay đổi
+    localStorage.setItem('selectedCalendars', JSON.stringify(selectedCalendars));
+  }, [selectedCalendars]);
 
-  const handleCheckboxChange = async (event, calendar) => {
-
-    if (cancelTokenSource) {
-      cancelTokenSource.cancel("Operation canceled by the user.");
-    }
+  const handleCheckboxChange = async (event, calendarId) => {
 
     const newState = { ...checkedBoxes };
-    newState[calendar.id] = event.target.checked;
+    newState[calendarId] = event.target.checked;
     setCheckedBoxes(newState);
     localStorage.setItem("checkedBoxes", JSON.stringify(newState));
   
     if (event.target.checked) {
-      const source = axios.CancelToken.source();
-      setCancelTokenSource(source);
-  
-      try {
-        const response = await axiosClient.get(`/event/calendar/${calendar.id}`, {
-          cancelToken: source.token,
-        });
-        const data = response.data.data;
-        // Thêm các event vào danh sách
-        data.forEach((eventItem) => addEvent(eventItem));
-        handleDeleteSuccess();
-      } catch (error) {
-        if (axios.isCancel(error)) {
-          console.log("Request canceled:", error.message);
-        } else {
-          // Xử lý các lỗi khác
-        }
-      }
+      setSelectedCalendars([...selectedCalendars, calendarId]);
     } else {
-      removeEventsByCalendarId(calendar.id);
-      handleDeleteSuccess();
+      setSelectedCalendars(selectedCalendars.filter(id => id !== calendarId));
     }
   };
+
+  useEffect(() => {
+    console.log(selectedCalendars)
+  }, [selectedCalendars]);
 
   useEffect(() => {
     localStorage.setItem("checkedBoxes", JSON.stringify(checkedBoxes));
@@ -240,7 +225,7 @@ export default function MyCalendar(props) {
         </div>
       </div>
       <div className='calendar-data'>
-        {data.map(calendar => (
+        {data.map((calendar, index) => (
           <div key={calendar.id} className='row align-items-center custom-height'>
             <div className='col'>
               <Form.Check className='mt-0'>
@@ -248,7 +233,7 @@ export default function MyCalendar(props) {
                   type='checkbox'
                   style={{ backgroundColor: getCheckboxValue(calendar.id) ? calendar.color : 'white', borderColor: calendar.color, fontSize: 15.5 }}
                   defaultChecked={getCheckboxValue(calendar.id)}
-                  onChange={(event) => handleCheckboxChange(event, calendar, calendar.id)}
+                  onChange={(event) => handleCheckboxChange(event, calendar.id)}
                 />
                 <Form.Check.Label title={calendar.name}>
                   {calendar.name}
@@ -262,12 +247,14 @@ export default function MyCalendar(props) {
                 className="calendar-data-icons-1 btn btn-outline-secondary rounded-5 border-0 ">
                 <FaEdit/> 
               </button>
-              <button 
-                onClick={() => handleDeleteCalendar(calendar.id)}
-                title='Delete'
-                className="calendar-data-icons-2 btn btn-outline-secondary rounded-5 border-0 ">
-                <FaTrash/> 
-              </button>
+              {index > 0 && ( // Ẩn button Delete nếu index là 0
+                <button 
+                  onClick={() => handleDeleteCalendar(calendar.id)}
+                  title='Delete'
+                  className="calendar-data-icons-2 btn btn-outline-secondary rounded-5 border-0 ">
+                  <FaTrash/> 
+                </button>
+              )}
               <button
                 onClick={() => handleToggleEventList(calendar.id)}
                 className="calendar-data-icons-3 btn btn-outline-secondary rounded-5 border-0"

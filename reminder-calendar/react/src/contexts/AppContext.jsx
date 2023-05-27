@@ -12,28 +12,9 @@ export const AppProvider = ({ children }) => {
     const [success, setSuccess] = useState(false);
     const [deleted, setDeleted] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [calendarSelected, setCalendarSelected] = useState(null);
     const [eventList, setEventList] = useState([])
-
-    useEffect(() => {
-        axiosClient.get('/event')
-          .then(response => {
-            setEventList(response.data.data);
-          })
-          .catch(error => {
-            console.log(error);
-          });
-    }, []);
-
-    useEffect(() => {
-        const storedEventList = localStorage.getItem('eventList');
-        if (storedEventList) {
-          setEventList(JSON.parse(storedEventList));
-        }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem('eventList', JSON.stringify(eventList));
-    }, [eventList]);
+    const [selectedCalendars, setSelectedCalendars] = useState([]);
 
     const handleSelectedEvent = (event) => {
         setSelectedEvent(event);
@@ -59,57 +40,23 @@ export const AppProvider = ({ children }) => {
         setReloadEvent(false);
     };
 
-    // Hàm thêm event vào danh sách
-    const addEvent = (event) => {
-        setEventList((prevEventList) => [...prevEventList, event]);
-    };
-
-    const addEventList = (event) => {
-        setEventList((prevEventList) => [...prevEventList, event]);
-    };
-
-    const removeEvent = (eventId) => {
-        const updatedEventList = eventList.filter(event => event.id !== eventId);
-        setEventList(updatedEventList);
-    };
-
-    // Hàm xóa event khỏi danh sách
-    const removeEventsByCalendarId = (calendarId) => {
-        const updatedEventList = eventList.filter(event => event.calendar_id !== calendarId);
-        setEventList(updatedEventList);
-    };
-
-    // Hàm kiểm tra xem một event có trong danh sách hay không
-    const hasEvent = (eventId) => {
-        return eventList.some(event => event.id === eventId);
-    };
-
     const contextValue = {
-        user,
-        loading,
-        success,
-        deleted,
-        reloadEvent,
-        showEventDetails,
-        selectedEvent, 
-        eventList, 
-        setUser,
-        setLoading,
-        setSuccess,
-        setDeleted,
-        setSelectedEvent,
+        user, setUser,
+        loading, setLoading,
+        success, setSuccess,
+        deleted, setDeleted,
+        reloadEvent, 
+        showEventDetails, 
+        selectedEvent, setSelectedEvent,
+        eventList, setEventList, 
+        calendarSelected, setCalendarSelected,
+        selectedCalendars, setSelectedCalendars,
+        handleShowEventDetails,
         handleCreateSuccess,
         handleDeleteSuccess,
-        handleShowEventDetails,
         handleCloseEventDetails,
         resetReloadEvent,
-        setEventList, 
-        addEvent, 
-        addEventList,
-        removeEventsByCalendarId, 
-        removeEvent,
         handleSelectedEvent,
-        hasEvent
     };
 
     return (

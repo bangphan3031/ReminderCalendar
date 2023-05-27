@@ -89,6 +89,7 @@ class EventController extends Controller
         $events = Event::where('calendar_id', $calendar->id)
                 ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
                 ->select('events.*', 'calendars.color', 'calendars.name')
+                ->orderBy('events.start_time')
                 ->get();
         return response()->json([
             'message' => 'Get events successful',
@@ -101,10 +102,8 @@ class EventController extends Controller
     {
         $user = auth()->user();
         $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
-        $a_event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
         $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
-        $events = Event::whereIn('events.id', $a_event_id)
-                ->orWhereIn('events.id', $event_id)
+        $events = Event::WhereIn('events.id', $event_id)
                 ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
                 ->select('events.*', 'calendars.color', 'calendars.name')
                 ->get();

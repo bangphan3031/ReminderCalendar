@@ -12,7 +12,7 @@ export default function CreateEvent(props) {
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
     const [addingEvent, setAddingEvent] = useState(false);
-    const {reloadEvent, handleCreateSuccess, addEventList} = useContext(AppContext);
+    const {reloadEvent, handleCreateSuccess, setCalendarSelected} = useContext(AppContext);
     const titleRef = useRef();
     const allDayRef = useRef();
     const startTimeRef = useRef();
@@ -53,7 +53,10 @@ export default function CreateEvent(props) {
     const handleCalendarChange = (calendar) => {
         setSelectedCalendarId(calendar.id);
         setSelectedCalendar(calendar);
+        setCalendarSelected(calendar);
     };
+
+    console.log(selectedCalendar)
 
     const handleAllDayChange = () => {
         if (allDayRef.current.checked) {
@@ -100,7 +103,6 @@ export default function CreateEvent(props) {
             const id = response.data.data.id;
             axiosClient.get(`/event/${id}`)
                 .then(response => {
-                    addEventList(response.data.data);
                     handleCreateSuccess();
                     props.onClose();
                     alert('Thêm mới công việc thành công')

@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FaTimes, FaBell, FaClock, FaMapMarkerAlt, FaAlignLeft, FaCalendarDay} from 'react-icons/fa';
 import axiosClient from '../axios-client';
 import { Dropdown} from 'react-bootstrap'
 import moment from 'moment'
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AppContext } from '../contexts/AppContext';
 
 export default function CreateEventDetail() {
+    const {calendarSelected, setCalendarSelected} = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
     const [calendars, setCalendars] = useState([]);
@@ -55,8 +57,9 @@ export default function CreateEventDetail() {
         axiosClient.get('/calendar')
             .then(response => {
                 setCalendars(response.data.data);
-                if (!selectedCalendar && !selectedCalendarId) {
+                if (!calendarSelected && !selectedCalendar && !selectedCalendarId) {
                     setSelectedCalendar(response.data.data[0]);
+                    setCalendarSelected(response.data.data[0]);
                     setSelectedCalendarId(response.data.data[0].id);
                 }
             })
@@ -132,6 +135,7 @@ export default function CreateEventDetail() {
     const handleCalendarChange = (calendar) => {
         setSelectedCalendarId(calendar.id);
         setSelectedCalendar(calendar);
+        setCalendarSelected(calendar);
     };
 
     const handleAllDayChange = () => {
@@ -393,8 +397,8 @@ export default function CreateEventDetail() {
                                 <div className="col">
                                     <Dropdown className="dropdown-calendar">
                                         <Dropdown.Toggle className='calendar-dropdown-toggle border-0 d-flex' variant="outline-secondary" id="dropdown-secondary"> 
-                                            <div className='calendar-color-event' style={{backgroundColor: selectedCalendar ? selectedCalendar.color : ''}}></div>
-                                            <span className='ms-1'>{selectedCalendar ? selectedCalendar.name : 'Select a calendar'}</span>
+                                            <div className='calendar-color-event' style={{backgroundColor: calendarSelected ? calendarSelected.color : ''}}></div>
+                                            <span className='ms-1'>{calendarSelected ? calendarSelected.name : 'Select a calendar'}</span>
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu className="dropdown-menu">
                                             {calendars.map(calendar => (

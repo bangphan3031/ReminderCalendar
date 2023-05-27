@@ -16,17 +16,15 @@ export default function Event(props) {
         handleShowEventDetails, 
         handleCloseEventDetails, 
         showEventDetails,
-        selectedEvent, 
-        eventList,
-        removeEvent,
         handleSelectedEvent,
-        setEventList
+        selectedCalendars, 
     } = useContext(AppContext);
     const navigate = useNavigate();
     const [isReload, setIsReload] = useState(false);
     const [selectedValue, setSelectedValue] = useState(localStorage.getItem('selectedValue') || 'month');
     const [selectedDate, setSelectedDate] = useState(props.selectedDate);
     const [myEventsList, setMyEventsList] = useState([]);
+    const [filteredEvents, setFilteredEvents] = useState([]);
 
     const formatEvents = (events) => {
         return events.map(event => ({
@@ -93,7 +91,6 @@ export default function Event(props) {
         if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
           axiosClient.delete(`/event/${id}`)
             .then(response => {
-                removeEvent(id)
                 handleCloseEventDetails();
                 handleDeleteSuccess();
                 alert('Xóa thành công')
@@ -108,26 +105,25 @@ export default function Event(props) {
         localStorage.setItem("selectedValue", selectedValue);
     }, [selectedValue]);
     
-    // useEffect(() => {
-    //     const fetchEvents = async () => {
-    //     try {
-    //         const response = await axiosClient.get('/event');
-    //         const formattedEvents = formatEvents(response.data.data);
-    //         setMyEventsList(formattedEvents);
-    //         resetReloadEvent();
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    //     };
-    //     fetchEvents();
-    // }, [reloadEvent]);
+    useEffect(() => {
+        const fetchEvents = async () => {
+        try {
+            const response = await axiosClient.get('/event');
+            const formattedEvents = formatEvents(response.data.data);
+            setMyEventsList(formattedEvents);
+            resetReloadEvent();
+        } catch (error) {
+            console.log(error);
+        }
+        };
+        fetchEvents();
+    }, [reloadEvent]);
 
     useEffect(() => {
-        //const storedEventList = localStorage.getItem('eventList');
-        const formattedEvents = formatEvents(eventList);
-        setMyEventsList(formattedEvents)
-        resetReloadEvent()
-    }, [reloadEvent]);
+        // Lọc danh sách event dựa trên các calendar đã được chọn
+        const filtered = myEventsList.filter(event => selectedCalendars.includes(event.calendar_id));
+        setFilteredEvents(filtered);
+    }, [myEventsList, selectedCalendars]);
 
     return (
         <div style={{ height: '91vh'}}>
@@ -135,7 +131,7 @@ export default function Event(props) {
             localizer={localizer}
             view={selectedValue}
             onView={(view) => handleViewChange(view)}
-            events={myEventsList}
+            events={filteredEvents}
             startAccessor="start"
             endAccessor="end"
             style={{ height: '100%' }}
