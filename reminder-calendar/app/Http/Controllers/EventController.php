@@ -120,10 +120,8 @@ class EventController extends Controller
         $now3 = Carbon::now('Asia/Ho_Chi_Minh')->addDays(3)->toDateTimeString();
         $user = auth()->user();
         $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
-        $a_event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
         $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
-        $events_upcomming = Event::whereIn('events.id', $a_event_id)
-                ->orWhereIn('events.id', $event_id)    
+        $events_upcomming = Event::WhereIn('events.id', $event_id)    
                 ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
                 ->select('events.*', 'calendars.color', 'calendars.name')
                 ->where('events.start_time', '>', $now)
@@ -154,7 +152,6 @@ class EventController extends Controller
             'data' => $result,
         ], 200);
     }
-
 
     // Tao moi event
     public function createEvent(Request $request)

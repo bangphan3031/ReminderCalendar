@@ -12,7 +12,12 @@ export default function CreateEvent(props) {
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
     const [addingEvent, setAddingEvent] = useState(false);
-    const {reloadEvent, handleCreateSuccess, setCalendarSelected} = useContext(AppContext);
+    const {
+        reloadEvent, 
+        handleCreateSuccess, 
+        setCalendarSelected,
+        setSuccess, setLoading
+    } = useContext(AppContext);
     const titleRef = useRef();
     const allDayRef = useRef();
     const startTimeRef = useRef();
@@ -56,8 +61,6 @@ export default function CreateEvent(props) {
         setCalendarSelected(calendar);
     };
 
-    console.log(selectedCalendar)
-
     const handleAllDayChange = () => {
         if (allDayRef.current.checked) {
             setFormData({
@@ -86,6 +89,8 @@ export default function CreateEvent(props) {
 
     const onSubmit = (ev) => {
         ev.preventDefault()
+        props.onClose();
+        setLoading(true);
         const startTime = moment(startTimeRef.current.value).format('YYYY-MM-DDTHH:mm:ss');
         const endTime = moment(endTimeRef.current.value).format('YYYY-MM-DDTHH:mm:ss');
         const payload = {
@@ -104,18 +109,23 @@ export default function CreateEvent(props) {
             axiosClient.get(`/event/${id}`)
                 .then(response => {
                     handleCreateSuccess();
-                    props.onClose();
-                    alert('Thêm mới công việc thành công')
+                    setSuccess(true)
+                    setLoading(false);
                     setAddingEvent(false); 
+                    setTimeout(() => {
+                        setSuccess(false);
+                    }, 3000);
                 })
                 .catch(error => {
                     console.error(error);
+                    setLoading(false);
                     setAddingEvent(false);
                     alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
                 });
             })
             .catch(error => {
                 console.error(error);
+                setLoading(false);
                 setAddingEvent(false); 
                 alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
             });

@@ -6,10 +6,13 @@ export const AppContext = createContext();
 export const AppProvider = ({ children }) => {
     const [user, setUser] = useState({})
     const [reloadEvent, setReloadEvent] = useState(false);
+    const [reloadCalendar, setReloadCalendar] = useState(false);
     const [showEventDetails, setShowEventDetails] = useState(false);
+    const [showEditCalendar, setShowEditCalendar] = useState(false);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [deleted, setDeleted] = useState(false);
+    const [updated, setUpdated] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [calendarSelected, setCalendarSelected] = useState(null);
     const [eventList, setEventList] = useState([])
@@ -51,7 +54,27 @@ export const AppProvider = ({ children }) => {
         setShowEventDetails(false);
     }
 
+    const handleShowEditCalendar = () => {
+        setShowEditCalendar(true);
+    }
+
+    const handleCloseEditCalendar = () => {
+        setShowEditCalendar(false);
+    }
+
+    const handleEditCalendarSuccess = () => {
+        setReloadCalendar(true);
+    }
+    
+    const resetReloadCalendar = () => {
+        setReloadCalendar(false);
+    };
+
     const handleCreateSuccess = () => {
+        setReloadEvent(true);
+    };
+
+    const handleEditSuccess = () => {
         setReloadEvent(true);
     };
 
@@ -68,7 +91,9 @@ export const AppProvider = ({ children }) => {
         loading, setLoading,
         success, setSuccess,
         deleted, setDeleted,
+        updated, setUpdated,
         reloadEvent, 
+        reloadCalendar, setReloadCalendar,
         showEventDetails, 
         selectedEvent, setSelectedEvent,
         eventList, setEventList, 
@@ -78,7 +103,11 @@ export const AppProvider = ({ children }) => {
         isLoadingData, setIsLoadingData,
         updateSelectedCalendars,
         handleShowEventDetails,
+        handleCloseEditCalendar,
+        handleEditCalendarSuccess,
+        resetReloadCalendar,
         handleCreateSuccess,
+        handleEditSuccess,
         handleDeleteSuccess,
         handleCloseEventDetails,
         resetReloadEvent,

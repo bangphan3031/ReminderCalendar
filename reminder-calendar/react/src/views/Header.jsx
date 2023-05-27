@@ -19,6 +19,8 @@ export default function Header() {
             setUser({})
             setToken(null)
             localStorage.removeItem("selectedValue")
+            localStorage.removeItem("selectedCalendars")
+            localStorage.removeItem("checkedBoxes")
         })
         .catch(error => console.log(error));
     }

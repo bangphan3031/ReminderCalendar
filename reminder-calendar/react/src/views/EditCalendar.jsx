@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FaTimes, FaCalendarAlt } from 'react-icons/fa';
 import axiosClient from '../axios-client';
+import { AppContext } from '../contexts/AppContext';
 
 export default function EditCalendar(props) {
 
@@ -8,6 +9,7 @@ export default function EditCalendar(props) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [color, setColor] = useState('');
+    const { setUpdated, setLoading, handleEditCalendarSuccess, handleEditSuccess } = useContext(AppContext);
 
     const handleCloseClick = () => {
         props.onClose();
@@ -21,16 +23,24 @@ export default function EditCalendar(props) {
 
     const handleSubmit = (event) => {
         event.preventDefault()
+        handleCloseClick()
+        setLoading(true)
         axiosClient.put(`/calendar/${calendar.id}`, {
-          name: name,
-          description: description,
-          color: color,
+            name: name,
+            description: description,
+            color: color,
         })
         .then(response => {
-            alert('Lịch đã được cập nhật');
-            window.location.reload()
+            setUpdated(true)
+            setLoading(false)
+            handleEditCalendarSuccess()
+            handleEditSuccess()
+            setTimeout(() => {
+                setUpdated(false);
+            }, 3000);
         })
         .catch(error => {
+            setLoading(false)
             console.log(error);
         });
     };

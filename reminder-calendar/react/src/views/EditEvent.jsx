@@ -21,6 +21,7 @@ export default function EditEvent(props) {
     const [selectedUser, setSelectedUser] = useState([null]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
+    const [erTime, setErTime] = useState('');
     const [editEvent, setEditEvent] = useState(false);
     const [isAllDay, setIsAllDay] = useState(null);
     const [timeStart, setTimeStart] = useState(null);
@@ -51,14 +52,14 @@ export default function EditEvent(props) {
             setFormData({
                 title: selectedEvent.title,
                 is_all_day: allDay,
-                start_time: allDay ? moment(selectedEvent.start).format('YYYY-MM-DD') : moment(selectedEvent.start).format('YYYY-MM-DDTHH:mm'),
-                end_time: allDay ? moment(selectedEvent.end).format('YYYY-MM-DD') : moment(selectedEvent.end).format('YYYY-MM-DDTHH:mm'),
+                start_time: allDay ? moment(selectedEvent.start_time).format('YYYY-MM-DD') : moment(selectedEvent.start_time).format('YYYY-MM-DDTHH:mm'),
+                end_time: allDay ? moment(selectedEvent.end_time).format('YYYY-MM-DD') : moment(selectedEvent.end_time).format('YYYY-MM-DDTHH:mm'),
                 location: selectedEvent.location,
                 description: selectedEvent.description
             });
             setSelectedCalendarId(selectedEvent.calendar_id)
-            setTimeStart(selectedEvent.start)
-            setTimeEnd(selectedEvent.start)
+            setTimeStart(selectedEvent.start_time)
+            setTimeEnd(selectedEvent.end_time)
             setIsAllDay(allDay)
         }
     }, [selectedEvent]);
@@ -248,7 +249,8 @@ export default function EditEvent(props) {
                 navigate('/')
             })
             .catch(error => {
-                console.log(error);
+                setErTime(error.response.data.end_time);
+                console.log(error.response.data);
             });
             deletedReminders.forEach((id) => {
                 axiosClient.delete(`/reminder/${id}`)
@@ -355,6 +357,9 @@ export default function EditEvent(props) {
                                     onChange={(event) => setFormData({...formData, end_time: event.target.value})}
                                     className='event-input input-time form-control border-0 border-bottom'
                                 />
+                            </div>
+                            <div className="error-message-login mt-0 ms-5">
+                                {erTime && <p>{erTime}</p>}
                             </div>
                         </div>
                         <div className="row">

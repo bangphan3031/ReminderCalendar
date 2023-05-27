@@ -26,7 +26,7 @@ export default function CreateCalendar(props) {
       
         axiosClient.post('/calendar', payload)
             .then(response => {
-                setSuccess(true)
+                setSuccess(true);
                 setLoading(false);
                 props.onSuccess();
                 setTimeout(() => {

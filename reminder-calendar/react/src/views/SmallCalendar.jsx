@@ -4,16 +4,17 @@ import 'react-calendar/dist/Calendar.css';
 import '../css/SmallCalendar.css'
 
 export default function SmallCalendar(props) {
+    const [selectedDate, setSelectedDate] = useState(null);
 
     const handleDateClick = (date) => {
         props.onDateClick(date);
+        setSelectedDate(date)
     };
 
-    const [date, setDate] = useState(new Date());
     return (
         <div>
             <div className='calendar-container'>
-                <Calendar onChange={handleDateClick} value={date} />
+                <Calendar onChange={handleDateClick} value={selectedDate} />
             </div>
         </div>
     )

@@ -139,6 +139,13 @@ header .btn:hover {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.calendar-data .animate__animated {
+    animation-duration: 1s;
+}
+  
+.calendar-data .animate__bounceIn {
+    animation-name: animate__bounceIn;
+}
 .calendar-data .event-time {
     margin-left: auto;
 }

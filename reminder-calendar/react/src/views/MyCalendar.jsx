@@ -13,17 +13,20 @@ export default function MyCalendar(props) {
   const [showCreateCalendar, setShowCreateCalendar] = useState(false);
   const [showEditCalendar, setShowEditCalendar] = useState(false);
   const [editingCalendar, setEditingCalendar] = useState(null);
-  const [reloadCalendar, setReloadCalendar] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const { 
     loading, 
     setLoading, 
-    success, setSuccess, 
+    success, 
     deleted, setDeleted, 
+    updated, 
     handleShowEventDetails, 
     setSelectedEvent,
     setReloadStorage,
     updateSelectedCalendars,
+    reloadCalendar, setReloadCalendar,
+    reloadEvent,
+    resetReloadCalendar,
   } = useContext(AppContext);
   
   const [selectedCalendars, setSelectedCalendars] = useState([]);
@@ -64,7 +67,7 @@ export default function MyCalendar(props) {
     data.forEach(calendar => {
       fetchEvents(calendar.id);
     });
-  }, [data]);
+  }, [data, reloadEvent]);
 
   const handleCreateCalendarClick = () => {
     setShowCreateCalendar(true);
@@ -99,9 +102,9 @@ export default function MyCalendar(props) {
   const handleClose = () => {
     setShowCreateCalendar(false);
     setShowEditCalendar(false);
-    setSuccess(false);
-    setDeleted(false);
   };
+
+  // console.log(success+"+"+deleted)
 
   const handleDeleteCalendar = (calendarId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa lịch này không?')) {
@@ -113,7 +116,7 @@ export default function MyCalendar(props) {
           setData(data.filter(calendar => calendar.id !== calendarId));
           setTimeout(() => {
             setDeleted(false);
-          }, 5000);
+          }, 3000);
         })
         .catch(error => {
           setLoading(false)
@@ -127,7 +130,7 @@ export default function MyCalendar(props) {
       .then(response => {
         setData(response.data.data);
         const calendarId = response.data.data.map(calendar => calendar.id);
-        setReloadCalendar(false);
+        resetReloadCalendar()
       })
       .catch(error => {
         console.log(error);
@@ -193,38 +196,28 @@ export default function MyCalendar(props) {
   return (
     <div>
       {loading && <Loading />}
-      {success && (
-          <div className="loading-content-overlay">
-              <div className="loading-box">
-                  <div className="loading-content">
-                      <p>Thêm thành công</p>
-                      <button
-                          onClick={handleClose}
-                          title='Close'
-                          className='close-notification btn btn-outline-secondary border-0 rounded-5'
-                      >
-                          <FaTimes />
-                      </button>
-                  </div>
-              </div>
+      {success || deleted || updated ? (
+        <div className="loading-content-overlay">
+          <div className="loading-box">
+            <div className="loading-content">
+              {success ? (
+                <p>Thêm thành công.</p>
+              ) : deleted ? (
+                <p>Xóa thành công.</p>
+              ) : updated ? (
+                <p>Sửa thành công.</p>
+              ) : null}
+              <button
+                onClick={handleClose}
+                title="Close"
+                className="close-notification btn btn-outline-secondary border-0 rounded-5"
+              >
+                <FaTimes />
+              </button>
+            </div>
           </div>
-      )}
-      {deleted && (
-          <div className="loading-content-overlay">
-              <div className="loading-box">
-                  <div className="loading-content">
-                      <p>Xóa thành công</p>
-                      <button
-                          onClick={handleClose}
-                          title='Close'
-                          className='close-notification btn btn-outline-secondary border-0 rounded-5'
-                      >
-                          <FaTimes />
-                      </button>
-                  </div>
-              </div>
-          </div>
-      )}
+        </div>
+      ) : null}
       {showCreateCalendar && <CreateCalendar onClose={handleClose} onSuccess={handleCreateSuccess}/>}
       {showEditCalendar && (
         <EditCalendar 

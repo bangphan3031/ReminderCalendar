@@ -18,6 +18,7 @@ export default function Event(props) {
         showEventDetails,
         handleSelectedEvent,
         selectedCalendars, 
+        setLoading, setDeleted,
     } = useContext(AppContext);
     const navigate = useNavigate();
     const [isReload, setIsReload] = useState(false);
@@ -89,15 +90,21 @@ export default function Event(props) {
 
     const handleDeleteEvent = (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
-          axiosClient.delete(`/event/${id}`)
-            .then(response => {
-                handleCloseEventDetails();
-                handleDeleteSuccess();
-                alert('Xóa thành công')
-            })
-            .catch(error => {
-              console.log(error);
-            });
+            handleCloseEventDetails();
+            setLoading(true);
+            axiosClient.delete(`/event/${id}`)
+                .then(response => {
+                    handleDeleteSuccess();
+                    setDeleted(true);
+                    setLoading(false);
+                    setTimeout(() => {
+                        setDeleted(false);
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.log(error);
+                    setLoading(false);
+                });
         }
     };
 
