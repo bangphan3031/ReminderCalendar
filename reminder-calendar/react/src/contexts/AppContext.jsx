@@ -1,6 +1,5 @@
 import React, { createContext, useState } from 'react';
 import { useEffect } from 'react';
-import axiosClient from '../axios-client';
 
 export const AppContext = createContext();
 
@@ -14,7 +13,31 @@ export const AppProvider = ({ children }) => {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [calendarSelected, setCalendarSelected] = useState(null);
     const [eventList, setEventList] = useState([])
-    const [selectedCalendars, setSelectedCalendars] = useState([]);
+    const [reloadStorage, setReloadStorage] = useState([])
+    const [isLoadingData, setIsLoadingData] = useState(true)
+    const [selectedCalendars, setSelectedCalendars] = useState([])
+
+    useEffect(() => {
+        const storedSelectedCalendars = localStorage.getItem('selectedCalendars');
+        if (storedSelectedCalendars && storedSelectedCalendars.length > 0) {
+          setSelectedCalendars(JSON.parse(storedSelectedCalendars));
+        }
+    }, []);
+
+    const updateSelectedCalendars = (newSelectedCalendars) => {
+        setSelectedCalendars(newSelectedCalendars);
+        localStorage.setItem('selectedCalendars', JSON.stringify(newSelectedCalendars));
+    };
+
+    useEffect(() => {
+        if (reloadStorage) {
+          const storedSelectedCalendars = localStorage.getItem('selectedCalendars');
+          if (storedSelectedCalendars) {
+            setSelectedCalendars(JSON.parse(storedSelectedCalendars));
+          }
+          setReloadStorage(false); 
+        }
+    }, [reloadStorage]);
 
     const handleSelectedEvent = (event) => {
         setSelectedEvent(event);
@@ -51,6 +74,9 @@ export const AppProvider = ({ children }) => {
         eventList, setEventList, 
         calendarSelected, setCalendarSelected,
         selectedCalendars, setSelectedCalendars,
+        reloadStorage, setReloadStorage,
+        isLoadingData, setIsLoadingData,
+        updateSelectedCalendars,
         handleShowEventDetails,
         handleCreateSuccess,
         handleDeleteSuccess,

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axiosClient from '../axios-client';
-import axios from 'axios';
-import { Form, Dropdown, DropdownButton } from 'react-bootstrap';
+import { Form} from 'react-bootstrap';
 import { FaTrash, FaPlus, FaEdit, FaTimes, FaAngleDown, FaAngleUp } from 'react-icons/fa';
 import CreateCalendar from './CreateCalendar';
 import EditCalendar from './EditCalendar';
@@ -15,6 +14,7 @@ export default function MyCalendar(props) {
   const [showEditCalendar, setShowEditCalendar] = useState(false);
   const [editingCalendar, setEditingCalendar] = useState(null);
   const [reloadCalendar, setReloadCalendar] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { 
     loading, 
     setLoading, 
@@ -22,7 +22,8 @@ export default function MyCalendar(props) {
     deleted, setDeleted, 
     handleShowEventDetails, 
     setSelectedEvent,
-    
+    setReloadStorage,
+    updateSelectedCalendars,
   } = useContext(AppContext);
   
   const [selectedCalendars, setSelectedCalendars] = useState([]);
@@ -126,7 +127,6 @@ export default function MyCalendar(props) {
       .then(response => {
         setData(response.data.data);
         const calendarId = response.data.data.map(calendar => calendar.id);
-        setSelectedCalendars(calendarId);
         setReloadCalendar(false);
       })
       .catch(error => {
@@ -135,12 +135,32 @@ export default function MyCalendar(props) {
   }, [reloadCalendar]);
 
   useEffect(() => {
-    // Lưu giá trị vào localStorage khi selectedCalendars thay đổi
-    localStorage.setItem('selectedCalendars', JSON.stringify(selectedCalendars));
-  }, [selectedCalendars]);
+    // Kiểm tra nếu có giá trị trong localStorage
+    const storedSelectedCalendars = localStorage.getItem('selectedCalendars');
+    if (storedSelectedCalendars && storedSelectedCalendars.length > 0) {
+      setSelectedCalendars(JSON.parse(storedSelectedCalendars));
+      setIsLoaded(true);
+    } else {
+      axiosClient.get('/calendar')
+        .then(response => {
+          const calendarIds = response.data.data.map(calendar => calendar.id);
+          setSelectedCalendars(calendarIds);
+          setIsLoaded(true);
+          updateSelectedCalendars(calendarIds);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('selectedCalendars', JSON.stringify(selectedCalendars));
+    }
+  }, [selectedCalendars, isLoaded]);
 
   const handleCheckboxChange = async (event, calendarId) => {
-
     const newState = { ...checkedBoxes };
     newState[calendarId] = event.target.checked;
     setCheckedBoxes(newState);
@@ -148,8 +168,10 @@ export default function MyCalendar(props) {
   
     if (event.target.checked) {
       setSelectedCalendars([...selectedCalendars, calendarId]);
+      setReloadStorage(true);
     } else {
       setSelectedCalendars(selectedCalendars.filter(id => id !== calendarId));
+      setReloadStorage(true);
     }
   };
 
