@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 
 export default function CreateEventDetail() {
-    const {calendarSelected, setCalendarSelected} = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
     const [calendars, setCalendars] = useState([]);
@@ -19,6 +18,12 @@ export default function CreateEventDetail() {
     const [selectedUser, setSelectedUser] = useState([null]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
+    const {
+        handleCreateSuccess, 
+        calendarSelected,
+        setCalendarSelected,
+        setSuccess, setLoading
+    } = useContext(AppContext);
     const userListRef = useRef(null);
     const titleRef = useRef();
     const allDayRef = useRef();
@@ -93,6 +98,7 @@ export default function CreateEventDetail() {
     };
 
     const handleCloseClick = () => {
+        setCalendarSelected(null);
         navigate('/');
     };
 
@@ -166,8 +172,12 @@ export default function CreateEventDetail() {
         }
     };
 
+    console.log(calendarSelected)
+
     const onSubmit = async (ev) => {
         ev.preventDefault()
+        navigate('/');
+        setLoading(true);
         const startTime = moment(startTimeRef.current.value).format('YYYY-MM-DDTHH:mm:ss');
         const endTime = moment(endTimeRef.current.value).format('YYYY-MM-DDTHH:mm:ss');
         const payload = {
@@ -177,7 +187,7 @@ export default function CreateEventDetail() {
             end_time: endTime,
             location: locationRef.current.value,
             description: descriptionRef.current.value,
-            calendar_id: selectedCalendarId
+            calendar_id: calendarSelected ? calendarSelected.id : selectedCalendarId
         }
         try {
             const eventResponse = await axiosClient.post('/event', payload);
@@ -204,11 +214,16 @@ export default function CreateEventDetail() {
             });
         
             await Promise.all([...reminderPromises, ...attendeePromises]);
-            alert('Thêm mới công việc thành công');
-            navigate(-1);
-
+            handleCreateSuccess();
+            setSuccess(true)
+            setLoading(false);
+            setTimeout(() => {
+                setSuccess(false);
+            }, 3000);
+            setCalendarSelected(null);
         } catch (error) {
             console.log(error);
+            setLoading(false);
             alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
         }
     };

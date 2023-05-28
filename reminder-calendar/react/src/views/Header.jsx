@@ -22,7 +22,10 @@ export default function Header() {
             localStorage.removeItem("selectedCalendars")
             localStorage.removeItem("checkedBoxes")
         })
-        .catch(error => console.log(error));
+        .catch(error => {
+            alert('Đã có lỗi xảy ra! Vui lòng thử lại sau') 
+            console.log(error)
+        });
     }
 
     useEffect(() => {

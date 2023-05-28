@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('event_id')->nullable();
             $table->unsignedInteger('calendar_id');
             $table->string('title', 100);
             $table->boolean('is_all_day');

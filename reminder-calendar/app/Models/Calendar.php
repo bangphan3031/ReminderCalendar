@@ -19,7 +19,7 @@ class Calendar extends Model
         'color',
     ];
 
-    public function uesr(){
+    public function user(){
         return $this->belongsTo(User::class);
     }
 

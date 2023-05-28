@@ -12,6 +12,11 @@ export default function EventDetail(props) {
     handleCloseEventDetails()
   }
 
+  useEffect( () => {
+    console.log(selectedEvent)
+  }, [selectedEvent])
+  
+
   let formatTime = '';
   if (selectedEvent) {
       const allday = selectedEvent.is_all_day;
@@ -71,7 +76,14 @@ export default function EventDetail(props) {
           <div className="row p-3">
             <div className="calendar-icon col-1"><FaCalendarAlt /></div>
             <div className="col" >
-              <div className='calendar-name'>{selectedEvent.name}</div>
+              <div className='calendar-name'>
+                {selectedEvent.creator_calendar ? selectedEvent.creator_calendar : selectedEvent.name}
+                  {selectedEvent.creator ? 
+                    <p className='small text-muted'>
+                      Create by: {selectedEvent.creator}
+                    </p> : ''
+                  }
+              </div>
             </div>
           </div>
         </div>

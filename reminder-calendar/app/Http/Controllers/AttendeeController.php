@@ -103,9 +103,21 @@ class AttendeeController extends Controller
             'event_id' => $event->id,
             'user_id' => $request->user_id,
         ]);
+        $attendee_calendar_id = Calendar::where('user_id', $request->user_id)->first();
+        $newEvent = Event::create([
+            'event_id' => $event_id,
+            'calendar_id' => $attendee_calendar_id->id,
+            'title' => $event->title,
+            'is_all_day' => $event->is_all_day,
+            'start_time' => $event->start_time,
+            'end_time' => $event->end_time,
+            'location' => $event->location,
+            'description' => $event->description,
+            'status' => 'incomplete',
+        ]);
         return response()->json([
             'message' => 'Add attendee successful',
-            'data' => $attendee,
+            'data' => $newEvent,
         ], 200);
     }
 
@@ -133,7 +145,14 @@ class AttendeeController extends Controller
                 'message' => 'Attendee not found',
             ], 404);
         }
+        // Lấy ra id các calendar của user được mời
+        $calendarIds = Calendar::where('user_id', $attendee->user_id)->pluck('id')->toArray();
+        // Lấy ra event cần xóa
+        $event = Event::where('event_id', $attendee->event_id)
+                    ->whereIn('calendar_id', $calendarIds)
+                    ->first();
+        $event->delete();
         $attendee->delete();
-        return response()->json(['message' => 'Event deleted', 'data' => $attendee]);
+        return response()->json(['message' => 'Attendee deleted', 'data' => $attendee]);
     }
 }

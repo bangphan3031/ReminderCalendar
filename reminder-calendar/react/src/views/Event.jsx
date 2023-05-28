@@ -30,6 +30,7 @@ export default function Event(props) {
     const formatEvents = (events) => {
         return events.map(event => ({
             id: event.id,
+            event_id: event.event_id,
             calendar_id: event.calendar_id,
             title: event.title,
             all_day: event.is_all_day,
@@ -39,6 +40,8 @@ export default function Event(props) {
             description: event.description,
             color: event.color,
             name: event.name,
+            creator: event.creator,
+            creator_calendar: event.creator_calendar,
         }));
     };
     
@@ -75,6 +78,7 @@ export default function Event(props) {
     const handleSelectEvent = event => {
         handleSelectedEvent({
             id: event.id,
+            event_id: event.event_id,
             calendar_id: event.calendar_id,
             title: event.title,
             start_time: event.start,
@@ -84,6 +88,8 @@ export default function Event(props) {
             description: event.description,
             color: event.color,
             name: event.name,
+            creator: event.creator,
+            creator_calendar: event.creator_calendar,
         });
         handleShowEventDetails();
     };

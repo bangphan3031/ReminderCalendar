@@ -63,8 +63,6 @@ export default function MyCalendar(props) {
         console.log(`Error fetching events for calendar ${calendarId}:`, error);
       }
     };
-
-    // Fetch events for each calendar
     data.forEach(calendar => {
       fetchEvents(calendar.id);
     });
