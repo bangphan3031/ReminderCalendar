@@ -27,6 +27,7 @@ export default function MyCalendar(props) {
     reloadCalendar, setReloadCalendar,
     reloadEvent,
     resetReloadCalendar,
+    handleDeleteSuccess,
   } = useContext(AppContext);
   
   const [selectedCalendars, setSelectedCalendars] = useState([]);
@@ -104,13 +105,12 @@ export default function MyCalendar(props) {
     setShowEditCalendar(false);
   };
 
-  // console.log(success+"+"+deleted)
-
   const handleDeleteCalendar = (calendarId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa lịch này không?')) {
       setLoading(true);
       axiosClient.delete(`/calendar/${calendarId}`)
         .then(response => {
+          handleDeleteSuccess()
           setDeleted(true)
           setLoading(false)
           setData(data.filter(calendar => calendar.id !== calendarId));
@@ -120,6 +120,7 @@ export default function MyCalendar(props) {
         })
         .catch(error => {
           setLoading(false)
+          alert('Đã có lỗi xảy ra! Vui long thử lại sau.')
           console.log(error);
         });
     }

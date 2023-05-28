@@ -8,13 +8,13 @@ export default function CreateCalendar(props) {
     const nameRef = useRef();
     const descriptionRef = useRef();
     const colorRef = useRef();
-    const { setLoading, setSuccess } = useContext(AppContext);
+    const { setLoading, setSuccess, setReloadStorage } = useContext(AppContext);
 
     const handleCloseClick = () => {
         props.onClose();
     };
 
-    const handleSubmit = (ev) => {
+    const handleSubmit = async (ev) => {
         ev.preventDefault(); 
         props.onClose();
         setLoading(true);
@@ -24,8 +24,13 @@ export default function CreateCalendar(props) {
             color: colorRef.current.value
         }
       
-        axiosClient.post('/calendar', payload)
+        await axiosClient.post('/calendar', payload)
             .then(response => {
+                const calendarList = JSON.parse(localStorage.getItem('selectedCalendars')) || [];
+                const newCalendar = response.data.data.id;
+                calendarList.push(newCalendar);
+                localStorage.setItem('selectedCalendars', JSON.stringify(calendarList));
+                setReloadStorage(true);
                 setSuccess(true);
                 setLoading(false);
                 props.onSuccess();
@@ -39,6 +44,7 @@ export default function CreateCalendar(props) {
                 alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
             });
     }
+    
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {
           ev.preventDefault();

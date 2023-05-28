@@ -47,8 +47,7 @@ export default function UpcomingEvent(props) {
             data.forEach((event) => {
                 times[event.id] = getTimeRemaining(event.start_time);
             });
-    
-          setRemainingTimes(times);
+            setRemainingTimes(times);
         }, 1000);
     
         return () => clearInterval(intervalId);

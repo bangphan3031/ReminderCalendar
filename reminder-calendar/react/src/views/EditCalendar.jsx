@@ -41,6 +41,7 @@ export default function EditCalendar(props) {
         })
         .catch(error => {
             setLoading(false)
+            alert('Đã có lỗi xảy ra! Vui lòng thử lại sau.')
             console.log(error);
         });
     };
