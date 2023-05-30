@@ -117,7 +117,7 @@ class AttendeeController extends Controller
         ]);
         return response()->json([
             'message' => 'Add attendee successful',
-            'data' => $newEvent,
+            'data' => $attendee,
         ], 200);
     }
 

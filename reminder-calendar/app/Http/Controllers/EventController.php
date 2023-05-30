@@ -87,9 +87,13 @@ class EventController extends Controller
                 'message' => 'Calendar not found',
             ], 404);
         }
-        $events = Event::where('calendar_id', $calendar->id)
+        $events = Event::where('events.calendar_id', $calendar->id)
                 ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
-                ->select('events.*', 'calendars.color', 'calendars.name')
+                ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+                ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+                ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+                ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+                ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
                 ->orderBy('events.start_time')
                 ->get();
         return response()->json([
@@ -128,7 +132,11 @@ class EventController extends Controller
         $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
         $events_upcomming = Event::WhereIn('events.id', $event_id)    
                 ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
-                ->select('events.*', 'calendars.color', 'calendars.name')
+                ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+                ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+                ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+                ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+                ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
                 ->where('events.start_time', '>', $now)
                 ->where('events.start_time', '<=', $now3)
                 ->orderBy('start_time', 'asc')

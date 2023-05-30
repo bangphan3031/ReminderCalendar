@@ -19,7 +19,6 @@ export default function CreateEventDetail() {
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
     const {
-        handleCreateSuccess, 
         calendarSelected,
         setCalendarSelected,
         setSuccess, setLoading
@@ -172,8 +171,6 @@ export default function CreateEventDetail() {
         }
     };
 
-    console.log(calendarSelected)
-
     const onSubmit = async (ev) => {
         ev.preventDefault()
         navigate('/');
@@ -208,13 +205,17 @@ export default function CreateEventDetail() {
                 try {
                     const response = await axiosClient.post(`/attendee/${eventId}`, { user_id: attendee.id });
                     console.log(response.data);
+                    const shouldSendInvite = window.confirm('Bạn có muốn gửi email thông báo đến các attendee không?');
+                    if (shouldSendInvite) {
+                        const sendInvite = await axiosClient.get(`/sendInvite/${response.data.data.id}`);
+                        console.log(sendInvite.data);
+                    }
                 } catch (error) {
                     console.log(error);
                 }
             });
         
             await Promise.all([...reminderPromises, ...attendeePromises]);
-            handleCreateSuccess();
             setSuccess(true)
             setLoading(false);
             setTimeout(() => {

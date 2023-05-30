@@ -82,11 +82,7 @@ export default function UpcomingEvent(props) {
         setSelectedEvent(event);
         handleShowEventDetails();
     };
-
-    useEffect(()=>{
-        console.log(selectedEvent)
-    },[])
-
+    
     const handleDeleteEvent = (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
           axiosClient.delete(`/event/${id}`)

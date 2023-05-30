@@ -10,12 +10,7 @@ export default function EventDetail(props) {
 
   const handleCloseEventDetail = () => {
     handleCloseEventDetails()
-  }
-
-  useEffect( () => {
-    console.log(selectedEvent)
-  }, [selectedEvent])
-  
+  }  
 
   let formatTime = '';
   if (selectedEvent) {

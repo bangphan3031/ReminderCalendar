@@ -9,7 +9,7 @@ import { AppContext } from '../contexts/AppContext';
 export default function EditEvent(props) {
     const { 
         selectedEvent, 
-        handleCreateSuccess, 
+        setUpdated, setLoading,
         handleCloseEventDetails,
         setEventList 
     } = useContext(AppContext);
@@ -224,8 +224,11 @@ export default function EditEvent(props) {
         }
     };
 
-    const onSubmit = (ev) => {
+    const onSubmit = async (ev) => {
         ev.preventDefault()
+        navigate('/');
+        handleCloseEventDetails()
+        setLoading(true);
         const startTime = moment(startTimeRef.current.value).format('YYYY-MM-DDTHH:mm:ss');
         const endTime = moment(endTimeRef.current.value).format('YYYY-MM-DDTHH:mm:ss');
         const payload = {
@@ -237,36 +240,19 @@ export default function EditEvent(props) {
             description: descriptionRef.current.value,
             calendar_id: selectedCalendarId
         }
-        setEditEvent(true); 
-        axiosClient.put(`/event/${event_id}`, payload)
-            .then(response => {
-                alert('Cập nhật công việc thành công')
-                setEditEvent(false); 
-                handleCloseEventDetails()
-                setEventList((prevEventList) =>
-                    prevEventList.map((event) => {
-                    if (event.id === event_id) {
-                        return response.data; // Sử dụng dữ liệu trả về từ server làm event mới
-                    }
-                    return event;
+        try {
+            const eventResponse = await axiosClient.put(`/event/${event_id}`, payload)
+            
+            const deleteReminderPromises = deletedReminders.map((id) => {
+                if(id){
+                    axiosClient.delete(`/reminder/${id}`)
+                    .then(response => {
+                        console.log(response.data)
                     })
-                );
-                navigate('/')
-            })
-            .catch(error => {
-                setErTime(error.response.data.end_time);
-                console.log(error.response.data);
-            });
-            deletedReminders.forEach((id) => {
-                axiosClient.delete(`/reminder/${id}`)
-                .then(response => {
-                    alert('Xóa reminder thành công')
-                    setEditEvent(false); 
-                })
-                .catch(error => {
-                    console.log(error);
-                    setEditEvent(false);
-                });
+                    .catch(error => {
+                        console.log(error);
+                    });
+                }
             });
             const reminderPromises = addedReminders.map(async (reminder) => {
                 try {
@@ -274,20 +260,29 @@ export default function EditEvent(props) {
                     console.log(response.data);
                     const sendReminderResponse = await axiosClient.get(`/sendReminder/${response.data.data.id}`);
                     console.log(sendReminderResponse.data);
-                    setEditEvent(false); 
                 } catch (error) {
                     console.log(error);
-                    setEditEvent(false);
                 }
             });
+            
+            await Promise.all([...deleteReminderPromises, ...reminderPromises]);
+            setUpdated(true)
+            setLoading(false);
+            setTimeout(() => {
+                setUpdated(false)
+            }, 3000);
 
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+            alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
+        }
+            
     };
 
     useEffect(() => {
-        if (!editEvent) {
-            handleCreateSuccess(); 
-        }
-    }, [editEvent]);
+        console.log(reminders)
+    }, [reminders]);
 
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {
@@ -412,7 +407,7 @@ export default function EditEvent(props) {
                             </div>
                             <div>
                                 {reminders.map((reminder, index) => (
-                                    <div className="row p-3 pt-0" key={reminder.id}>
+                                    <div className="row p-3 pt-0" key={index}>
                                         <div className="col-1 pt-1"></div>
                                         <div className="col-7">
                                             <div className="input-group">

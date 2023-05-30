@@ -233,7 +233,7 @@ export default function MyCalendar(props) {
               ) : deleted ? (
                 <p>Xóa thành công.</p>
               ) : updated ? (
-                <p>Sửa thành công.</p>
+                <p>Cập nhật thành công.</p>
               ) : null}
               <button
                 onClick={handleClose}
