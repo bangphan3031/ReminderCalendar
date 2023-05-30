@@ -21,7 +21,7 @@ export default function Event(props) {
         setLoading, setDeleted,
     } = useContext(AppContext);
     const navigate = useNavigate();
-    const [isReload, setIsReload] = useState(false);
+    const [initialLoad, setInitialLoad] = useState(true);
     const [selectedValue, setSelectedValue] = useState(localStorage.getItem('selectedValue') || 'month');
     const [selectedDate, setSelectedDate] = useState(props.selectedDate);
     const [myEventsList, setMyEventsList] = useState([]);
@@ -119,18 +119,29 @@ export default function Event(props) {
     }, [selectedValue]);
     
     useEffect(() => {
+        let isReloadEvent = false;
         const fetchEvents = async () => {
-        try {
-            const response = await axiosClient.get('/event');
-            const formattedEvents = formatEvents(response.data.data);
-            setMyEventsList(formattedEvents);
-            resetReloadEvent();
-        } catch (error) {
-            console.log(error);
-        }
+            try {
+                const response = await axiosClient.get('/event');
+                const formattedEvents = formatEvents(response.data.data);
+                setMyEventsList(formattedEvents);
+            } catch (error) {
+                console.log(error);
+            }
         };
-        fetchEvents();
-    }, [reloadEvent]);
+        if (initialLoad) {
+            fetchEvents();
+            setInitialLoad(false);
+        } else {
+            if (reloadEvent) {
+                isReloadEvent = true;
+            }
+            if (isReloadEvent) {
+                fetchEvents();
+                resetReloadEvent();
+            }
+        }
+    }, [initialLoad, reloadEvent]);
 
     useEffect(() => {
         // Lọc danh sách event dựa trên các calendar đã được chọn

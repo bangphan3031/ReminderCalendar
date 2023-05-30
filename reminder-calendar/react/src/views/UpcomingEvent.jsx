@@ -36,6 +36,7 @@ export default function UpcomingEvent(props) {
         selectedEvent, 
         setSelectedEvent
     } = useContext(AppContext);
+    const [initialLoad, setInitialLoad] = useState(true);
     const [remainingTimes, setRemainingTimes] = useState({});
     const [myEventsList, setMyEventsList] = useState([]);
     const [data, setData] = useState([]);
@@ -54,19 +55,28 @@ export default function UpcomingEvent(props) {
     }, [data]);
 
     useEffect(() => {
-        console.log(reloadEvent)
-    }, [reloadEvent]);
-
-    useEffect(() => {
-        axiosClient.get('/event/upcoming')
-        .then(response => {
-            setData(response.data.data);
-            setMyEventsList(data);
-        })
-        .catch(error => {
-            console.log(error);
-        });
-    }, [reloadEvent]);
+        let isReloadEvent = false;
+        const fetchEvents = async () => {
+            try {
+                const response = await axiosClient.get('/event/upcoming');
+                setData(response.data.data);
+                setMyEventsList(data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        if (initialLoad) {
+            fetchEvents();
+            setInitialLoad(false);
+        } else {
+            if (reloadEvent) {
+                isReloadEvent = true;
+            }
+            if (isReloadEvent) {
+                fetchEvents();
+            }
+        }
+    }, [initialLoad, reloadEvent]);
 
     const handleSelectEvent = event => {
         setSelectedEvent(event);

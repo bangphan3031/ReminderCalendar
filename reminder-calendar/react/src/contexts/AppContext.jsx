@@ -26,7 +26,7 @@ export const AppProvider = ({ children }) => {
         const fetchData = async () => {
             try {
                 const response = await axiosClient.get('calendar');
-                console.log(response.data.data)
+                // console.log(response.data.data)
                 // setCalendar(response.data.data);
                 // setCalendarSelected(response.data.data[0]);
             } catch (error) {

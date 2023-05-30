@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useDebugValue } from 'react';
 import axiosClient from '../axios-client';
 import { Form} from 'react-bootstrap';
 import { FaTrash, FaPlus, FaEdit, FaTimes, FaAngleDown, FaAngleUp } from 'react-icons/fa';
@@ -14,6 +14,7 @@ export default function MyCalendar(props) {
   const [showEditCalendar, setShowEditCalendar] = useState(false);
   const [editingCalendar, setEditingCalendar] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const { 
     loading, 
     setLoading, 
@@ -51,13 +52,15 @@ export default function MyCalendar(props) {
     }
   });
 
+  useEffect(()=>{
+    console.log(initialLoad, reloadEvent)
+  },[])
+
   useEffect(() => {
     let isReload = false;
-
     const fetchEvents = async (calendarId) => {
       try {
         const response = await axiosClient.get(`/event/calendar/${calendarId}`);
-        console.log('Đang chạy')
         setEvents(prevEvents => ({
           ...prevEvents,
           [calendarId]: response.data.data
@@ -67,17 +70,36 @@ export default function MyCalendar(props) {
       }
     };
 
-    if (reloadEvent) {
-      isReload = true;
+    if (initialLoad) {
+      const fetchAllEvents = async () => {
+        let completedCount = 0;
+        const fetchEvent = async (calendarId) => {
+          try {
+            await fetchEvents(calendarId);
+            completedCount++;
+            if (completedCount === data.length) {
+              setInitialLoad(false);
+            }
+          } catch (error) {
+            console.log(`Error fetching events for calendar ${calendarId}:`, error);
+          }
+        };
+        data.forEach((calendar) => {
+          fetchEvent(calendar.id);
+        });
+      };
+      fetchAllEvents();
+    } else {
+        if (reloadEvent) {
+            isReload = true;
+        }
+        if (isReload) {
+            data.forEach(calendar => {
+              fetchEvents(calendar.id);
+            });
+        }
     }
-  
-    data.forEach(calendar => {
-      if (isReload) {
-        fetchEvents(calendar.id);
-      }
-    });
-    
-  }, [data, reloadEvent]);
+  }, [initialLoad, data, reloadEvent]);
 
   const handleCreateCalendarClick = () => {
     setShowCreateCalendar(true);
@@ -187,10 +209,6 @@ export default function MyCalendar(props) {
       setReloadStorage(true);
     }
   };
-
-  useEffect(() => {
-    console.log(selectedCalendars)
-  }, [selectedCalendars]);
 
   useEffect(() => {
     localStorage.setItem("checkedBoxes", JSON.stringify(checkedBoxes));
