@@ -52,9 +52,12 @@ export default function MyCalendar(props) {
   });
 
   useEffect(() => {
+    let isReload = false;
+
     const fetchEvents = async (calendarId) => {
       try {
         const response = await axiosClient.get(`/event/calendar/${calendarId}`);
+        console.log('Đang chạy')
         setEvents(prevEvents => ({
           ...prevEvents,
           [calendarId]: response.data.data
@@ -63,9 +66,17 @@ export default function MyCalendar(props) {
         console.log(`Error fetching events for calendar ${calendarId}:`, error);
       }
     };
+
+    if (reloadEvent) {
+      isReload = true;
+    }
+  
     data.forEach(calendar => {
-      fetchEvents(calendar.id);
+      if (isReload) {
+        fetchEvents(calendar.id);
+      }
     });
+    
   }, [data, reloadEvent]);
 
   const handleCreateCalendarClick = () => {

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { Navigate } from "react-router-dom";
 
 const StateContext = createContext({
     user: null,
@@ -18,6 +19,7 @@ export const ContextProvider = ({children}) => {
             localStorage.setItem('ACCESS_TOKEN', token);
         } else {
             localStorage.removeItem('ACCESS_TOKEN')
+            localStorage.removeItem('selectedCalendars')
         }
     }
     

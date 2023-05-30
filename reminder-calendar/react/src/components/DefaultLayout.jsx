@@ -29,7 +29,6 @@ export default function DefautltLayout() {
                     </div>
                     <div className="col">
                         <Event selectedDate={selectedDate}/>
-                        {/* <Month month={currentMonth} /> */}
                     </div>
                 </div>
             </div>

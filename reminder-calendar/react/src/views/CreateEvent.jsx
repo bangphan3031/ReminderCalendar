@@ -102,7 +102,7 @@ export default function CreateEvent(props) {
             description: descriptionRef.current.value,
             calendar_id: selectedCalendarId
         }
-        setAddingEvent(true); 
+
         axiosClient.post('/event', payload)
             .then(response => {
             const id = response.data.data.id;
@@ -111,7 +111,6 @@ export default function CreateEvent(props) {
                     handleCreateSuccess();
                     setSuccess(true)
                     setLoading(false);
-                    setAddingEvent(false); 
                     setTimeout(() => {
                         setSuccess(false);
                     }, 3000);
@@ -119,24 +118,17 @@ export default function CreateEvent(props) {
                 .catch(error => {
                     console.error(error);
                     setLoading(false);
-                    setAddingEvent(false);
+
                     alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
                 });
             })
             .catch(error => {
                 console.error(error);
                 setLoading(false);
-                setAddingEvent(false); 
+
                 alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
             });
-
     };
-
-    useEffect(() => {
-        if (!addingEvent) {
-            handleCreateSuccess(); 
-        }
-    }, [addingEvent]);
 
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {
