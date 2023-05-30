@@ -183,12 +183,18 @@ export default function CreateEvent(props) {
                         <input ref={startTimeRef} type='date' name='start_time' required
                             value={formData.start_time}
                             onChange={(event) => setFormData({...formData, start_time: event.target.value})}
+                            onBlur={() => {
+                                if (formData.end_time < formData.start_time) {
+                                  setFormData({ ...formData, end_time: formData.start_time });
+                                }
+                            }}
                             className='input-time form-control border-0 border-bottom'
                         />
                         <p className='pt-1'>_</p>
                         <input ref={endTimeRef} type='date' name='end_time' required
                             value={formData.end_time}
                             onChange={(event) => setFormData({...formData, end_time: event.target.value})}
+                            min={formData.start_time}
                             className='input-time form-control border-0 border-bottom'
                         />
                     </div>
@@ -239,9 +245,6 @@ export default function CreateEvent(props) {
                 <div className="row p-3 d-flex justify-content-end">
                     <div className="col-1"></div>
                     <div className="col-auto">
-                    {/* <Link to="/edit-event">
-                        <button className='btn btn-secondary mx-2 fw-bold' type='button'>More option</button>
-                    </Link> */}
                     <Link to={`/create-event?title=${formData.title}&allday=${formData.is_all_day}&start=${formData.start_time}&end=${formData.end_time}&location=${formData.location}&description=${formData.description}`}>
                         <button className='btn btn-secondary mx-2 fw-bold' type='button'>More option</button>
                     </Link>

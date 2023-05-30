@@ -23,22 +23,6 @@ export const AppProvider = ({ children }) => {
     const [selectedCalendars, setSelectedCalendars] = useState([])
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axiosClient.get('calendar');
-                // console.log(response.data.data)
-                // setCalendar(response.data.data);
-                // setCalendarSelected(response.data.data[0]);
-            } catch (error) {
-                console.log(error)
-            }
-        };
-        fetchData();
-    }, []);
-
-    //console.log('calendar'+calendar, 'select calendar'+calendarSelected)
-
-    useEffect(() => {
         const storedSelectedCalendars = localStorage.getItem('selectedCalendars');
         if (storedSelectedCalendars && storedSelectedCalendars.length > 0) {
           setSelectedCalendars(JSON.parse(storedSelectedCalendars));

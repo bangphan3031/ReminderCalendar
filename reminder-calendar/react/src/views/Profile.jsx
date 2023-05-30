@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useEffect } from "react";
-import "../css/Profile.css"
 import axiosClient from '../axios-client';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaBackward } from "react-icons/fa";

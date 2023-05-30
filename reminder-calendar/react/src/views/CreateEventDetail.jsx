@@ -291,6 +291,11 @@ export default function CreateEventDetail() {
                                 <input ref={startTimeRef} type={inputType} name='start_time' required
                                     value={formData.start_time}
                                     onChange={(event) => setFormData({...formData, start_time: event.target.value})}
+                                    onBlur={() => {
+                                        if (formData.end_time < formData.start_time) {
+                                          setFormData({ ...formData, end_time: formData.start_time });
+                                        }
+                                    }}
                                     className='event-input input-time form-control border-0 border-bottom'
                                 />
                                 <div>
@@ -299,6 +304,7 @@ export default function CreateEventDetail() {
                                 <input ref={endTimeRef} type={inputType} name='end_time' required
                                     value={formData.end_time}
                                     onChange={(event) => setFormData({...formData, end_time: event.target.value})}
+                                    min={formData.start_time}
                                     className='event-input input-time form-control border-0 border-bottom'
                                 />
                             </div>

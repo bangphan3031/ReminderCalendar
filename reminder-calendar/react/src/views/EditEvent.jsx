@@ -7,7 +7,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 
 export default function EditEvent(props) {
-    const { selectedEvent, handleCreateSuccess, handleCloseEventDetails, setEventList } = useContext(AppContext);
+    const { 
+        selectedEvent, 
+        handleCreateSuccess, 
+        handleCloseEventDetails,
+        setEventList 
+    } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
     const [calendars, setCalendars] = useState([]);
@@ -347,6 +352,11 @@ export default function EditEvent(props) {
                                 <input ref={startTimeRef} type={inputType} name='start_time' required
                                     value={formData.start_time}
                                     onChange={(event) => setFormData({...formData, start_time: event.target.value})}
+                                    onBlur={() => {
+                                        if (formData.end_time < formData.start_time) {
+                                          setFormData({ ...formData, end_time: formData.start_time });
+                                        }
+                                    }}
                                     className='event-input input-time form-control border-0 border-bottom'
                                 />
                                 <div>
@@ -355,6 +365,7 @@ export default function EditEvent(props) {
                                 <input ref={endTimeRef} type={inputType} name='end_time' required
                                     value={formData.end_time}
                                     onChange={(event) => setFormData({...formData, end_time: event.target.value})}
+                                    min={formData.start_time}
                                     className='event-input input-time form-control border-0 border-bottom'
                                 />
                             </div>

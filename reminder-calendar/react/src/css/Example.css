@@ -1,5 +1,5 @@
 .login-page, .register-page, .profile-page {
-  background-image: url('https://www.psd.ca/uploads/calendarbanner5.png');
+  background-image: url('../assets/calendarbanner5.png');
   background-size: cover;
   background-position: center;
 }
