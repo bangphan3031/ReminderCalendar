@@ -151,7 +151,9 @@ class AttendeeController extends Controller
         $event = Event::where('event_id', $attendee->event_id)
                     ->whereIn('calendar_id', $calendarIds)
                     ->first();
-        $event->delete();
+        if($event) {
+            $event->delete();
+        }
         $attendee->delete();
         return response()->json(['message' => 'Attendee deleted', 'data' => $attendee]);
     }

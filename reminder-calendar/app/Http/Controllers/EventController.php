@@ -292,6 +292,19 @@ class EventController extends Controller
                 'message' => 'Event not found',
             ], 404);
         }
+        $event_id = Event::where('event_id', $id)->pluck('event_id')->toArray();
+        $attendee_event = Event::whereIn('event_id', $event_id)->get();
+        $attendee = Attendee::where('event_id',$id)->orWhereIn('event_id', $event_id)->get();
+        if($attendee) {
+            $attendee->each(function ($attendees) {
+                $attendees->delete();
+            });
+        }
+        if($attendee_event){
+            $attendee_event->each(function ($events) {
+                $events->delete();
+            });
+        }
         $event->delete();
         return response()->json(['message' => 'Event deleted']);
     }

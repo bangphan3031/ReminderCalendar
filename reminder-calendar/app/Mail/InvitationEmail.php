@@ -3,13 +3,10 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ReminderMail extends Mailable
+class InvitationEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -18,14 +15,11 @@ class ReminderMail extends Mailable
     public $location;
     public $description;
     public $create_user;
-    /**
-     * Create a new message instance.
-     */
+
     public function __construct($title, $time, $location, $description, $create_user)
     {
-        //
         $this->title = $title;
-        $this->time= $time;
+        $this->time = $time;
         $this->location = $location;
         $this->description = $description;
         $this->create_user = $create_user;
@@ -33,17 +27,7 @@ class ReminderMail extends Mailable
 
     public function build()
     {
-        return $this->view('emails.reminder')
-        ->subject('Reminder Mail');
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
+        return $this->view('emails.invitation')
+            ->subject('Assigning tasks mail');
     }
 }

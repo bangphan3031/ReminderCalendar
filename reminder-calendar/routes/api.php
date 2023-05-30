@@ -90,4 +90,5 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::delete('/attendee/{id}', [AttendeeController::class, 'deleteAttendee']);
 });
 Route::get('/sendReminder/{id}', [SendReminderController::class, 'sendReminder']);
+Route::get('/sendInvite/{id}', [SendReminderController::class, 'sendInvite']);
 

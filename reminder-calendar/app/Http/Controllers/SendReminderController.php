@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendReminderJob;
+use App\Mail\InvitationEmail;
 use App\Mail\ReminderMail;
 use App\Models\Attendee;
 use App\Models\Calendar;
@@ -28,34 +29,47 @@ class SendReminderController extends Controller
         //lay ra so dien thoai de gui nhac nho theo id
         $phone = User::whereIn('id', $user_id)->pluck('phone')->toArray();
 
+        $allday = $event->is_all_day;
+        $start_time = Carbon::parse($event->start_time)->format('d-m-Y');
+        $end_time = Carbon::parse($event->end_time)->format('d-m-Y');
+
+        if ($allday == 1 && $start_time == $end_time) {
+            $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y');
+        } elseif ($allday == 1 && $start_time != $end_time) {
+            $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y') . ' - ' . Carbon::parse($event->end_time)->format('d-m-Y');
+        } elseif ($allday == 0 && $start_time == $end_time) {
+            $formattedTime = $start_time . ', ' . Carbon::parse($event->start_time)->format('h:i A') . ' - ' . Carbon::parse($event->end_time)->format('h:i A');
+        } else {
+            $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y, h:i A') . ' - ' . Carbon::parse($event->end_time)->format('d-m-Y, h:i A');
+        }
+
         //lay cac thong tin de gui nhac nho
         $reminder_id = "rmd".$id;
         $title = $event->title;
-        $start_time = $event->start_time;
-        $end_time = $event->end_time;
+        $time = $formattedTime;
         $location = $event->location;
         $description = $event->description;
         $method = $reminder->method;
         $create_user = User::where('id', $calendar->user_id)->first();
 
         //tinh toan thoi gian gui nhac nho
-        $carbon_start_time = Carbon::parse($start_time);
+        $carbon_start_time = Carbon::parse($event->start_time);
         $carbon_time_to_send = $carbon_start_time->sub($reminder->time, $reminder->kind_of_time);
         $time_to_send = $carbon_time_to_send->format('Y-m-d H:i:s');
         $delay = Carbon::parse(now())->diffInSeconds($time_to_send, false);
         
-        if ($method === 'Email' && $reminder->send !== 1) {
+        if ($method === 'Email' && $reminder->send !== 1 && $delay >= 0) {
             foreach ($email as $e) {
-                SendReminderJob::dispatch($e, $title, $start_time, $end_time, $location, $description, $create_user, $reminder_id, $method)
+                SendReminderJob::dispatch($e, $title, $time, $location, $description, $create_user, $reminder_id, $method)
                 ->onQueue('send-reminders')
                 ->delay($delay);
             }
             $reminder->send = 1;
             $reminder->save();
         }
-        if ($method === 'Sms' && $reminder->send !== 1) {
+        if ($method === 'Sms' && $reminder->send !== 1 && $delay >= 0) {
             foreach ($phone as $p) {
-                SendReminderJob::dispatch($p, $title, $start_time, $end_time, $location, $description, $create_user, $reminder_id, $method)
+                SendReminderJob::dispatch($p, $title, $time, $location, $description, $create_user, $reminder_id, $method)
                 ->onQueue('send-reminders')
                 ->delay($delay);
             }
@@ -64,4 +78,42 @@ class SendReminderController extends Controller
         }
         return response()->json(['message' => 'Set to send reminder successful'], 200);
     }
+
+    public function sendInvite(string $id)
+    {
+        $attendee = Attendee::find($id);
+        $event = Event::where('id', $attendee->event_id)->first();
+        $user = User::where('id', $attendee->user_id)->first();
+        $create_user = $event->calendar->user;
+        $email = $user->email;
+
+        // Xử lý format thời gian
+        $allday = $event->is_all_day;
+        $start_time = Carbon::parse($event->start_time)->format('d-m-Y');
+        $end_time = Carbon::parse($event->end_time)->format('d-m-Y');
+
+        if ($allday == 1 && $start_time == $end_time) {
+            $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y');
+        } elseif ($allday == 1 && $start_time != $end_time) {
+            $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y') . ' - ' . Carbon::parse($event->end_time)->format('d-m-Y');
+        } elseif ($allday == 0 && $start_time == $end_time) {
+            $formattedTime = $start_time . ', ' . Carbon::parse($event->start_time)->format('h:i A') . ' - ' . Carbon::parse($event->end_time)->format('h:i A');
+        } else {
+            $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y, h:i A') . ' - ' . Carbon::parse($event->end_time)->format('d-m-Y, h:i A');
+        }
+
+        //lay cac thong tin de gui nhac nho
+        $title = $event->title;
+        $time = $formattedTime;
+        $location = $event->location;
+        $description = $event->description;
+        $create_user = $event->calendar->user->email;
+
+        $invitationEmail = new InvitationEmail($title, $time, $location, $description, $create_user);
+        
+        Mail::to($email)->send($invitationEmail);
+        
+        return response()->json(['message' => 'Assigning tasks successful'], 200);
+    }
+
 }

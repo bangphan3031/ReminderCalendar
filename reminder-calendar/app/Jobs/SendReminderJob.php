@@ -19,8 +19,7 @@ class SendReminderJob implements ShouldQueue
 
     protected $recipient;
     protected $title;
-    protected $start_time;
-    protected $end_time;
+    protected $time;
     protected $location;
     protected $description;
     protected $create_user;
@@ -30,13 +29,12 @@ class SendReminderJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct($recipient, $title, $start_time, $end_time, $location, $description, $create_user, $reminder_id, $method)
+    public function __construct($recipient, $title, $time, $location, $description, $create_user, $reminder_id, $method)
     {
         //
         $this->recipient = $recipient;
         $this->title = $title;
-        $this->start_time = $start_time;
-        $this->end_time = $end_time;
+        $this->time = $time;
         $this->location = $location;
         $this->description = $description;
         $this->create_user = $create_user;
@@ -54,8 +52,7 @@ class SendReminderJob implements ShouldQueue
             // Gửi mail
             $data = [
                 'title' => $this->title,
-                'start_time' => $this->start_time,
-                'end_time' => $this->end_time,
+                'time' => $this->time,
                 'location' => $this->location,
                 'description' => $this->description,
                 'create_user' => $this->create_user,
@@ -72,15 +69,13 @@ class SendReminderJob implements ShouldQueue
             //$receiverNumber = "+84394403760";
             $message = "Nhắc nhở công việc\n" .
                     "Tiêu đề công việc: $this->title\n" .
-                    "Thời gian: Từ $this->start_time đến $this->end_time\n" .
+                    "Thời gian: $this->time\n" .
                     "\n" .
                     "Địa điểm: $this->location\n" .
                     "\n" .
                     "Mô tả công việc: $this->description";
                     // Nội dung tin nhắn SMS
-    
             try {
-
                 $account_sid = getenv("TWILIO_SID");
                 $auth_token = getenv("TWILIO_TOKEN");
                 $twilio_number = getenv("TWILIO_FROM");
