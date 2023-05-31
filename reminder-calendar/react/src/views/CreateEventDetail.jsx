@@ -171,8 +171,6 @@ export default function CreateEventDetail() {
         }
     };
 
-    let shouldDisplayPrompt = true;
-
     const onSubmit = async (ev) => {
         ev.preventDefault();
         navigate('/');
@@ -204,20 +202,22 @@ export default function CreateEventDetail() {
                 }
             });
     
+            let shouldDisplayPrompt = true;
+            let shouldSendInvite = null;
+    
             const attendeePromises = attendeeList.map(async (attendee) => {
                 try {
                     const response = await axiosClient.post(`/attendee/${eventId}`, { user_id: attendee.id });
                     console.log(response.data);
                     if (shouldDisplayPrompt) {
-                        const shouldSendInvite = window.confirm('Bạn có muốn gửi email thông báo đến các attendee không?');
-                        if (shouldSendInvite) {
-                            shouldDisplayPrompt = false;
-                        }
+                        const confirm = window.confirm('Bạn có muốn gửi email thông báo đến các attendee không?');
+                        shouldSendInvite = confirm;
+                        shouldDisplayPrompt = false; 
                     }
-    
-                    // Move the sendInvite code outside the if block
-                    const sendInvite = await axiosClient.get(`/sendInvite/${response.data.data.id}`);
-                    console.log(sendInvite.data);
+                    if (shouldSendInvite) {
+                        const sendInvite = await axiosClient.get(`/sendInvite/${response.data.data.id}`);
+                        console.log(sendInvite.data);
+                    }
                 } catch (error) {
                     console.log(error);
                 }

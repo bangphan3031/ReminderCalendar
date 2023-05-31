@@ -113,8 +113,6 @@ export default function EditEvent(props) {
     useEffect(() => {
         axiosClient.get(`/user/${event_id}`)
             .then(response => {
-                console.log('load...')
-                console.log(attendeeList)
                 setAttendeeList(response.data);
             })
             .catch(error => {
@@ -127,8 +125,6 @@ export default function EditEvent(props) {
             .then(response => {
                 const invitedUserIds = attendeeList.map(user => user.id);
                 const filteredUsers = response.data.filter(user => !invitedUserIds.includes(user.id));
-                console.log('loading')
-                console.log(invitedUserIds)
                 setUsers(filteredUsers);
             })
             .catch(error => {
@@ -139,18 +135,12 @@ export default function EditEvent(props) {
     useEffect(() => {
         axiosClient.get(`/attendee/${event_id}`)
             .then(response => {
-                console.log('load...')
-                console.log(attendeeList)
                 setAttendees(response.data.data);
             })
             .catch(error => {
                 console.log(error);
             });
     }, [event_id]);
-
-    useEffect(()=>{
-        console.log(attendeeList, users, addedAttendee, deletedAttendee)
-    })
 
     const handleUserClick = (user) => {
         const isDeletedAttendee = deletedAttendee.find(attendee => attendee.user_id === user.id);
@@ -257,8 +247,6 @@ export default function EditEvent(props) {
         }
     };
 
-    let shouldDisplayPrompt = true;
-
     const onSubmit = async (ev) => {
         ev.preventDefault()
         navigate('/');
@@ -308,20 +296,23 @@ export default function EditEvent(props) {
                     console.log(error);
                 }
             });
+
+            let shouldDisplayPrompt = true;
+            let shouldSendInvite = null;
           
-            const attendeePromises = attendeeList.map(async (attendee) => {
+            const attendeePromises = addedAttendee.map(async (attendee) => {
                 try {
                     const response = await axiosClient.post(`/attendee/${event_id}`, { user_id: attendee.id });
                     console.log(response.data);
                     if (shouldDisplayPrompt) {
-                        const shouldSendInvite = window.confirm('Bạn có muốn gửi email thông báo đến các attendee không?');
-                        if (shouldSendInvite) {
-                            shouldDisplayPrompt = false;
-                        }
+                        const confirm = window.confirm('Bạn có muốn gửi email thông báo đến các attendee không?');
+                        shouldSendInvite = confirm;
+                        shouldDisplayPrompt = false; 
                     }
-
-                    const sendInvite = await axiosClient.get(`/sendInvite/${response.data.data.id}`);
-                    console.log(sendInvite.data);
+                    if (shouldSendInvite) {
+                        const sendInvite = await axiosClient.get(`/sendInvite/${response.data.data.id}`);
+                        console.log(sendInvite.data);
+                    }
                 } catch (error) {
                     console.log(error);
                 }

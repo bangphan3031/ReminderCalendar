@@ -23,6 +23,12 @@ aside .create:hover {
 aside .create {
     box-shadow: 0 2px 4px 0 rgba(20, 20, 20, 0.2);
 }
+aside {
+    height: 92vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    white-space: nowrap;
+}
 .my-dropdown .btn-basic:hover,
 .my-dropdown .btn-basic:focus{
     background-color: #fff;
@@ -98,7 +104,8 @@ header .btn:hover {
     color: black;
 }
 .calendar-data {
-    height: 135px;
+    /* border: 1px solid black; */
+    height: 19vh;
     overflow-x: hidden;
     overflow-y: auto;
     white-space: nowrap;
@@ -150,7 +157,7 @@ header .btn:hover {
     margin-left: auto;
 }
 .event-data {
-    height: 98px;
+    height: 13vh;
     overflow-x: hidden;
     overflow-y: auto;
     white-space: nowrap;

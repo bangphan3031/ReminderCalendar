@@ -150,7 +150,7 @@ export default function Event(props) {
     }, [myEventsList, selectedCalendars]);
 
     return (
-        <div style={{ height: '91vh'}}>
+        <div style={{height: '100%'}}>
         <Calendar
             localizer={localizer}
             view={selectedValue}
@@ -158,7 +158,7 @@ export default function Event(props) {
             events={filteredEvents}
             startAccessor="start"
             endAccessor="end"
-            style={{ height: '100%' }}
+            style={{ height: '100%'}}
             date={selectedDate}
             onNavigate={handleNavigate}
             onSelectEvent={handleSelectEvent}
