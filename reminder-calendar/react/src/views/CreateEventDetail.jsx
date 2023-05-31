@@ -171,8 +171,10 @@ export default function CreateEventDetail() {
         }
     };
 
+    let shouldDisplayPrompt = true;
+
     const onSubmit = async (ev) => {
-        ev.preventDefault()
+        ev.preventDefault();
         navigate('/');
         setLoading(true);
         const startTime = moment(startTimeRef.current.value).format('YYYY-MM-DDTHH:mm:ss');
@@ -185,11 +187,12 @@ export default function CreateEventDetail() {
             location: locationRef.current.value,
             description: descriptionRef.current.value,
             calendar_id: calendarSelected ? calendarSelected.id : selectedCalendarId
-        }
+        };
+    
         try {
             const eventResponse = await axiosClient.post('/event', payload);
             const eventId = eventResponse.data.data.id;
-        
+    
             const reminderPromises = reminders.map(async (reminder) => {
                 try {
                     const response = await axiosClient.post(`/reminder/${eventId}`, reminder);
@@ -200,23 +203,28 @@ export default function CreateEventDetail() {
                     console.log(error);
                 }
             });
-              
+    
             const attendeePromises = attendeeList.map(async (attendee) => {
                 try {
                     const response = await axiosClient.post(`/attendee/${eventId}`, { user_id: attendee.id });
                     console.log(response.data);
-                    const shouldSendInvite = window.confirm('Bạn có muốn gửi email thông báo đến các attendee không?');
-                    if (shouldSendInvite) {
-                        const sendInvite = await axiosClient.get(`/sendInvite/${response.data.data.id}`);
-                        console.log(sendInvite.data);
+                    if (shouldDisplayPrompt) {
+                        const shouldSendInvite = window.confirm('Bạn có muốn gửi email thông báo đến các attendee không?');
+                        if (shouldSendInvite) {
+                            shouldDisplayPrompt = false;
+                        }
                     }
+    
+                    // Move the sendInvite code outside the if block
+                    const sendInvite = await axiosClient.get(`/sendInvite/${response.data.data.id}`);
+                    console.log(sendInvite.data);
                 } catch (error) {
                     console.log(error);
                 }
             });
-        
+    
             await Promise.all([...reminderPromises, ...attendeePromises]);
-            setSuccess(true)
+            setSuccess(true);
             setLoading(false);
             setTimeout(() => {
                 setSuccess(false);
@@ -227,8 +235,8 @@ export default function CreateEventDetail() {
             setLoading(false);
             alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
         }
-    };
-
+    };    
+      
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {
           ev.preventDefault();

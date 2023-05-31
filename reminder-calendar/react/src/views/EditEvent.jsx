@@ -11,7 +11,6 @@ export default function EditEvent(props) {
         selectedEvent, 
         setUpdated, setLoading,
         handleCloseEventDetails,
-        setEventList 
     } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -19,6 +18,9 @@ export default function EditEvent(props) {
     const [reminders, setReminders] = useState([]);
     const [deletedReminders, setDeletedReminders] = useState([]);
     const [addedReminders, setAddedReminders] = useState([]);
+    const [deletedAttendee, setDeletedAttendee] = useState([]);
+    const [addedAttendee, setAddedAttendee] = useState([]);
+    const [attendees, setAttendees] = useState([]);
     const [users, setUsers] = useState([]);
     const [showUserList, setShowUserList] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState('');
@@ -26,8 +28,6 @@ export default function EditEvent(props) {
     const [selectedUser, setSelectedUser] = useState([null]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
-    const [erTime, setErTime] = useState('');
-    const [editEvent, setEditEvent] = useState(false);
     const [isAllDay, setIsAllDay] = useState(null);
     const [timeStart, setTimeStart] = useState(null);
     const [timeEnd, setTimeEnd] = useState(null);
@@ -95,16 +95,6 @@ export default function EditEvent(props) {
     }, [event_id]);
 
     useEffect(() => {
-        axiosClient.get(`/user/${event_id}`)
-            .then(response => {
-                setAttendeeList(response.data);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }, [event_id]);
-
-    useEffect(() => {
         axiosClient.get('/calendar')
             .then(response => {
                 setCalendars(response.data.data);
@@ -121,14 +111,70 @@ export default function EditEvent(props) {
     }, [selectedEvent]);  
 
     useEffect(() => {
+        axiosClient.get(`/user/${event_id}`)
+            .then(response => {
+                console.log('load...')
+                console.log(attendeeList)
+                setAttendeeList(response.data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }, [event_id]);
+      
+    useEffect(() => {
         axiosClient.get('/user')
-          .then(response => {
-            setUsers(response.data);
-          })
-          .catch(error => {
-            console.log(error);
-          });
-    }, []); 
+            .then(response => {
+                const invitedUserIds = attendeeList.map(user => user.id);
+                const filteredUsers = response.data.filter(user => !invitedUserIds.includes(user.id));
+                console.log('loading')
+                console.log(invitedUserIds)
+                setUsers(filteredUsers);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }, [attendeeList]);
+
+    useEffect(() => {
+        axiosClient.get(`/attendee/${event_id}`)
+            .then(response => {
+                console.log('load...')
+                console.log(attendeeList)
+                setAttendees(response.data.data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }, [event_id]);
+
+    useEffect(()=>{
+        console.log(attendeeList, users, addedAttendee, deletedAttendee)
+    })
+
+    const handleUserClick = (user) => {
+        const isDeletedAttendee = deletedAttendee.find(attendee => attendee.user_id === user.id);
+        if (!isDeletedAttendee) {
+            setAttendeeList([...attendeeList, user]);
+            setShowUserList(false);
+            setSearchKeyword('');
+            setAddedAttendee([...addedAttendee, user]);
+        } else {
+            const updatedDeletedAttendee = deletedAttendee.filter(attendee => attendee.user_id !== user.id);
+            setDeletedAttendee(updatedDeletedAttendee);
+            setAttendeeList([...attendeeList, user]);
+            setShowUserList(false);
+            setSearchKeyword('');
+        }
+    };
+      
+    const handleDeleteClick = (user) => {
+        const deletedAttendees = attendees.filter(attendee => attendee.user_id === user.id);
+        setAttendeeList(attendeeList.filter((u) => u.id !== user.id));
+        setUsers([...users, user]);
+        setAddedAttendee(addedAttendee.filter((u) => u.id !== user.id));
+        setDeletedAttendee([...deletedAttendee, ...deletedAttendees ]);
+    }
 
     const handleAddReminderClick = () => {
         const newReminder = {
@@ -154,19 +200,6 @@ export default function EditEvent(props) {
     const handleCloseClick = () => {
         navigate('/');
     };
-
-    const handleUserClick = (user) => {
-        setSelectedUser(user);
-        setAttendeeList([...attendeeList, user]);
-        setShowUserList(false);
-        setUsers(users.filter((u) => u.id !== user.id));
-        setSearchKeyword('');
-    };
-
-    function handleDeleteClick(user) {
-        setAttendeeList(attendeeList.filter((u) => u.id !== user.id));
-        setUsers([...users, user]);
-    }
     
     const handleInputClick = () => {
         setShowUserList(true);
@@ -224,6 +257,8 @@ export default function EditEvent(props) {
         }
     };
 
+    let shouldDisplayPrompt = true;
+
     const onSubmit = async (ev) => {
         ev.preventDefault()
         navigate('/');
@@ -264,8 +299,35 @@ export default function EditEvent(props) {
                     console.log(error);
                 }
             });
+
+            const deleteAttendeePromises = deletedAttendee.map(async (attendee) => {
+                try {
+                    const response = await axiosClient.delete(`/attendee/${attendee.id}`);
+                    console.log(response.data);
+                } catch (error) {
+                    console.log(error);
+                }
+            });
+          
+            const attendeePromises = attendeeList.map(async (attendee) => {
+                try {
+                    const response = await axiosClient.post(`/attendee/${event_id}`, { user_id: attendee.id });
+                    console.log(response.data);
+                    if (shouldDisplayPrompt) {
+                        const shouldSendInvite = window.confirm('Bạn có muốn gửi email thông báo đến các attendee không?');
+                        if (shouldSendInvite) {
+                            shouldDisplayPrompt = false;
+                        }
+                    }
+
+                    const sendInvite = await axiosClient.get(`/sendInvite/${response.data.data.id}`);
+                    console.log(sendInvite.data);
+                } catch (error) {
+                    console.log(error);
+                }
+            });
             
-            await Promise.all([...deleteReminderPromises, ...reminderPromises]);
+            await Promise.all([...deleteReminderPromises, ...reminderPromises, ...deleteAttendeePromises, ...attendeePromises]);
             setUpdated(true)
             setLoading(false);
             setTimeout(() => {
@@ -279,10 +341,6 @@ export default function EditEvent(props) {
         }
             
     };
-
-    useEffect(() => {
-        console.log(reminders)
-    }, [reminders]);
 
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {
@@ -312,7 +370,7 @@ export default function EditEvent(props) {
                             <div className="col">
                                 <div>
                                     <input ref={titleRef} type="text" name='title' placeholder='Add title' required
-                                        value={formData.title}
+                                        value={formData.title ? formData.title : ''}
                                         onChange={(event) => setFormData({...formData, title: event.target.value})}
                                         className='title-event-input form-control border-0 border-bottom'
                                     />
@@ -328,7 +386,7 @@ export default function EditEvent(props) {
                                         type='checkbox' 
                                         className='form-check-input' 
                                         style={{fontSize: 15.5, marginLeft: 10, marginRight: 5}}
-                                        checked={isAllDay}
+                                        checked={isAllDay ? isAllDay : true}
                                         onChange={handleAllDayChange}
                                     />
                                     <label className='form-check-label' htmlFor='all-day-checkbox'>
@@ -345,7 +403,7 @@ export default function EditEvent(props) {
                             </div>
                             <div className="col d-flex">
                                 <input ref={startTimeRef} type={inputType} name='start_time' required
-                                    value={formData.start_time}
+                                    value={formData.start_time ? formData.start_time  : ''}
                                     onChange={(event) => setFormData({...formData, start_time: event.target.value})}
                                     onBlur={() => {
                                         if (formData.end_time < formData.start_time) {
@@ -358,14 +416,11 @@ export default function EditEvent(props) {
                                     <p className='lable-to pt-2'>to</p>
                                 </div>
                                 <input ref={endTimeRef} type={inputType} name='end_time' required
-                                    value={formData.end_time}
+                                    value={formData.end_time ? formData.end_time  : ''}
                                     onChange={(event) => setFormData({...formData, end_time: event.target.value})}
                                     min={formData.start_time}
                                     className='event-input input-time form-control border-0 border-bottom'
                                 />
-                            </div>
-                            <div className="error-message-login mt-0 ms-5">
-                                {erTime && <p>{erTime}</p>}
                             </div>
                         </div>
                         <div className="row">
@@ -383,7 +438,7 @@ export default function EditEvent(props) {
                                 </div>
                                 <div className="col pt-1">
                                     <input ref={locationRef} name='location' placeholder='Add location'
-                                        value={formData.location}
+                                        value={formData.location ? formData.location : ''}
                                         onChange={(event) => setFormData({...formData, location: event.target.value})}
                                         className='event-input form-control border-0 border-bottom text-xl w-100'
                                     />
@@ -503,7 +558,7 @@ export default function EditEvent(props) {
                                 </div>
                                 <div className="col">
                                     <textarea ref={descriptionRef} name='description' placeholder='Add description'
-                                        value={formData.description}
+                                        value={formData.description ? formData.description : ''}
                                         onChange={(event) => setFormData({...formData, description: event.target.value})}
                                         className='event-input-area form-control border-0 border-bottom text-xl w-100'
                                     />
@@ -531,9 +586,9 @@ export default function EditEvent(props) {
                                         value={searchKeyword} onChange={handleSearchChange}/>
                                     {showUserList && (
                                         <div ref={userListRef} className='user-list'>
-                                        {filteredUsers.map((user) => (
-                                            <div key={user.id} onClick={() => handleUserClick(user)}>
-                                                {user.name} - {user.email}
+                                        {filteredUsers.map((attendee) => (
+                                            <div key={attendee.id} onClick={() => handleUserClick(attendee)}>
+                                                {attendee.name} - {attendee.email}
                                             </div>
                                         ))}
                                         </div>
