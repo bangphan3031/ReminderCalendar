@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axiosClient from '../axios-client';
-import { Link, useNavigate } from 'react-router-dom';
 import EventDetail from './EventDetail';
 import { AppContext } from '../contexts/AppContext';
 
@@ -20,7 +19,6 @@ export default function Event(props) {
         selectedCalendars, 
         setLoading, setDeleted,
     } = useContext(AppContext);
-    const navigate = useNavigate();
     const [initialLoad, setInitialLoad] = useState(true);
     const [selectedValue, setSelectedValue] = useState(localStorage.getItem('selectedValue') || 'month');
     const [selectedDate, setSelectedDate] = useState(props.selectedDate);
@@ -81,8 +79,8 @@ export default function Event(props) {
             event_id: event.event_id,
             calendar_id: event.calendar_id,
             title: event.title,
-            start_time: event.start,
-            end_time: event.end,
+            start_time: moment(event.start).format('YYYY-MM-DD h:mm:ss'),
+            end_time: moment(event.end).format('YYYY-MM-DD h:mm:ss'),
             is_all_day: event.all_day,
             location: event.location,
             description: event.description,

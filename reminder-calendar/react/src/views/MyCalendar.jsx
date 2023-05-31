@@ -18,9 +18,9 @@ export default function MyCalendar(props) {
   const { 
     loading, 
     setLoading, 
-    success, 
+    success, setSuccess,
     deleted, setDeleted, 
-    updated, 
+    updated, setUpdated,
     handleShowEventDetails, 
     setSelectedEvent,
     setReloadStorage,
@@ -134,6 +134,9 @@ export default function MyCalendar(props) {
   const handleClose = () => {
     setShowCreateCalendar(false);
     setShowEditCalendar(false);
+    setDeleted(false);
+    setUpdated(false);
+    setSuccess(false);
   };
 
   const handleDeleteCalendar = (calendarId) => {
@@ -225,23 +228,25 @@ export default function MyCalendar(props) {
     <div>
       {loading && <Loading />}
       {success || deleted || updated ? (
-        <div className="loading-content-overlay">
-          <div className="loading-box">
-            <div className="loading-content">
-              {success ? (
-                <p>Thêm thành công.</p>
-              ) : deleted ? (
-                <p>Xóa thành công.</p>
-              ) : updated ? (
-                <p>Cập nhật thành công.</p>
-              ) : null}
-              <button
-                onClick={handleClose}
-                title="Close"
-                className="close-notification btn btn-outline-secondary border-0 rounded-5"
-              >
-                <FaTimes />
-              </button>
+        <div className="loading-overlay-wrapper">
+          <div className="notification-content-overlay">
+            <div className="loading-box">
+              <div className="loading-content">
+                {success ? (
+                  <p>Thêm thành công.</p>
+                ) : deleted ? (
+                  <p>Xóa thành công.</p>
+                ) : updated ? (
+                  <p>Cập nhật thành công.</p>
+                ) : null}
+                <button
+                  onClick={handleClose}
+                  title="Close"
+                  className="close-notification btn btn-outline-secondary border-0 rounded-5"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
           </div>
         </div>

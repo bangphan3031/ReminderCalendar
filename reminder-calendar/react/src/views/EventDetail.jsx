@@ -1,15 +1,48 @@
 import moment from 'moment';
 import React, { useContext, useEffect } from 'react'
-import { FaCalendarAlt, FaClock, FaEdit, FaTimes, FaTrash } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaEdit, FaTimes, FaTrash, FaCheck } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext'
+import axiosClient from '../axios-client';
 
 export default function EventDetail(props) {
-  const { handleCloseEventDetails, selectedEvent } = useContext(AppContext);
-  const { handleDeleteEvent} = props;
+  const { 
+    handleCloseEventDetails, 
+    selectedEvent,
+    setUpdated, setLoading,
+    handleCreateSuccess,
+  } = useContext(AppContext);
+  const { handleDeleteEvent } = props;
 
   const handleCloseEventDetail = () => {
     handleCloseEventDetails()
+  }  
+
+  const updateData = {
+    ...selectedEvent,
+    status: 'completed'
+  };
+
+  useEffect(()=>{
+    console.log(selectedEvent)
+  }, [selectedEvent])
+
+  const handleMarkCompletedEvent = async (eventId) => {
+    handleCloseEventDetails()
+    setLoading(true)
+    try {
+      const response = await axiosClient.put(`/event/${eventId}`, updateData)
+      console.log(response.data)
+      setLoading(false)
+      setUpdated(true)
+      handleCreateSuccess()
+      setTimeout(() => {
+        setUpdated(false);
+    }, 3000);
+    } catch (error) {
+      setLoading(false)
+      console.log(error)
+    }
   }  
 
   let formatTime = '';
@@ -43,6 +76,12 @@ export default function EventDetail(props) {
               className='delete btn btn-outline-secondary border-0 rounded-5'
               onClick={() => handleDeleteEvent(selectedEvent.id)}>
               <FaTrash />
+            </button>
+            <button 
+              title='Mark completed' 
+              className='delete btn btn-outline-secondary border-0 rounded-5'
+              onClick={() => handleMarkCompletedEvent(selectedEvent.id)}>
+              <FaCheck />
             </button>
             <button 
               title='Close'

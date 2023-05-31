@@ -21,7 +21,7 @@ return new class extends Migration
             $table->dateTime('end_time');
             $table->string('location')->nullable();
             $table->text('description')->nullable();
-            $table->enum('status', ['incomplete', 'complete'])->default('incomplete');
+            $table->enum('status', ['incomplete', 'completed'])->default('incomplete');
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
             $table->foreign('calendar_id')->references('id')->on('calendars')->onDelete('cascade');

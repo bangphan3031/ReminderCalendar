@@ -108,7 +108,7 @@ class EventController extends Controller
         $user = auth()->user();
         $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
         $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
-        $events = Event::whereIn('events.id', $event_id)
+        $events = Event::whereIn('events.id', $event_id)->where('events.status', '=', 'incomplete')
             ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
             ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
             ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
@@ -277,6 +277,9 @@ class EventController extends Controller
         $event->end_time = $request->end_time;
         $event->location = $request->location;
         $event->description = $request->description;
+        if($request->status){
+            $event->status = $request->status;
+        }
         $event->save();
         return response()->json([
             'message' => 'Event updated',
