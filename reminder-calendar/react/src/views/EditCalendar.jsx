@@ -98,7 +98,7 @@ export default function EditCalendar(props) {
                 <div className="row p-3 d-flex justify-content-end">
                     <div className="col-1"></div>
                     <div className="col-auto">
-                        <button className='btn btn-secondary mx-2 fw-bold' type='submit'>Lưu</button>
+                        <button className='btn btn-secondary mx-2 fw-bold' type='submit'>Save</button>
                     </div>
                 </div>
             </form>

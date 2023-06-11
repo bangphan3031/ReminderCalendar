@@ -166,6 +166,30 @@ class EventController extends Controller
         ], 200);
     }
 
+    //Lay ra cac event da xoa (soft delete)
+    public function getEventDeleted()
+    {
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        $event_id = Event::withTrashed()
+            ->whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $events = Event::onlyTrashed() // Thêm withTrashed() để lấy cả sự kiện đã bị xóa
+            ->whereIn('events.id', $event_id)
+            ->where('events.status', '=', 'incomplete')
+            ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+            ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+            ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+            ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+            ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+            ->select('events.id', 'events.title', 'events.is_all_day', 'events.start_time', 'events.end_time', 'events.deleted_at', 
+                    'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->get();
+        return response()->json([
+            'message' => 'Get deleted events successful',
+            'data' => $events
+        ], 200);
+    }
+
     // Tao moi event
     public function createEvent(Request $request)
     {
@@ -320,5 +344,81 @@ class EventController extends Controller
         return response()->json(['message' => 'Event deleted']);
     }
 
+    public function restoreEvent(string $id)
+    {
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        if (!$calendar_id) {
+            return response()->json([
+                'message' => 'Calendar not found',
+            ], 404);
+        }
+
+        $event = Event::onlyTrashed()
+            ->whereIn('calendar_id', $calendar_id)
+            ->find($id);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Event not found',
+            ], 404);
+        }
+
+        $event->restore();
+
+        return response()->json(['message' => 'Event restored']);
+    }
+
+    public function forceDeleteEvent(string $id)
+    {
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        if (!$calendar_id) {
+            return response()->json([
+                'message' => 'Calendar not found',
+            ], 404);
+        }
+
+        $event = Event::onlyTrashed()
+            ->whereIn('calendar_id', $calendar_id)
+            ->find($id);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Event not found',
+            ], 404);
+        }
+
+        $event->forceDelete();
+
+        return response()->json(['message' => 'Event permanently deleted']);
+    }
+
+    public function forceDeleteAllEvent()
+    {
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        if (!$calendar_id) {
+            return response()->json([
+                'message' => 'Calendar not found',
+            ], 404);
+        }
+
+        $events = Event::onlyTrashed()
+            ->whereIn('calendar_id', $calendar_id)
+            ->get();
+
+            if (!$events) {
+                return response()->json([
+                    'message' => 'Event not found',
+                ], 404);
+            }
+
+        foreach ($events as $event) {
+            $event->forceDelete();
+        }
+
+        return response()->json(['message' => 'All events permanently deleted']);
+    }
 
 }

@@ -32,12 +32,16 @@ class SendReminderController extends Controller
         $allday = $event->is_all_day;
         $start_time = Carbon::parse($event->start_time)->format('d-m-Y');
         $end_time = Carbon::parse($event->end_time)->format('d-m-Y');
+        $start_time_hs = Carbon::parse($event->start_time)->format('h:i A');
+        $end_time_hs = Carbon::parse($event->end_time)->format('h:i A');
 
         if ($allday == 1 && $start_time == $end_time) {
             $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y');
         } elseif ($allday == 1 && $start_time != $end_time) {
             $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y') . ' - ' . Carbon::parse($event->end_time)->format('d-m-Y');
-        } elseif ($allday == 0 && $start_time == $end_time) {
+        } elseif ($allday == 0 && $start_time == $end_time && $start_time_hs == $end_time_hs) {
+            $formattedTime = $start_time . ', ' . Carbon::parse($event->start_time)->format('h:i A');
+        } elseif ($allday == 0 && $start_time == $end_time && $start_time_hs != $end_time_hs) {
             $formattedTime = $start_time . ', ' . Carbon::parse($event->start_time)->format('h:i A') . ' - ' . Carbon::parse($event->end_time)->format('h:i A');
         } else {
             $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y, h:i A') . ' - ' . Carbon::parse($event->end_time)->format('d-m-Y, h:i A');
@@ -91,12 +95,16 @@ class SendReminderController extends Controller
         $allday = $event->is_all_day;
         $start_time = Carbon::parse($event->start_time)->format('d-m-Y');
         $end_time = Carbon::parse($event->end_time)->format('d-m-Y');
+        $start_time_hs = Carbon::parse($event->start_time)->format('h:i A');
+        $end_time_hs = Carbon::parse($event->end_time)->format('h:i A');
 
         if ($allday == 1 && $start_time == $end_time) {
             $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y');
         } elseif ($allday == 1 && $start_time != $end_time) {
             $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y') . ' - ' . Carbon::parse($event->end_time)->format('d-m-Y');
-        } elseif ($allday == 0 && $start_time == $end_time) {
+        } elseif ($allday == 0 && $start_time == $end_time && $start_time_hs == $end_time_hs) {
+            $formattedTime = $start_time . ', ' . Carbon::parse($event->start_time)->format('h:i A');
+        } elseif ($allday == 0 && $start_time == $end_time && $start_time_hs != $end_time_hs) {
             $formattedTime = $start_time . ', ' . Carbon::parse($event->start_time)->format('h:i A') . ' - ' . Carbon::parse($event->end_time)->format('h:i A');
         } else {
             $formattedTime = Carbon::parse($event->start_time)->format('d-m-Y, h:i A') . ' - ' . Carbon::parse($event->end_time)->format('d-m-Y, h:i A');

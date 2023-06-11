@@ -248,7 +248,7 @@ export default function CreateEvent(props) {
                     <Link to={`/create-event?title=${formData.title}&allday=${formData.is_all_day}&start=${formData.start_time}&end=${formData.end_time}&location=${formData.location}&description=${formData.description}`}>
                         <button className='btn btn-secondary mx-2 fw-bold' type='button'>More option</button>
                     </Link>
-                        <button className='btn btn-secondary mx-2 fw-bold' type='submit'>Lưu</button>
+                        <button className='btn btn-secondary mx-2 fw-bold' type='submit'>Save</button>
                     </div>
                 </div>
             </form>

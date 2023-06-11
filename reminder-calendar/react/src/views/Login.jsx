@@ -5,7 +5,6 @@ import {useStateContext} from "../contexts/ContextProvider.jsx";
 import { useState } from "react";
 import '../css/example.css'
 import { FaGoogle } from "react-icons/fa";
-import logo from '../assets/TamNhuLogo.jpg';
 import { Oval } from 'react-loader-spinner'
 
 export default function Login() {
@@ -50,9 +49,8 @@ export default function Login() {
     ev.preventDefault()
     
     axiosClient.get('/auth/google')
-      .then(({data}) => {
-        setUser(data.user);
-        setToken(data.token);
+      .then(response => {
+        window.location.href = response.data.redirect_url;
       })
       .catch((err) => {
         console.log(err);

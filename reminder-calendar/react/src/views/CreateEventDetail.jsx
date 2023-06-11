@@ -351,7 +351,7 @@ export default function CreateEventDetail() {
                                         type="button"
                                         onClick={handleAddReminderClick}
                                         >
-                                        Thêm nhắc nhở
+                                        Add reminder
                                     </button>
                                 </div>
                             </div>
@@ -372,7 +372,6 @@ export default function CreateEventDetail() {
                                                         }}
                                                     >
                                                         <option value="email">Email</option>
-                                                        <option value="zalo">Zalo</option>
                                                         <option value="sms">SMS</option>
                                                     </select>
                                                 </div>
@@ -464,7 +463,7 @@ export default function CreateEventDetail() {
                     <div className='col-6'>
                         <div className="row p-1">
                             <div className="col-11">
-                                <button className='submit-event-button btn btn-primary fw-bold' type='submit'>Lưu</button>
+                                <button className='submit-event-button btn btn-primary fw-bold' type='submit'>Save</button>
                             </div>
                         </div> 
                         <div className="row">

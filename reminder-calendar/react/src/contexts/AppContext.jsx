@@ -44,6 +44,16 @@ export const AppProvider = ({ children }) => {
         }
     }, [reloadStorage]);
 
+    useEffect(() => {
+        axiosClient.get('/profile')
+        .then(response => {
+            setUser(response.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }, []);
+
     const handleSelectedEvent = (event) => {
         setSelectedEvent(event);
     };

@@ -28,7 +28,7 @@ export default function EditEvent(props) {
     const [selectedUser, setSelectedUser] = useState([null]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
-    const [isAllDay, setIsAllDay] = useState(null);
+    const [isAllDay, setIsAllDay] = useState(true);
     const [timeStart, setTimeStart] = useState(null);
     const [timeEnd, setTimeEnd] = useState(null);
     const userListRef = useRef(null);
@@ -340,6 +340,10 @@ export default function EditEvent(props) {
         }
     };
 
+    useEffect(()=>{
+        console.log(isAllDay)
+    },[isAllDay])
+
     return (
         <div className="">
             <form className="edit-event-form" onSubmit={onSubmit} onKeyDown={handleKeyDown}>
@@ -377,7 +381,7 @@ export default function EditEvent(props) {
                                         type='checkbox' 
                                         className='form-check-input' 
                                         style={{fontSize: 15.5, marginLeft: 10, marginRight: 5}}
-                                        checked={isAllDay ? isAllDay : true}
+                                        checked={isAllDay}
                                         onChange={handleAllDayChange}
                                     />
                                     <label className='form-check-label' htmlFor='all-day-checkbox'>
@@ -447,7 +451,7 @@ export default function EditEvent(props) {
                                         type="button"
                                         onClick={handleAddReminderClick}
                                         >
-                                        Thêm nhắc nhở
+                                        Add reminder
                                     </button>
                                 </div>
                             </div>
@@ -468,7 +472,6 @@ export default function EditEvent(props) {
                                                         }}
                                                     >
                                                         <option value="Email">Email</option>
-                                                        <option value="Zalo">Zalo</option>
                                                         <option value="Sms">Sms</option>
                                                     </select>
                                                 </div>
@@ -560,7 +563,7 @@ export default function EditEvent(props) {
                     <div className='col-6'>
                         <div className="row p-1">
                             <div className="col-11">
-                                <button className='submit-event-button btn btn-primary fw-bold' type='submit'>Lưu</button>
+                                <button className='submit-event-button btn btn-primary fw-bold' type='submit'>Save</button>
                             </div>
                         </div> 
                         <div className="row">

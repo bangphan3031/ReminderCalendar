@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useEffect } from "react";
 import axiosClient from '../axios-client';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaHome, FaBackward } from "react-icons/fa";
+import { Watch } from 'react-loader-spinner'
 
 export default function Profile() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null); // Thêm state mới để lưu trữ URL của ảnh được chọn
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -15,13 +18,15 @@ export default function Profile() {
   useEffect(() => {
       axiosClient.get('/profile')
       .then(response => {
-          setName(response.data.name);
-          setEmail(response.data.email);
-          setPhone(response.data.phone);
-          setImage(response.data.image);
+        setName(response.data.name);
+        setEmail(response.data.email);
+        setPhone(response.data.phone);
+        setImage(response.data.image);
+        setIsLoading(false);
       })
       .catch(error => {
-          console.log(error);
+        console.log(error);
+        setIsLoading(false);
       });
   }, []);
 
@@ -34,6 +39,9 @@ export default function Profile() {
 
   const handleImageChange = (event) => {
     setSelectedImage(event.target.files[0]);
+    // Tạo URL tạm thời cho ảnh được chọn
+    const imageObjectURL = URL.createObjectURL(event.target.files[0]);
+    setPreviewImage(imageObjectURL);
   };
 
   const handleHomeClick = () => {
@@ -62,6 +70,9 @@ export default function Profile() {
         formData.append('image', selectedImage);
         const uploadResponse = await axiosClient.post('/profile/upload', formData);
         console.log(editResponse, uploadResponse);
+  
+        // Cập nhật đường dẫn ảnh sau khi upload thành công
+        setImage(uploadResponse.data.image);
       }
       alert('Cập nhật thông tin thành công');
       navigate('/');
@@ -73,6 +84,22 @@ export default function Profile() {
 
   return (
     <div className="profile-page">
+      {isLoading ? (
+        <div className="loading-overlay-trash">
+          <Watch
+            height={100}
+            width={100}
+            color="#4fa94d"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={true}
+            ariaLabel='oval-loading'
+            secondaryColor="#4fa94d"
+            strokeWidth={5}
+            strokeWidthSecondary={2}
+          />
+        </div>
+      ) : (
       <div className="container d-flex justify-content-center align-items-center min-vh-100">
         <div className="row border rounded-4 p-3 bg-white shadow box-area">
           <div className="col-7 right-box">
@@ -110,10 +137,17 @@ export default function Profile() {
                   <a href="#">Thay đổi</a>
                 </div>
               </div>
-              <div className="input-group ">
+              <div className="input">
                 <button 
                   onClick={handleFormSubmit} 
-                  className="btn btn-lg btn-primary fs-6 fw-bold" style={{marginLeft: 50}}>Save</button>
+                  className="btn btn-lg btn-primary fs-6 fw-bold" style={{marginLeft: 50}}>
+                  Save
+                </button>
+                <button 
+                  onClick={handleFormSubmit} 
+                  className="btn btn-lg btn-primary fs-6 fw-bold" style={{marginLeft: 50}}>
+                  Change Password
+                </button>
               </div>
             </div>
           </div>
@@ -131,7 +165,8 @@ export default function Profile() {
               </div>
             </div>
             <div className="profile-picture">
-              {image && <img src={"http://localhost:8000/uploads/"+ image}/>}
+              {previewImage && <img src={previewImage} alt="Preview" />}
+              {!previewImage && image && <img src={"http://localhost:8000/uploads/"+ image} alt="Profile" />}
               <label className='text-center'>
                 Change profile picture
                 <input type="file" accept="image/*" onChange={handleImageChange} />
@@ -140,6 +175,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

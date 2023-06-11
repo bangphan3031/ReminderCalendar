@@ -40,8 +40,5 @@ class Event extends Model
      *
      * @var array<int, string>
      */
-    protected $hidden = [
-        'deleted_at',
-    ];
 
 }

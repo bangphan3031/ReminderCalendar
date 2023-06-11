@@ -67,11 +67,15 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::get('/event/calendar/{calendar_id}', [EventController::class, 'getEventWithCalendar']);
     Route::get('event', [EventController::class, 'getAllEvent']);
     Route::get('event/upcoming', [EventController::class, 'getUpcomingEvent']);
+    Route::get('event/deleted', [EventController::class, 'getEventDeleted']);
     Route::get('event/find/{keyword}', [EventController::class, 'getEventWithTitle']);
     Route::get('/event/{id}', [EventController::class, 'showEvent']);
     Route::post('/event', [EventController::class, 'createEvent']);
     Route::put('/event/{id}', [EventController::class, 'updateEvent']);
     Route::delete('/event/{id}', [EventController::class, 'deleteEvent']);
+    Route::patch('/event/restore/{id}', [EventController::class, 'restoreEvent']);
+    Route::delete('/event/force-delete/{id}', [EventController::class, 'forceDeleteEvent']);
+    Route::delete('/event/delete/all', [EventController::class, 'forceDeleteAllEvent']);
 
     //reminder api
     Route::get('/reminder', [ReminderController::class, 'getAllReminder']);
@@ -86,7 +90,6 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::get('/attendee/{event_id}', [AttendeeController::class, 'getAttendeeWithEvent']);
     Route::post('/attendee/{event_id}', [AttendeeController::class, 'addAttendee']);
     Route::get('/attendee/show/{id}', [AttendeeController::class, 'showAttendee']);
-    //Route::put('attendee/{event_id}/{id}', [ReminderController::class, 'updateReminder']);
     Route::delete('/attendee/{id}', [AttendeeController::class, 'deleteAttendee']);
 });
 Route::get('/sendReminder/{id}', [SendReminderController::class, 'sendReminder']);

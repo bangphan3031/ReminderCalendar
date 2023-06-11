@@ -148,7 +148,7 @@ export default function Event(props) {
     }, [myEventsList, selectedCalendars]);
 
     return (
-        <div style={{height: '100%'}}>
+        <div style={{height: '92vh'}}>
         <Calendar
             localizer={localizer}
             view={selectedValue}

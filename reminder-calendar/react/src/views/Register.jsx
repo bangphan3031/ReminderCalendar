@@ -2,7 +2,6 @@ import { Link } from "react-router-dom"
 import {useRef, useState} from "react";
 import axiosClient from "../axios-client"
 import {useStateContext} from "../contexts/ContextProvider"
-import logo from '../assets/TamNhuLogo.jpg';
 
 export default function Register() {
 

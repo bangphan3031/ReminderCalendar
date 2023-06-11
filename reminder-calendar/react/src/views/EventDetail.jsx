@@ -23,9 +23,9 @@ export default function EventDetail(props) {
     status: 'completed'
   };
 
-  useEffect(()=>{
-    console.log(selectedEvent)
-  }, [selectedEvent])
+  // useEffect(()=>{
+  //   console.log(selectedEvent)
+  // }, [selectedEvent])
 
   const handleMarkCompletedEvent = async (eventId) => {
     handleCloseEventDetails()
@@ -50,13 +50,17 @@ export default function EventDetail(props) {
       const allday = selectedEvent.is_all_day;
       const startTime = moment(selectedEvent.start_time).format('DD-MM-YYYY');
       const endTime = moment(selectedEvent.end_time).format('DD-MM-YYYY');
+      const startTimeHs = moment(selectedEvent.start_time).format('h:mm a');
+      const endTimeHs = moment(selectedEvent.end_time).format('h:mm a');
       formatTime = allday && startTime == endTime 
       ? moment(selectedEvent.start_time).format('DD-MM-YYYY')
       : allday && startTime != endTime
-          ? moment(selectedEvent.start_time).format('DD-MM-YYYY') + " - " + moment(selectedEvent.end_time).format('DD-MM-YYYY')
-          : !allday && startTime == endTime
+        ? moment(selectedEvent.start_time).format('DD-MM-YYYY') + " - " + moment(selectedEvent.end_time).format('DD-MM-YYYY')
+        : !allday && startTime == endTime && startTimeHs != endTimeHs
           ? startTime + ", " + moment(selectedEvent.start_time).format('h:mm a') + " - " + moment(selectedEvent.end_time).format('h:mm a')
-          : moment(selectedEvent.start_time).format('DD-MM-YYYY, h:mm a') + " - " + moment(selectedEvent.end_time).format('DD-MM-YYYY, h:mm a');
+          : !allday && startTime == endTime && startTimeHs == endTimeHs
+            ? startTime + ", " + moment(selectedEvent.start_time).format('h:mm a')
+            : moment(selectedEvent.start_time).format('DD-MM-YYYY, h:mm a') + " - " + moment(selectedEvent.end_time).format('DD-MM-YYYY, h:mm a');
   }
 
   return (
