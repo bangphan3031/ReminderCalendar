@@ -77,6 +77,7 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::patch('/event/restore/{id}', [EventController::class, 'restoreEvent']);
     Route::delete('/event/force-delete/{id}', [EventController::class, 'forceDeleteEvent']);
     Route::delete('/event/delete/all', [EventController::class, 'forceDeleteAllEvent']);
+    Route::get('/completed-event/export', [EventController::class, 'exportCompletedEvent']);
 
     //reminder api
     Route::get('/reminder', [ReminderController::class, 'getAllReminder']);
@@ -95,4 +96,5 @@ Route::group(['middleware'=>'auth:api'], function($router){
 });
 Route::get('/sendReminder/{id}', [SendReminderController::class, 'sendReminder']);
 Route::get('/sendInvite/{id}', [SendReminderController::class, 'sendInvite']);
+Route::get('/export', [EventController::class, 'exportCompletedEvent'])->name('export');
 

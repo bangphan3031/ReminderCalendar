@@ -90,6 +90,16 @@ export default function CompletedEvent() {
         }
     };  
 
+    function handleExportEventCompleted() {
+        axiosClient.get('/completed-event/export')
+            .then(response => {
+                console.log(response)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
     return (
         <div>
             {loading && <Loading />}
@@ -153,7 +163,8 @@ export default function CompletedEvent() {
                         <div className="d-flex mt-1 text-secondary ms-2 mt-3 mb-2">
                             <h4 className='mt-2 mb-2'>Completed Events</h4>
                             <div className="ms-auto me-2">
-                                <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'>
+                                <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'
+                                    onClick={handleExportEventCompleted}>
                                 <div className="d-flex">
                                     <div className='clear-trash-icon'><FaTrashAlt /></div>
                                     <div className='clear-trash-lable ms-2'><span>Export file</span></div>
