@@ -85,11 +85,11 @@ export default function Profile() {
   return (
     <div className="profile-page">
       {isLoading ? (
-        <div className="loading-overlay-trash">
+        <div className="loading-overlay-profile">
           <Watch
             height={100}
             width={100}
-            color="#4fa94d"
+            color="#0d6efd"
             wrapperStyle={{}}
             wrapperClass=""
             visible={true}

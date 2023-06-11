@@ -13,6 +13,7 @@ import withAuth from "./components/Auth"
 import RecycleBin from "./views/RecycleBin";
 import CompleteEvent from "./views/CompletedEvent";
 import IncompleteEvent from "./views/IncompleteEvent"
+import SearchEvent from "./views/SearchEvent";
 
 const ProtectedProfile = withAuth(Profile);
 const ProtectedEditEvent = withAuth(EditEvent);
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
     {
         path: '/incomplete-event',
         element: <IncompleteEvent />
+    },
+    {
+        path: '/search',
+        element: <SearchEvent />
     },
 ])
 export default router;

@@ -115,6 +115,28 @@ class EventController extends Controller
             ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
             ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
             ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->orderBy('events.start_time', 'asc')
+            ->get();
+        return response()->json([
+            'message' => 'Get events successful',
+            'data' => $events
+        ], 200);
+    }
+
+    // Lay tat ca event da hoan thanh
+    public function getCompletedEvent()
+    {
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $events = Event::whereIn('events.id', $event_id)->where('events.status', '=', 'completed')
+            ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+            ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+            ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+            ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+            ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+            ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->orderBy('events.start_time', 'asc')
             ->get();
         return response()->json([
             'message' => 'Get events successful',
@@ -157,9 +179,17 @@ class EventController extends Controller
                 'message' => 'Calendar not found',
             ], 404);
         }
-        $event_id = Attendee::where('user_id', $user->id)->pluck('event_id')->toArray();
-        $events_id = Event::whereIn('calendar_id', $calendar_id)->orWhereIn('id', $event_id)->pluck('id')->toArray();
-        $result = Event::whereIn('id', $events_id)->where('title', 'like', '%'.$keyword.'%')->get();
+        $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $result = Event::whereIn('events.id', $event_id)
+                ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+                ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+                ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+                ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+                ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+                ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+                ->where('events.title', 'like', '%'. $keyword .'%')
+                ->orderBy('events.start_time', 'asc')
+                ->get();
         return response()->json([
             'message' => 'Get events successful',
             'data' => $result,
@@ -183,6 +213,7 @@ class EventController extends Controller
             ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
             ->select('events.id', 'events.title', 'events.is_all_day', 'events.start_time', 'events.end_time', 'events.deleted_at', 
                     'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->orderBy('events.start_time', 'asc')
             ->get();
         return response()->json([
             'message' => 'Get deleted events successful',
@@ -421,4 +452,21 @@ class EventController extends Controller
         return response()->json(['message' => 'All events permanently deleted']);
     }
 
+    public function exportCompletedEvent()
+    {
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $events = Event::whereIn('events.id', $event_id)->where('events.status', '=', 'completed')
+            ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+            ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+            ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+            ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+            ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+            ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->orderBy('events.start_time', 'asc')
+            ->get();
+        //return Excel::download(new EventsExport($events), 'completed_events.xlsx');
+        return response()->json(['message' => 'All events permanently deleted']);
+    }
 }

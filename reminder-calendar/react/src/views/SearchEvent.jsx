@@ -1,18 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axiosClient from '../axios-client';
 import moment from 'moment';
-import { FaTrash, FaRedoAlt, FaTimes, FaTrashAlt } from 'react-icons/fa';
+import { FaTrash, FaRedoAlt, FaTimes, FaTrashAlt, FaSearch } from 'react-icons/fa';
 import { Watch } from 'react-loader-spinner'
 import { AppContext } from '../contexts/AppContext';
 import Loading from './Loading';
 import { Link } from 'react-router-dom';
 import SubLayoutHeader from './SubLayoutHeader';
 
-export default function CompletedEvent() {
+export default function SearchEvent() {
     const [eventList, setEventList] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [reloadEvent, setReloadEvent] = useState(false);
     const [initialLoad, setInitialLoad] = useState(true);
+    const [keyword, setKeyword] = useState('');
     const { 
         loading, 
         setLoading, 
@@ -20,13 +21,19 @@ export default function CompletedEvent() {
         deleted, setDeleted, 
     } = useContext(AppContext);
 
-    useEffect(() => {
-        let isReloadEvent = false;
-        const fetchEvents = async () => {
+    const handleClose = () => {
+        setDeleted(false);
+        setSuccess(false);
+    };
+
+    const handleSearch = async () => {
+        setInitialLoad(true);
+        setIsLoading(true);
+        const trimmedKeyword = keyword.trim();
+        
+        if (trimmedKeyword !== '') {
             try {
-                const response = await axiosClient.get('/event/completed');
-                console.log(reloadEvent)
-                console.log('loading')
+                const response = await axiosClient.get(`/event/find/${trimmedKeyword}`);
                 setEventList(response.data.data);
                 setReloadEvent(false);
                 setIsLoading(false);
@@ -34,23 +41,10 @@ export default function CompletedEvent() {
                 console.log(error);
                 setIsLoading(false);
             }
-        };
-        if (initialLoad) {
-            fetchEvents();
-            setInitialLoad(false);
-        } else {
-            if (reloadEvent) {
-                isReloadEvent = true;
-            }
-            if (isReloadEvent) {
-                fetchEvents();
-            }
+            } else {
+                setEventList([]);
+                setIsLoading(false);
         }
-    }, [initialLoad, reloadEvent]);
-
-    const handleClose = () => {
-        setDeleted(false);
-        setSuccess(false);
     };
 
     const handleRestore = (eventId) => {
@@ -121,14 +115,14 @@ export default function CompletedEvent() {
                 <div className="row">
                     <div className="col-1" style={{ width: "200px", height:"200px" }}>
                         <Link to="/search" className='text-decoration-none text-secondary'>
-                            <div className="row mb-2 mt-2 sidebar-title-row">
+                            <div className="row mb-2 mt-2 sidebar-title-row-choose">
                                 <div className='ms-3 mt-2 mb-2'>
                                     Search Event
                                 </div>
                             </div>
                         </Link>
                         <Link to="/completed-event" className='text-decoration-none text-secondary'>
-                            <div className="row mb-2 mt-2 sidebar-title-row-choose">
+                            <div className="row mb-2 mt-2 sidebar-title-row">
                                 <div className='ms-3 mt-2 mb-2'>
                                     Completed Events
                                 </div>
@@ -151,14 +145,21 @@ export default function CompletedEvent() {
                     </div>
                     <div className="col">
                         <div className="d-flex mt-1 text-secondary ms-2 mt-3 mb-2">
-                            <h4 className='mt-2 mb-2'>Completed Events</h4>
-                            <div className="ms-auto me-2">
-                                <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'>
-                                <div className="d-flex">
-                                    <div className='clear-trash-icon'><FaTrashAlt /></div>
-                                    <div className='clear-trash-lable ms-2'><span>Export file</span></div>
+                            <h4 className='mt-2 mb-2'>Search Event</h4>
+                            <div className="search-container ms-5 mt-1">
+                                <div className="input-group search-input-container">
+                                    <input
+                                        type="search"
+                                        className="form-control search-input custom-search-input"
+                                        style={{width: "50vw"}}
+                                        placeholder="Enter keyword..."
+                                        value={keyword}
+                                        onChange={(e) => setKeyword(e.target.value)}
+                                    />
+                                    <button className="btn btn-primary search-button" onClick={handleSearch}>
+                                        <FaSearch />
+                                    </button>
                                 </div>
-                                </button>
                             </div>
                         </div>
                         {isLoading ? (
@@ -186,7 +187,7 @@ export default function CompletedEvent() {
                                         <div className='col-2'>Date</div>
                                         <div className='col-1'>Time</div>
                                         <div className='col-2'>Organizer</div>
-                                        <div className='col-2'>Completed date</div>
+                                        <div className='col-2'>Created date</div>
                                         <div className='col-1'>Action</div>
                                     </div>
                                     <div className="event-list-container">
@@ -213,7 +214,7 @@ export default function CompletedEvent() {
                                                     <span className='ms-1'>{event.creator ? event.creator : 'Me'}</span>
                                                 </div>
                                                 <div className='col-2'>
-                                                    <span className='ms-1'>{moment(event.update_at).format('DD-MM-YYYY')}</span>
+                                                    <span className='ms-1'>{moment(event.created_at).format('DD-MM-YYYY')}</span>
                                                 </div>
                                                 <div className='col-1 d-flex'>
                                                     <button
@@ -234,7 +235,7 @@ export default function CompletedEvent() {
                                     </div>
                                 </div>
                             ) : (
-                            <div className="no-events-message ms-2">There are no completed events.</div>
+                            <div className="no-events-message ms-2">No results found</div>
                         )}
                     </>
                     )}

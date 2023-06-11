@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axiosClient from '../axios-client';
 import moment from 'moment';
-import { FaTrash, FaRedoAlt, FaTimes } from 'react-icons/fa';
+import { FaTrash, FaRedoAlt, FaTimes, FaTrashAlt } from 'react-icons/fa';
 import { Watch } from 'react-loader-spinner'
 import { AppContext } from '../contexts/AppContext';
 import Loading from './Loading';
@@ -24,7 +24,7 @@ export default function IncompleteEvent() {
         let isReloadEvent = false;
         const fetchEvents = async () => {
             try {
-                const response = await axiosClient.get('/event/deleted');
+                const response = await axiosClient.get('/event');
                 console.log(reloadEvent)
                 console.log('loading')
                 setEventList(response.data.data);
@@ -120,6 +120,13 @@ export default function IncompleteEvent() {
                 </div>
                 <div className="row">
                     <div className="col-1" style={{ width: "200px", height:"200px" }}>
+                        <Link to="/search" className='text-decoration-none text-secondary'>
+                            <div className="row mb-2 mt-2 sidebar-title-row">
+                                <div className='ms-3 mt-2 mb-2'>
+                                    Search Event
+                                </div>
+                            </div>
+                        </Link>
                         <Link to="/completed-event" className='text-decoration-none text-secondary'>
                             <div className="row mb-2 mt-2 sidebar-title-row">
                                 <div className='ms-3 mt-2 mb-2'>
@@ -143,6 +150,17 @@ export default function IncompleteEvent() {
                         </Link>
                     </div>
                     <div className="col">
+                        <div className="d-flex mt-1 text-secondary ms-2 mt-3 mb-2">
+                            <h4 className='mt-2 mb-2'>Incomplete Events</h4>
+                            <div className="ms-auto me-2">
+                                <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'>
+                                <div className="d-flex">
+                                    <div className='clear-trash-icon'><FaTrashAlt /></div>
+                                    <div className='clear-trash-lable ms-2'><span>Export file</span></div>
+                                </div>
+                                </button>
+                            </div>
+                        </div>
                         {isLoading ? (
                             <div className="loading-overlay-trash">
                                 <Watch
@@ -162,62 +180,61 @@ export default function IncompleteEvent() {
                         <>
                             {eventList.length > 0 ? (
                                 <div className='event-deleted'>
-                                    <div className="d-flex mt-1 text-secondary ms-2 mt-3 mb-2">
-                                        <h4 className='mt-2 mb-2'>Incomplete Events</h4>
-                                    </div>
                                     <div className='row mt-1'>
                                         <div className='col-2 ps-4'>Calendar</div>
                                         <div className='col-2'>Title</div>
                                         <div className='col-2'>Date</div>
                                         <div className='col-1'>Time</div>
                                         <div className='col-2'>Organizer</div>
-                                        <div className='col-2'>Deleted date</div>
-                                        <div className='col-1'>Abc</div>
+                                        <div className='col-2'>Created date</div>
+                                        <div className='col-1'>Action</div>
                                     </div>
-                                    {eventList.map(event => (
-                                        <div key={event.id} className='row border align-items-center on-event-data'>
-                                            <div className='col-2 d-flex ps-4'>
-                                                <div className='event-color' style={{ backgroundColor: event.color }}></div>
-                                                <span className='ms-1'>{event.title}</span>
+                                    <div className="event-list-container">
+                                        {eventList.map(event => (
+                                            <div key={event.id} className='row border align-items-center on-event-data'>
+                                                <div className='col-2 d-flex ps-4'>
+                                                    <div className='event-color' style={{ backgroundColor: event.color }}></div>
+                                                    <span className='ms-1'>{event.creator_calendar ? event.creator_calendar : event.name}</span>
+                                                </div>
+                                                <div className='col-2 d-flex'>
+                                                    <span className='ms-1'>{event.title}</span>
+                                                </div>
+                                                <div className='col-2 d-flex'>
+                                                    <span>
+                                                        {moment(event.start_time).format('DD-MM-YYYY')}
+                                                    </span>
+                                                </div>
+                                                <div className='col-1 d-flex'>
+                                                    <span>
+                                                        {event.is_all_day ? 'All day' : moment(event.start_time).format('hh:mm')}
+                                                    </span>
+                                                </div>
+                                                <div className='col-2'>
+                                                    <span className='ms-1'>{event.creator ? event.creator : 'Me'}</span>
+                                                </div>
+                                                <div className='col-2'>
+                                                    <span className='ms-1'>{moment(event.created_at).format('DD-MM-YYYY')}</span>
+                                                </div>
+                                                <div className='col-1 d-flex'>
+                                                    <button
+                                                        title='Restore'
+                                                        className="restore-button btn btn-outline-secondary rounded-5 border-0 "
+                                                        onClick={() => handleRestore(event.id)}>
+                                                        <FaRedoAlt />
+                                                    </button>
+                                                    <button
+                                                        title='Delete'
+                                                        className="delete-button btn btn-outline-secondary rounded-5 border-0 "
+                                                        onClick={() => handleForceDelete(event.id)}>
+                                                        <FaTrash />
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className='col-2 d-flex'>
-                                                <span className='ms-1'>{event.title}</span>
-                                            </div>
-                                            <div className='col-2 d-flex'>
-                                                <span>
-                                                    {moment(event.start_time).format('DD-MM-YYYY')}
-                                                </span>
-                                            </div>
-                                            <div className='col-1 d-flex'>
-                                                <span>
-                                                    {event.is_all_day ? 'All day' : moment(event.start_time).format('hh:mm')}
-                                                </span>
-                                            </div>
-                                            <div className='col-2'>
-                                                <span className='ms-1'>{event.creator ? event.creator : 'Me'}</span>
-                                            </div>
-                                            <div className='col-2'>
-                                                <span className='ms-1'>{moment(event.deleted_date).format('DD-MM-YYYY')}</span>
-                                            </div>
-                                            <div className='col-1 d-flex'>
-                                                <button
-                                                    title='Restore'
-                                                    className="restore-button btn btn-outline-secondary rounded-5 border-0 "
-                                                    onClick={() => handleRestore(event.id)}>
-                                                    <FaRedoAlt />
-                                                </button>
-                                                <button
-                                                    title='Delete'
-                                                    className="delete-button btn btn-outline-secondary rounded-5 border-0 "
-                                                    onClick={() => handleForceDelete(event.id)}>
-                                                    <FaTrash />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             ) : (
-                            <div className="no-events-message">There are no deleted events.</div>
+                            <div className="no-events-message ms-2">There are no incomplete events.</div>
                         )}
                     </>
                     )}
