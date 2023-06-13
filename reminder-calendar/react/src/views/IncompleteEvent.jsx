@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axiosClient from '../axios-client';
 import moment from 'moment';
-import { FaTrash, FaRedoAlt, FaTimes, FaTrashAlt } from 'react-icons/fa';
+import { FaTrash, FaCheck, FaTimes, FaEye, FaPrint } from 'react-icons/fa';
 import { Watch } from 'react-loader-spinner'
 import { AppContext } from '../contexts/AppContext';
 import Loading from './Loading';
@@ -155,7 +155,7 @@ export default function IncompleteEvent() {
                             <div className="ms-auto me-2">
                                 <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'>
                                 <div className="d-flex">
-                                    <div className='clear-trash-icon'><FaTrashAlt /></div>
+                                    <div className='clear-trash-icon'><FaPrint /></div>
                                     <div className='clear-trash-lable ms-2'><span>Export file</span></div>
                                 </div>
                                 </button>
@@ -220,7 +220,7 @@ export default function IncompleteEvent() {
                                                         title='Restore'
                                                         className="restore-button btn btn-outline-secondary rounded-5 border-0 "
                                                         onClick={() => handleRestore(event.id)}>
-                                                        <FaRedoAlt />
+                                                        <FaCheck />
                                                     </button>
                                                     <button
                                                         title='Delete'

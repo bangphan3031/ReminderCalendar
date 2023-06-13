@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axiosClient from '../axios-client';
 import moment from 'moment';
-import { FaTrash, FaRedoAlt, FaTimes, FaTrashAlt, FaSearch } from 'react-icons/fa';
+import { FaTrash, FaRedoAlt, FaTimes, FaEye, FaSearch } from 'react-icons/fa';
 import { Watch } from 'react-loader-spinner'
 import { AppContext } from '../contexts/AppContext';
 import Loading from './Loading';
@@ -16,6 +16,7 @@ export default function SearchEvent() {
     const [keyword, setKeyword] = useState('');
     const { 
         loading, 
+        setIsLoadingData,
         setLoading, 
         success, setSuccess,
         deleted, setDeleted, 
@@ -37,6 +38,7 @@ export default function SearchEvent() {
                 setEventList(response.data.data);
                 setReloadEvent(false);
                 setIsLoading(false);
+                setIsLoadingData(false);
             } catch (error) {
                 console.log(error);
                 setIsLoading(false);
@@ -44,6 +46,7 @@ export default function SearchEvent() {
             } else {
                 setEventList([]);
                 setIsLoading(false);
+                setIsLoadingData(false);
         }
     };
 
@@ -221,7 +224,7 @@ export default function SearchEvent() {
                                                         title='Restore'
                                                         className="restore-button btn btn-outline-secondary rounded-5 border-0 "
                                                         onClick={() => handleRestore(event.id)}>
-                                                        <FaRedoAlt />
+                                                        <FaEye />
                                                     </button>
                                                     <button
                                                         title='Delete'

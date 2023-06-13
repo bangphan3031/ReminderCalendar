@@ -4,6 +4,8 @@ import moment from 'moment';
 import axiosClient from '../axios-client';
 import EventDetail from './EventDetail';
 import { AppContext } from '../contexts/AppContext';
+import Loading from './Loading';
+import { Watch } from 'react-loader-spinner';
 
 const localizer = momentLocalizer(moment);
 
@@ -24,6 +26,7 @@ export default function Event(props) {
     const [selectedDate, setSelectedDate] = useState(props.selectedDate);
     const [myEventsList, setMyEventsList] = useState([]);
     const [filteredEvents, setFilteredEvents] = useState([]);
+    const [load, setLoad] = useState(true);
 
     const formatEvents = (events) => {
         return events.map(event => ({
@@ -123,8 +126,10 @@ export default function Event(props) {
                 const response = await axiosClient.get('/event');
                 const formattedEvents = formatEvents(response.data.data);
                 setMyEventsList(formattedEvents);
+                setLoad(false);
             } catch (error) {
                 console.log(error);
+                setLoad(false);
             }
         };
         if (initialLoad) {
@@ -162,11 +167,29 @@ export default function Event(props) {
             onSelectEvent={handleSelectEvent}
             eventPropGetter={eventStyleGetter}
         />
+        {load ? (
+            <div className="loading-overlay-event">
+                <Watch
+                    height={100}
+                    width={100}
+                    color="#ccc"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                    visible={true}
+                    ariaLabel="oval-loading"
+                    secondaryColor="#4fa94d"
+                    strokeWidth={5}
+                    strokeWidthSecondary={2}
+                />
+            </div>
+        ) : (
+        <>
         {showEventDetails && (
             <EventDetail 
                 handleDeleteEvent={handleDeleteEvent} 
             />
         )}
+        </>)}
         </div>
     );
 };

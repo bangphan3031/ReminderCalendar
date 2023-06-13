@@ -457,28 +457,28 @@ class EventController extends Controller
 
     public function exportCompletedEvent()
     {
-        // $user = auth()->user();
-        // $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
-        // $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
-        // $events = Event::whereIn('events.id', $event_id)->where('events.status', '=', 'completed')
-        //     ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
-        //     ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
-        //     ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
-        //     ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
-        //     ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
-        //     ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
-        //     ->orderBy('events.start_time', 'asc')
-        //     ->get();
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $events = Event::whereIn('events.id', $event_id)->where('events.status', '=', 'completed')
+            ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+            ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+            ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+            ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+            ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+            ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->orderBy('events.start_time', 'asc')
+            ->get();
 
-        $fileName = 'completed_events.csv';
+        $fileName = 'completed_events.xlsx';
         $filePath = storage_path('app/' . $fileName);
-        //Excel::store(new CompletedEventExport($events), $fileName);
+        Excel::store(new CompletedEventExport($events), $fileName);
 
-        if (file_exists($filePath)) {
-            return response()->download($filePath);
-        } else {
-            abort(404, 'File not found');
-        }
+        // if (file_exists($filePath)) {
+        //     return response()->download($filePath);
+        // } else {
+        //     abort(404, 'File not found');
+        // }
 
         // return response()
         // ->download($filePath, $fileName, $headers);

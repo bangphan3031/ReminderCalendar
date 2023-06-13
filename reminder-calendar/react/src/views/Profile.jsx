@@ -143,11 +143,6 @@ export default function Profile() {
                   className="btn btn-lg btn-primary fs-6 fw-bold" style={{marginLeft: 50}}>
                   Save
                 </button>
-                <button 
-                  onClick={handleFormSubmit} 
-                  className="btn btn-lg btn-primary fs-6 fw-bold" style={{marginLeft: 50}}>
-                  Change Password
-                </button>
               </div>
             </div>
           </div>

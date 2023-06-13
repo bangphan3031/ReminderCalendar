@@ -121,11 +121,11 @@ export default function UpcomingEvent(props) {
                 ))}
             </div>
             {selectedEvent && showEventDetails && (
-            <EventDetail 
-                selectedEvent={selectedEvent} 
-                handleDeleteEvent={handleDeleteEvent} 
-            />
-             )}
+                <EventDetail 
+                    selectedEvent={selectedEvent} 
+                    handleDeleteEvent={handleDeleteEvent} 
+                />
+            )}
         </div>
     )
 }

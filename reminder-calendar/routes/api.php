@@ -52,6 +52,7 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::put('/profile', [UserController::class, 'update']);
     Route::post('/profile/upload', [UserController::class, 'uploadImage']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
 
     //calendar api
     Route::get('/calendar',[CalendarController::class, 'getCalendar']);
@@ -96,5 +97,5 @@ Route::group(['middleware'=>'auth:api'], function($router){
 });
 Route::get('/sendReminder/{id}', [SendReminderController::class, 'sendReminder']);
 Route::get('/sendInvite/{id}', [SendReminderController::class, 'sendInvite']);
-Route::get('/export', [EventController::class, 'exportCompletedEvent'])->name('export');
+// Route::get('/export', [EventController::class, 'exportCompletedEvent'])->name('export');
 
