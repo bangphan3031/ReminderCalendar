@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Twilio\Rest\Client;
 
 class SendReminderController extends Controller
 {
@@ -123,5 +124,18 @@ class SendReminderController extends Controller
         
         return response()->json(['message' => 'Assigning tasks successful'], 200);
     }
+
+    // public function sendSMSReminder()
+    // {
+    //     $account_sid = config('services.twilio.sid');
+    //     $auth_token = config('services.twilio.auth_token');
+    //     $twilio_number = config('services.twilio.phone_number');
+
+    //     $client = new Client($account_sid, $auth_token);
+    //     $client->messages->create('+84364911017', [
+    //         'from' => $twilio_number, 
+    //         'body' => 'test message'
+    //     ]);
+    // }
 
 }

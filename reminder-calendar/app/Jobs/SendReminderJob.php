@@ -66,7 +66,7 @@ class SendReminderJob implements ShouldQueue
             if (substr($this->recipient, 0, 1) === "0") {
                 $receiverNumber = "+84" . substr($this->recipient, 1);
             }
-            //$receiverNumber = "+84394403760";
+            //$receiverNumber = "+84364911017";
             $message = "Nhắc nhở công việc\n" .
                     "Tiêu đề công việc: $this->title\n" .
                     "Thời gian: $this->time\n" .
@@ -76,9 +76,9 @@ class SendReminderJob implements ShouldQueue
                     "Mô tả công việc: $this->description";
                     // Nội dung tin nhắn SMS
             try {
-                $account_sid = getenv("TWILIO_SID");
-                $auth_token = getenv("TWILIO_TOKEN");
-                $twilio_number = getenv("TWILIO_FROM");
+                $account_sid = config('services.twilio.sid');
+                $auth_token = config('services.twilio.auth_token');
+                $twilio_number = config('services.twilio.phone_number');
     
                 $client = new Client($account_sid, $auth_token);
                 $client->messages->create($receiverNumber, [
