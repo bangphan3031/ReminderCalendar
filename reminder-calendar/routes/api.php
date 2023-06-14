@@ -33,7 +33,7 @@ Route::get('verify-email/{id}', [EmailVerificationController::class, 'verify'])-
 Route::post('/login', [AuthController::class, 'login'])->middleware('verified')->name('login');
 Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('loginGoogle');
 Route::get('auth/google/callback', [GoogleAuthController::class, 'callbackGoogle']);
-
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 Route::group(['middleware'=>'auth:api'], function($router){
     Route::apiResource('admin/user', 'App\Http\Controllers\Admin\UserController');
@@ -79,6 +79,9 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::delete('/event/force-delete/{id}', [EventController::class, 'forceDeleteEvent']);
     Route::delete('/event/delete/all', [EventController::class, 'forceDeleteAllEvent']);
     Route::get('/completed-event/export', [EventController::class, 'exportCompletedEvent']);
+    Route::get('/incomplete-event/export', [EventController::class, 'exportInCompleteEvent']);
+    Route::patch('/event/mark-completed/{id}', [EventController::class, 'markCompleted']);
+    Route::patch('/event/un-completed/{id}', [EventController::class, 'unCompleted']);
 
     //reminder api
     Route::get('/reminder', [ReminderController::class, 'getAllReminder']);
@@ -97,5 +100,4 @@ Route::group(['middleware'=>'auth:api'], function($router){
 });
 Route::get('/sendReminder/{id}', [SendReminderController::class, 'sendReminder']);
 Route::get('/sendInvite/{id}', [SendReminderController::class, 'sendInvite']);
-// Route::get('/export', [EventController::class, 'exportCompletedEvent'])->name('export');
 

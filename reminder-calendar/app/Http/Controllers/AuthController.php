@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ResetPasswordMail;
 use App\Mail\UserVerification;
 use App\Models\Calendar;
 use Illuminate\Http\Request;
@@ -69,19 +70,6 @@ class AuthController extends Controller
                 );
             }
         }
-
-        $credential = $request->only('email', 'password');
-
-        // // Generate a JWT token
-        // $token = JWTAuth::attempt($credential);
-
-        // return response()->json(
-        //     [
-        //         'message' => 'Register successfull',
-        //         'token' => $token,
-        //     ],
-        //     200
-        // );
     }
 
     //login
@@ -164,6 +152,37 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json(['message' => 'Password changed successfully'], 200);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Email not found'], 404);
+        }
+
+        $newPassword = $this->generateRandomPassword();
+
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        Mail::to($user->email)->send(new ResetPasswordMail($newPassword));
+
+        return response()->json(['message' => 'Password reset email sent'], 200);
+    }
+
+    private function generateRandomPassword()
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $newPassword = '';
+        for ($i = 0; $i < 8; $i++) {
+            $randomIndex = rand(0, strlen($characters) - 1);
+            $newPassword .= $characters[$randomIndex];
+        }
+        return $newPassword;
     }
 
 }

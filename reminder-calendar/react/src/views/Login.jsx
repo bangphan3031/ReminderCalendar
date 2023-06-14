@@ -6,6 +6,7 @@ import { useState } from "react";
 import '../css/example.css'
 import { FaGoogle } from "react-icons/fa";
 import { Oval } from 'react-loader-spinner'
+import ForgotPassword from "./ForgotPassword.jsx";
 
 export default function Login() {
   const emailRef = createRef()
@@ -14,6 +15,7 @@ export default function Login() {
   const [erEmail, setErEmail] = useState('');
   const [erPassword, setErPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const onSubmit = ev => {
     ev.preventDefault()
@@ -45,6 +47,15 @@ export default function Login() {
       // Chuyển đến trang chủ
     }, 2000);
   }
+
+  const onClick = () => {
+    setShowForgotPassword(true);
+  };
+
+  const onClose = () => {
+    setShowForgotPassword(false);
+  };
+
   const handleGoogleLogin = ev  => {
     ev.preventDefault()
     
@@ -59,6 +70,7 @@ export default function Login() {
 
   return (
     <div className="login-page">
+      {showForgotPassword && <ForgotPassword onClose={onClose}/>}
       {loading && (
         <div className="loading-overlay">
             <Oval
@@ -109,7 +121,7 @@ export default function Login() {
                   <label htmlFor="formCheck" className="form-check-lable text-secondary"><small>Remember me</small></label>
                 </div>
                 <div className="forgot">
-                  <small><a href="#">Forgot Password</a></small>
+                  <small><a className="cursor-pointer" onClick={onClick}>Forgot Password</a></small>
                 </div>
               </div>
               <div className="input-group mb-3">

@@ -6,7 +6,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class CompletedEventExport implements FromCollection, WithHeadings, WithMapping
+class InCompleteEventExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $events;
 
@@ -29,7 +29,7 @@ class CompletedEventExport implements FromCollection, WithHeadings, WithMapping
             'Start Time',
             'End Time',
             'Organizer',
-            'Completed date',
+            'Created date',
         ];
     }
 
@@ -42,7 +42,7 @@ class CompletedEventExport implements FromCollection, WithHeadings, WithMapping
             $event->start_time,
             $event->end_time,
             $event->creator ? $event->creator : 'Me',
-            $event->updated_at,
+            $event->created_at,
         ];
     }
 }

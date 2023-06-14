@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axiosClient from '../axios-client';
 import moment from 'moment';
-import { FaTrash, FaCheck, FaTimes, FaEye, FaPrint } from 'react-icons/fa';
+import { FaTrash, FaCheck, FaTimes, FaPrint } from 'react-icons/fa';
 import { Watch } from 'react-loader-spinner'
 import { AppContext } from '../contexts/AppContext';
 import Loading from './Loading';
@@ -53,32 +53,47 @@ export default function IncompleteEvent() {
         setSuccess(false);
     };
 
-    const handleRestore = (eventId) => {
-        setLoading(true);
-        axiosClient.patch(`/event/restore/${eventId}`)
-        .then((response) => {
+    const handleMarkCompletedEvent = async (eventId) => {
+        setLoading(true)
+        try {
+            const response = await axiosClient.patch(`/event/mark-completed/${eventId}`)
             console.log(response.data)
-            setSuccess(true)
             setLoading(false)
+            setSuccess(true)
             setEventList(eventList.filter(event => event.id !== eventId));
             setTimeout(() => {
                 setSuccess(false);
             }, 3000);
+        } catch (error) {
+            setLoading(false)
+            console.log(error)
+        }
+    }  
+
+    function handleExportEventInComplete() {
+        axiosClient.get('/incomplete-event/export', { responseType: 'blob' })
+        .then(response => {
+            const blobUrl = URL.createObjectURL(response.data);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = 'incomplete_events.xlsx';
+            downloadLink.click();
+            URL.revokeObjectURL(blobUrl);
         })
-        .catch((error) => {
-            console.error(error);
+        .catch(error => {
+            console.log(error)
         });
-    };
+    }  
     
-    const handleForceDelete = (eventId) => {
-        if (window.confirm('Sự kiện sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?')) {
+    const handleDelete = (eventId) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
             setLoading(true);
-            axiosClient.delete(`/event/force-delete/${eventId}`)
+            axiosClient.delete(`/event/${eventId}`)
             .then((response) => {
                 console.log(response.data);
                 setDeleted(true)
                 setLoading(false)
-                setReloadEvent(true);
+                setEventList(eventList.filter(event => event.id !== eventId));
                 setTimeout(() => {
                     setDeleted(false);
                 }, 3000);
@@ -98,11 +113,7 @@ export default function IncompleteEvent() {
                     <div className="notification-content-overlay">
                         <div className="loading-box">
                             <div className="loading-content">
-                                {success ? (
-                                    <p>Phục hồi thành công.</p>
-                                    ) : deleted ? (
-                                    <p>Xóa thành công.</p>
-                                ) : null}
+                                <p>Thành công.</p>
                                 <button
                                     onClick={handleClose}
                                     title="Close"
@@ -153,7 +164,9 @@ export default function IncompleteEvent() {
                         <div className="d-flex mt-1 text-secondary ms-2 mt-3 mb-2">
                             <h4 className='mt-2 mb-2'>Incomplete Events</h4>
                             <div className="ms-auto me-2">
-                                <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'>
+                                <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'
+                                    onClick={handleExportEventInComplete}
+                                >
                                 <div className="d-flex">
                                     <div className='clear-trash-icon'><FaPrint /></div>
                                     <div className='clear-trash-lable ms-2'><span>Export file</span></div>
@@ -210,22 +223,22 @@ export default function IncompleteEvent() {
                                                     </span>
                                                 </div>
                                                 <div className='col-2'>
-                                                    <span className='ms-1'>{event.creator ? event.creator : 'Me'}</span>
+                                                    <span className='ms-2'>{event.creator ? event.creator : 'Me'}</span>
                                                 </div>
                                                 <div className='col-2'>
                                                     <span className='ms-1'>{moment(event.created_at).format('DD-MM-YYYY')}</span>
                                                 </div>
                                                 <div className='col-1 d-flex'>
                                                     <button
-                                                        title='Restore'
+                                                        title='Mark completed'
                                                         className="restore-button btn btn-outline-secondary rounded-5 border-0 "
-                                                        onClick={() => handleRestore(event.id)}>
+                                                        onClick={() => handleMarkCompletedEvent(event.id)}>
                                                         <FaCheck />
                                                     </button>
                                                     <button
-                                                        title='Delete'
+                                                        title='Move to trash'
                                                         className="delete-button btn btn-outline-secondary rounded-5 border-0 "
-                                                        onClick={() => handleForceDelete(event.id)}>
+                                                        onClick={() => handleDelete(event.id)}>
                                                         <FaTrash />
                                                     </button>
                                                 </div>

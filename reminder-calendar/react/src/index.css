@@ -81,12 +81,12 @@ header .btn:hover {
 .close {
     margin-left: auto;
 }
-.create-calendar header, .event-detail header, .create-event header  {
+.create-calendar header, .event-detail header, .create-event header, .forgot-password header {
     background-color: #e8e8e8;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
 }
-.create-calendar, .event-detail, .create-event {
+.create-calendar, .event-detail, .create-event, .forgot-password {
     background-color: #fff;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     position: fixed;
@@ -100,6 +100,9 @@ header .btn:hover {
 }
 .create-event {
     width: 500px;
+}
+.forgot-password {
+    width: 400px;
 }
 .event-detail {
     width: 500px;

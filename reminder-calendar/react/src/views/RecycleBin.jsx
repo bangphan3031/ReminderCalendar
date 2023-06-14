@@ -71,7 +71,7 @@ export default function RecycleBin() {
     };
     
     const handleForceDelete = (eventId) => {
-        if (window.confirm('Sự kiện sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?')) {
+        if (window.confirm('Công việc sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?')) {
             setLoading(true);
             axiosClient.delete(`/event/force-delete/${eventId}`)
             .then((response) => {
@@ -91,7 +91,7 @@ export default function RecycleBin() {
     };
 
     const handleForceDeleteAll = () => {
-        if (window.confirm('Tất cả sự kiện sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?')) {
+        if (window.confirm('Tất cả các công việc sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?')) {
             setLoading(true);
             axiosClient.delete('/event/delete/all')
                 .then((response) => {

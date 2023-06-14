@@ -53,32 +53,32 @@ export default function CompletedEvent() {
         setSuccess(false);
     };
 
-    const handleRestore = (eventId) => {
-        setLoading(true);
-        axiosClient.patch(`/event/restore/${eventId}`)
-        .then((response) => {
+    const handleUnCompletedEvent = async (eventId) => {
+        setLoading(true)
+        try {
+            const response = await axiosClient.patch(`/event/un-completed/${eventId}`)
             console.log(response.data)
-            setSuccess(true)
             setLoading(false)
+            setSuccess(true)
             setEventList(eventList.filter(event => event.id !== eventId));
             setTimeout(() => {
                 setSuccess(false);
             }, 3000);
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-    };
+        } catch (error) {
+            setLoading(false)
+            console.log(error)
+        }
+    } 
     
-    const handleForceDelete = (eventId) => {
-        if (window.confirm('Sự kiện sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?')) {
+    const handleDelete = (eventId) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
             setLoading(true);
-            axiosClient.delete(`/event/force-delete/${eventId}`)
+            axiosClient.delete(`/event/${eventId}`)
             .then((response) => {
                 console.log(response.data);
                 setDeleted(true)
                 setLoading(false)
-                setReloadEvent(true);
+                setEventList(eventList.filter(event => event.id !== eventId));
                 setTimeout(() => {
                     setDeleted(false);
                 }, 3000);
@@ -91,14 +91,19 @@ export default function CompletedEvent() {
     };  
 
     function handleExportEventCompleted() {
-        axiosClient.get('/completed-event/export')
-            .then(response => {
-                console.log(response)
-            })
-            .catch(error => {
-                console.log(error)
-            });
-    }
+        axiosClient.get('/completed-event/export', { responseType: 'blob' })
+        .then(response => {
+            const blobUrl = URL.createObjectURL(response.data);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = 'completed_events.xlsx';
+            downloadLink.click();
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }    
 
     return (
         <div>
@@ -108,11 +113,7 @@ export default function CompletedEvent() {
                     <div className="notification-content-overlay">
                         <div className="loading-box">
                             <div className="loading-content">
-                                {success ? (
-                                    <p>Phục hồi thành công.</p>
-                                    ) : deleted ? (
-                                    <p>Xóa thành công.</p>
-                                ) : null}
+                                <p>Thành công.</p>
                                 <button
                                     onClick={handleClose}
                                     title="Close"
@@ -228,15 +229,15 @@ export default function CompletedEvent() {
                                                 </div>
                                                 <div className='col-1 d-flex'>
                                                     <button
-                                                        title='Restore'
+                                                        title='Incomplete'
                                                         className="restore-button btn btn-outline-secondary rounded-5 border-0 "
-                                                        onClick={() => handleRestore(event.id)}>
+                                                        onClick={() => handleUnCompletedEvent(event.id)}>
                                                         <FaRedoAlt />
                                                     </button>
                                                     <button
-                                                        title='Delete'
+                                                        title='Move to trash'
                                                         className="delete-button btn btn-outline-secondary rounded-5 border-0 "
-                                                        onClick={() => handleForceDelete(event.id)}>
+                                                        onClick={() => handleDelete(event.id)}>
                                                         <FaTrash />
                                                     </button>
                                                 </div>

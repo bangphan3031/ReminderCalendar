@@ -7,6 +7,7 @@ import { AppContext } from '../contexts/AppContext';
 import Loading from './Loading';
 import { Link } from 'react-router-dom';
 import SubLayoutHeader from './SubLayoutHeader';
+import EventDetail from './EventDetail';
 
 export default function SearchEvent() {
     const [eventList, setEventList] = useState([]);
@@ -14,12 +15,18 @@ export default function SearchEvent() {
     const [reloadEvent, setReloadEvent] = useState(false);
     const [initialLoad, setInitialLoad] = useState(true);
     const [keyword, setKeyword] = useState('');
+    const [count, setCount] = useState(0);
     const { 
         loading, 
         setIsLoadingData,
         setLoading, 
+        handleShowEventDetails, 
+        setSelectedEvent,
         success, setSuccess,
-        deleted, setDeleted, 
+        deleted, setDeleted,
+        selectedEvent,
+        showEventDetails, 
+        handleCloseEventDetails
     } = useContext(AppContext);
 
     const handleClose = () => {
@@ -39,6 +46,7 @@ export default function SearchEvent() {
                 setReloadEvent(false);
                 setIsLoading(false);
                 setIsLoadingData(false);
+                setCount(response.data.data.length);
             } catch (error) {
                 console.log(error);
                 setIsLoading(false);
@@ -49,33 +57,16 @@ export default function SearchEvent() {
                 setIsLoadingData(false);
         }
     };
-
-    const handleRestore = (eventId) => {
-        setLoading(true);
-        axiosClient.patch(`/event/restore/${eventId}`)
-        .then((response) => {
-            console.log(response.data)
-            setSuccess(true)
-            setLoading(false)
-            setEventList(eventList.filter(event => event.id !== eventId));
-            setTimeout(() => {
-                setSuccess(false);
-            }, 3000);
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-    };
     
-    const handleForceDelete = (eventId) => {
-        if (window.confirm('Sự kiện sẽ bị xóa vĩnh viễn. Bạn có chắc chắn không?')) {
+    const handleDelete = (eventId) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
             setLoading(true);
-            axiosClient.delete(`/event/force-delete/${eventId}`)
+            axiosClient.delete(`/event/${eventId}`)
             .then((response) => {
                 console.log(response.data);
                 setDeleted(true)
                 setLoading(false)
-                setReloadEvent(true);
+                setEventList(eventList.filter(event => event.id !== eventId));
                 setTimeout(() => {
                     setDeleted(false);
                 }, 3000);
@@ -90,6 +81,12 @@ export default function SearchEvent() {
     return (
         <div>
             {loading && <Loading />}
+            {selectedEvent && showEventDetails && (
+                <EventDetail 
+                    selectedEvent={selectedEvent} 
+                    handleDeleteEvent={handleDeleteEvent} 
+                />
+            )}
             {success || deleted ? (
                 <div className="loading-overlay-wrapper">
                     <div className="notification-content-overlay">
@@ -165,6 +162,7 @@ export default function SearchEvent() {
                                 </div>
                             </div>
                         </div>
+                        <div className="no-events-message ms-2">Result: {count}</div>
                         {isLoading ? (
                             <div className="loading-overlay-trash">
                                 <Watch
@@ -190,7 +188,7 @@ export default function SearchEvent() {
                                         <div className='col-2'>Date</div>
                                         <div className='col-1'>Time</div>
                                         <div className='col-2'>Organizer</div>
-                                        <div className='col-2'>Created date</div>
+                                        <div className='col-2'>Status</div>
                                         <div className='col-1'>Action</div>
                                     </div>
                                     <div className="event-list-container">
@@ -217,19 +215,13 @@ export default function SearchEvent() {
                                                     <span className='ms-1'>{event.creator ? event.creator : 'Me'}</span>
                                                 </div>
                                                 <div className='col-2'>
-                                                    <span className='ms-1'>{moment(event.created_at).format('DD-MM-YYYY')}</span>
+                                                    <span className='ms-1'>{event.status}</span>
                                                 </div>
-                                                <div className='col-1 d-flex'>
+                                                <div className='col-1'>
                                                     <button
-                                                        title='Restore'
-                                                        className="restore-button btn btn-outline-secondary rounded-5 border-0 "
-                                                        onClick={() => handleRestore(event.id)}>
-                                                        <FaEye />
-                                                    </button>
-                                                    <button
-                                                        title='Delete'
+                                                        title='Move to trash'
                                                         className="delete-button btn btn-outline-secondary rounded-5 border-0 "
-                                                        onClick={() => handleForceDelete(event.id)}>
+                                                        onClick={() => handleDelete(event.id)}>
                                                         <FaTrash />
                                                     </button>
                                                 </div>
@@ -238,7 +230,7 @@ export default function SearchEvent() {
                                     </div>
                                 </div>
                             ) : (
-                            <div className="no-events-message ms-2">No results found</div>
+                            <div/>
                         )}
                     </>
                     )}

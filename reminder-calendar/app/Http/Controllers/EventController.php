@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CompletedEventExport;
+use App\Exports\InCompleteEventExport;
 use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Support\Facades\Storage;
@@ -345,6 +346,38 @@ class EventController extends Controller
         ], 200);
     }
 
+    public function markCompleted(string $id)
+    {
+        $event = Event::find($id);
+        if(!$event) {
+            return response()->json([
+                'message' => 'Event not found',
+            ], 404);
+        }
+        $event->status = 'completed';
+        $event->save();
+        return response()->json([
+            'message' => 'Event updated',
+            'data' => $event,
+        ], 200);
+    }
+
+    public function unCompleted(string $id)
+    {
+        $event = Event::find($id);
+        if(!$event) {
+            return response()->json([
+                'message' => 'Event not found',
+            ], 404);
+        }
+        $event->status = 'incomplete';
+        $event->save();
+        return response()->json([
+            'message' => 'Event updated',
+            'data' => $event,
+        ], 200);
+    }
+
     // Xoa event (xoa mem)
     public function deleteEvent(string $id)
     {
@@ -471,21 +504,26 @@ class EventController extends Controller
             ->get();
 
         $fileName = 'completed_events.xlsx';
-        $filePath = storage_path('app/' . $fileName);
-        Excel::store(new CompletedEventExport($events), $fileName);
+        return Excel::download(new CompletedEventExport($events), $fileName);
+    }
 
-        // if (file_exists($filePath)) {
-        //     return response()->download($filePath);
-        // } else {
-        //     abort(404, 'File not found');
-        // }
+    public function exportInCompleteEvent()
+    {
+        $user = auth()->user();
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $events = Event::whereIn('events.id', $event_id)->where('events.status', '=', 'incomplete')
+            ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+            ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+            ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+            ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+            ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+            ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->orderBy('events.start_time', 'asc')
+            ->get();
 
-        // return response()
-        // ->download($filePath, $fileName, $headers);
-        
-        // return response()->json([
-        //     'message' => 'Export successful',
-        // ], 200);
+        $fileName = 'incomplete_events.xlsx';
+        return Excel::download(new InCompleteEventExport($events), $fileName);
     }
 
 }

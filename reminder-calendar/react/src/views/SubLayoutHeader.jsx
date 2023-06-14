@@ -11,10 +11,6 @@ export default function SubLayoutHeader() {
     const [showCreateEvent, setShowCreateEvent] = useState(false);
     const navigate = useNavigate();
 
-    if(!token) {
-        return <Navigate to="/login" />
-    }
-
     const handleBackClick = () => {
         navigate('/')
     }
@@ -49,6 +45,10 @@ export default function SubLayoutHeader() {
             alert('Đã có lỗi xảy ra! Vui lòng thử lại sau') 
             console.log(error)
         });
+    }
+
+    if(!token) {
+        return <Navigate to="/login" />
     }
 
     return (

@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { FaTimes} from 'react-icons/fa';
 import axiosClient from '../axios-client';
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"></link>
 
 import { AppContext } from '../contexts/AppContext';
 
@@ -30,7 +29,6 @@ export default function ChangePassword(props) {
             })
             .catch((error) => {
                 console.error(error.response.data);
-                const err = error.response.data.errors;
                 setError(error.response.data.message)
             });
     };
@@ -49,7 +47,7 @@ export default function ChangePassword(props) {
                     </button>
                 </header>
                 <div className='p-3'>
-                    {error && <p>{error}</p>}
+                    {error && <p className='text-danger'>{error}</p>}
                 </div>
                 <div className="row p-3 pt-0">
                     <div className="col">
@@ -62,16 +60,6 @@ export default function ChangePassword(props) {
                             required
                             autoComplete="current-password" 
                         />
-                    </div>
-                </div>
-                <div className="row p-3 pt-0">
-                    <div className="col">
-                    <div className="input-group">
-  <input type="password" className="form-control rounded" required/>
-  <button id="toggle-password" type="button" className="d-none"
-    aria-label="Show password as plain text. Warning: this will display your password on the screen.">
-  </button>
-</div>
                     </div>
                 </div>
                 <div className="row p-3 pt-0">

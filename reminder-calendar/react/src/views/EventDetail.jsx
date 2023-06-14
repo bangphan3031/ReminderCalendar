@@ -23,10 +23,6 @@ export default function EventDetail(props) {
     status: 'completed'
   };
 
-  // useEffect(()=>{
-  //   console.log(selectedEvent)
-  // }, [selectedEvent])
-
   const handleMarkCompletedEvent = async (eventId) => {
     handleCloseEventDetails()
     setLoading(true)
@@ -76,7 +72,7 @@ export default function EventDetail(props) {
               </button>
             </Link>
             <button 
-              title='Delete' 
+              title='Move to trash' 
               className='delete btn btn-outline-secondary border-0 rounded-5'
               onClick={() => handleDeleteEvent(selectedEvent.id)}>
               <FaTrash />
