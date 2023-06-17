@@ -1,13 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axiosClient from '../axios-client';
 import moment from 'moment';
-import { FaTrash, FaRedoAlt, FaTimes, FaEye, FaSearch } from 'react-icons/fa';
+import { FaTrash, FaTimes, FaPrint } from 'react-icons/fa';
 import { Watch } from 'react-loader-spinner'
 import { AppContext } from '../contexts/AppContext';
 import Loading from './Loading';
 import { Link } from 'react-router-dom';
 import SubLayoutHeader from './SubLayoutHeader';
-import EventDetail from './EventDetail';
 
 export default function SearchEvent() {
     const [eventList, setEventList] = useState([]);
@@ -15,18 +14,18 @@ export default function SearchEvent() {
     const [reloadEvent, setReloadEvent] = useState(false);
     const [initialLoad, setInitialLoad] = useState(true);
     const [keyword, setKeyword] = useState('');
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
+    const [calendarId, setCalendarId] = useState('');
+    const [status, setStatus] = useState('');
+    const [calendars, setCalendars] = useState('');
     const [count, setCount] = useState(0);
     const { 
         loading, 
         setIsLoadingData,
         setLoading, 
-        handleShowEventDetails, 
-        setSelectedEvent,
         success, setSuccess,
         deleted, setDeleted,
-        selectedEvent,
-        showEventDetails, 
-        handleCloseEventDetails
     } = useContext(AppContext);
 
     const handleClose = () => {
@@ -34,29 +33,58 @@ export default function SearchEvent() {
         setSuccess(false);
     };
 
+    useEffect(() => {
+        const fetchCalendars = async () => {
+            try {
+                const response = await axiosClient.get('/calendar');
+                const data = await response.data.data;
+                setCalendars(data);
+            } catch (error) {
+                console.error('Error fetching calendars:', error);
+            }
+        };
+
+        fetchCalendars();
+    }, []);
+
     const handleSearch = async () => {
         setInitialLoad(true);
         setIsLoading(true);
-        const trimmedKeyword = keyword.trim();
-        
-        if (trimmedKeyword !== '') {
-            try {
-                const response = await axiosClient.get(`/event/find/${trimmedKeyword}`);
-                setEventList(response.data.data);
-                setReloadEvent(false);
-                setIsLoading(false);
-                setIsLoadingData(false);
-                setCount(response.data.data.length);
-            } catch (error) {
-                console.log(error);
-                setIsLoading(false);
-            }
-            } else {
-                setEventList([]);
-                setIsLoading(false);
-                setIsLoadingData(false);
+        const payload = {
+            keyword: keyword,
+            startTime: startTime,
+            endTime: endTime,
+            calendarId: calendarId,
+            status: status
+        };
+
+        try {
+            const response = await axiosClient.post('/events/search', payload);
+            setEventList(response.data.data);
+            setReloadEvent(false);
+            setIsLoading(false);
+            setIsLoadingData(false);
+            setCount(response.data.data.length);
+        } catch (error) {
+            console.log(error);
+            setIsLoading(false);
         }
-    };
+    }
+
+    function handleExportEvent() {
+        axiosClient.post('/search-event/export', null, { responseType: 'blob' })
+        .then(response => {
+            const blobUrl = URL.createObjectURL(response.data);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = 'export_events.xlsx';
+            downloadLink.click();
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
     
     const handleDelete = (eventId) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa công việc này không?')) {
@@ -81,12 +109,6 @@ export default function SearchEvent() {
     return (
         <div>
             {loading && <Loading />}
-            {selectedEvent && showEventDetails && (
-                <EventDetail 
-                    selectedEvent={selectedEvent} 
-                    handleDeleteEvent={handleDeleteEvent} 
-                />
-            )}
             {success || deleted ? (
                 <div className="loading-overlay-wrapper">
                     <div className="notification-content-overlay">
@@ -148,19 +170,71 @@ export default function SearchEvent() {
                             <h4 className='mt-2 mb-2'>Search Event</h4>
                             <div className="search-container ms-5 mt-1">
                                 <div className="input-group search-input-container">
+                                    <select
+                                        className="form-control search-input custom-search-input"
+                                        style={{ width: "25%" }}
+                                        value={calendarId}
+                                        onChange={(e) => setCalendarId(e.target.value)}
+                                    >
+                                        <option value=""> All calendar </option>
+                                        {Array.isArray(calendars) && calendars.length > 0 ? (
+                                            calendars.map((calendar) => (
+                                                <option key={calendar.id} value={calendar.id}>
+                                                    {calendar.name}
+                                                </option>
+                                            ))
+                                        ) : (
+                                            <option value="">No calendars available</option>
+                                        )}
+                                    </select>
+                                    <input
+                                        type="date"
+                                        className="form-control search-input custom-search-input"
+                                        style={{ width: "20%" }}
+                                        placeholder="Enter start time..."
+                                        value={startTime}
+                                        onChange={(e) => setStartTime(e.target.value)}
+                                    />
+                                    <input
+                                        type="date"
+                                        className="form-control search-input custom-search-input"
+                                        style={{ width: "20%" }}
+                                        placeholder="Enter end time..."
+                                        value={endTime}
+                                        onChange={(e) => setEndTime(e.target.value)}
+                                    />
+                                    <select
+                                        className="form-control search-input custom-search-input"
+                                        style={{ width: "20%" }}
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value)}
+                                    >
+                                        <option value="" className='text-secondary'> All status </option>
+                                        <option value="completed">Completed</option>
+                                        <option value="incomplete">Incomplete</option>
+                                    </select>
+                                </div>
+                                <div className="input-group search-input-container">
                                     <input
                                         type="search"
                                         className="form-control search-input custom-search-input"
-                                        style={{width: "50vw"}}
-                                        placeholder="Enter keyword..."
+                                        placeholder="Title"
                                         value={keyword}
                                         onChange={(e) => setKeyword(e.target.value)}
                                     />
                                     <button className="btn btn-primary search-button" onClick={handleSearch}>
-                                        <FaSearch />
+                                        Search
                                     </button>
                                 </div>
                             </div>
+                            <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'
+                                onClick={handleExportEvent}
+                            >
+                            <div className="d-flex">
+                                <div className='clear-trash-icon'><FaPrint /></div>
+                                <div className='clear-trash-lable ms-2'><span>Export file</span></div>
+                            </div>
+                            </button>
                         </div>
                         <div className="no-events-message ms-2">Result: {count}</div>
                         {isLoading ? (
@@ -238,5 +312,5 @@ export default function SearchEvent() {
                 </div>
             </div>
         </div>
-    );      
+    );        
 }

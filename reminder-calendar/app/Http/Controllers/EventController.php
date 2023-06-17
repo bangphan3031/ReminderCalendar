@@ -217,7 +217,7 @@ class EventController extends Controller
             ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
             ->select('events.id', 'events.title', 'events.is_all_day', 'events.start_time', 'events.end_time', 'events.deleted_at', 
                     'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
-            ->orderBy('events.start_time', 'asc')
+            ->orderBy('events.deleted_at', 'asc')
             ->get();
         return response()->json([
             'message' => 'Get deleted events successful',
@@ -524,6 +524,108 @@ class EventController extends Controller
 
         $fileName = 'incomplete_events.xlsx';
         return Excel::download(new InCompleteEventExport($events), $fileName);
+    }
+
+    public function searchEvents(Request $request)
+    {
+        $keyword = $request->input('keyword', null);
+        $startTime = $request->input('startTime', null);
+        $endTime = $request->input('endTime', null);
+        $calendarId = $request->input('calendarId', null);
+        $status = $request->input('status', null);
+
+        $user = auth()->user();
+        $calendarIds = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        if (empty($calendarIds)) {
+            return response()->json([
+                'message' => 'Calendar not found',
+            ], 404);
+        }
+
+        $query = Event::whereIn('events.calendar_id', $calendarIds)
+            ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+            ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+            ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+            ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+            ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+            ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->where('events.title', 'like', '%' . $keyword .'%');
+
+        if (!empty($keyword)) {
+            $query->where('events.title', 'like', '%' . $keyword . '%');
+        }
+
+        if (!empty($startTime) && !empty($endTime)) {
+            $query->where(function ($query) use ($startTime, $endTime) {
+                $query->whereBetween('events.start_time', [$startTime, $endTime])
+                    ->orWhereBetween('events.end_time', [$startTime, $endTime]);
+            });
+        }
+
+        if (!empty($calendarId)) {
+            $query->where('events.calendar_id', $calendarId);
+        }
+
+        if (!empty($status)) {
+            $query->where('events.status', $status);
+        }
+
+        $result = $query->orderBy('events.start_time', 'asc')->get();
+
+        return response()->json([
+            'message' => 'Search events successful',
+            'data' => $result
+        ], 200);
+    }
+
+    public function exportEvent(Request $request)
+    {
+        $keyword = $request->input('keyword', null);
+        $startTime = $request->input('startTime', null);
+        $endTime = $request->input('endTime', null);
+        $calendarId = $request->input('calendarId', null);
+        $status = $request->input('status', null);
+
+        $user = auth()->user();
+        $calendarIds = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        if (empty($calendarIds)) {
+            return response()->json([
+                'message' => 'Calendar not found',
+            ], 404);
+        }
+
+        $query = Event::whereIn('events.calendar_id', $calendarIds)
+            ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+            ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+            ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+            ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+            ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+            ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->where('events.title', 'like', '%' . $keyword .'%');
+
+        if (!empty($keyword)) {
+            $query->where('events.title', 'like', '%' . $keyword . '%');
+        }
+
+        if (!empty($startTime) && !empty($endTime)) {
+            $query->where(function ($query) use ($startTime, $endTime) {
+                $query->whereBetween('events.start_time', [$startTime, $endTime])
+                    ->orWhereBetween('events.end_time', [$startTime, $endTime]);
+            });
+        }
+
+        if (!empty($calendarId)) {
+            $query->where('events.calendar_id', $calendarId);
+        }
+
+        if (!empty($status)) {
+            $query->where('events.status', $status);
+        }
+
+        $result = $query->orderBy('events.start_time', 'asc')->get();
+
+        $fileName = 'export_events.xlsx';
+        return Excel::download(new InCompleteEventExport($result), $fileName);
     }
 
 }

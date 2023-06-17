@@ -80,8 +80,10 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::delete('/event/delete/all', [EventController::class, 'forceDeleteAllEvent']);
     Route::get('/completed-event/export', [EventController::class, 'exportCompletedEvent']);
     Route::get('/incomplete-event/export', [EventController::class, 'exportInCompleteEvent']);
+    Route::post('/search-event/export', [EventController::class, 'exportEvent']);
     Route::patch('/event/mark-completed/{id}', [EventController::class, 'markCompleted']);
     Route::patch('/event/un-completed/{id}', [EventController::class, 'unCompleted']);
+    Route::post('/events/search', [EventController::class, 'searchEvents']);
 
     //reminder api
     Route::get('/reminder', [ReminderController::class, 'getAllReminder']);
