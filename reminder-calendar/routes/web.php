@@ -30,3 +30,6 @@ Route::get('/register', function () {
 Route::get('/login', function () {
     return view('/users/login');
 })->name('login.page');
+Route::get('/mail', function () {
+    return view('/emails/name');
+});

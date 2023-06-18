@@ -235,7 +235,7 @@ export default function RecycleBin() {
                                                 <div className='col-2'>
                                                     <span className='ms-1'>{moment(event.deleted_at).format('DD-MM-YYYY')}</span>
                                                 </div>
-                                                <div className='col-1 d-flex'>
+                                                <div className='col-1'>
                                                     <button
                                                         title='Restore'
                                                         className="restore-button btn btn-outline-secondary rounded-5 border-0 "

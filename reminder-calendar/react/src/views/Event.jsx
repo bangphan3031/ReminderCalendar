@@ -29,21 +29,35 @@ export default function Event(props) {
     const [load, setLoad] = useState(true);
 
     const formatEvents = (events) => {
-        return events.map(event => ({
-            id: event.id,
-            event_id: event.event_id,
-            calendar_id: event.calendar_id,
-            title: event.title,
-            all_day: event.is_all_day,
-            start: new Date(event.start_time),
-            end: new Date(event.end_time),
-            location: event.location,
-            description: event.description,
-            color: event.color,
-            name: event.name,
-            creator: event.creator,
-            creator_calendar: event.creator_calendar,
-        }));
+        return events.map(event => {
+            const isAllDay = event.is_all_day === 1;
+            const start = moment(event.start_time).utcOffset('+07:00').toDate();
+
+            let end;
+            if (isAllDay && moment(event.start_time).isSame(event.end_time, 'day')) {
+                end = moment(event.end_time).utcOffset('+07:00').toDate();
+            } else if (isAllDay) {
+                end = moment(event.end_time).utcOffset('+07:00').endOf('day').toDate();
+            } else {
+                end = moment(event.end_time).utcOffset('+07:00').toDate();
+            }
+
+            return {
+                id: event.id,
+                event_id: event.event_id,
+                calendar_id: event.calendar_id,
+                title: event.title,
+                all_day: isAllDay,
+                start,
+                end,
+                location: event.location,
+                description: event.description,
+                color: event.color,
+                name: event.name,
+                creator: event.creator,
+                creator_calendar: event.creator_calendar,
+            };
+        });
     };
     
     const eventStyleGetter = (event, start, end, isSelected) => {

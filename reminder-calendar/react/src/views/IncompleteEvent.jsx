@@ -228,7 +228,7 @@ export default function IncompleteEvent() {
                                                 <div className='col-2'>
                                                     <span className='ms-1'>{moment(event.created_at).format('DD-MM-YYYY')}</span>
                                                 </div>
-                                                <div className='col-1 d-flex'>
+                                                <div className='col-1'>
                                                     <button
                                                         title='Mark completed'
                                                         className="restore-button btn btn-outline-secondary rounded-5 border-0 "

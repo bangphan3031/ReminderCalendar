@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axiosClient from '../axios-client';
 import moment from 'moment';
-import { FaTrash, FaTimes, FaPrint } from 'react-icons/fa';
+import { FaTrash, FaTimes, FaPrint, FaEye } from 'react-icons/fa';
 import { Watch } from 'react-loader-spinner'
 import { AppContext } from '../contexts/AppContext';
 import Loading from './Loading';
 import { Link } from 'react-router-dom';
 import SubLayoutHeader from './SubLayoutHeader';
+import EventDetailSub from './EventDetailSub';
 
 export default function SearchEvent() {
     const [eventList, setEventList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [reloadEvent, setReloadEvent] = useState(false);
     const [initialLoad, setInitialLoad] = useState(true);
     const [keyword, setKeyword] = useState('');
     const [startTime, setStartTime] = useState('');
@@ -21,16 +21,26 @@ export default function SearchEvent() {
     const [calendars, setCalendars] = useState('');
     const [count, setCount] = useState(0);
     const { 
+        resetReloadEvent,
+        reloadEvent, setReloadEvent,
         loading, 
         setIsLoadingData,
         setLoading, 
-        success, setSuccess,
+        updated, setUpdated,
         deleted, setDeleted,
+        handleShowEventDetails, 
+        showEventDetails,
+        selectedEvent, setSelectedEvent,
     } = useContext(AppContext);
 
     const handleClose = () => {
         setDeleted(false);
-        setSuccess(false);
+        setUpdated(false);
+    };
+
+    const handleSelectEvent = event => {
+        setSelectedEvent(event);
+        handleShowEventDetails();
     };
 
     useEffect(() => {
@@ -47,6 +57,36 @@ export default function SearchEvent() {
         fetchCalendars();
     }, []);
 
+    useEffect(() => {
+        const savedKeyword = localStorage.getItem('searchKeyword');
+        const savedStartTime = localStorage.getItem('searchStartTime');
+        const savedEndTime = localStorage.getItem('searchEndTime');
+        const savedCalendarId = localStorage.getItem('searchCalendarId');
+        const savedStatus = localStorage.getItem('searchStatus');
+      
+        if (savedKeyword) setKeyword(savedKeyword);
+        if (savedStartTime) setStartTime(savedStartTime);
+        if (savedEndTime) setEndTime(savedEndTime);
+        if (savedCalendarId) setCalendarId(savedCalendarId);
+        if (savedStatus) setStatus(savedStatus);
+      
+        if (reloadEvent) {
+          handleSearch();
+          resetReloadEvent()
+        }
+    }, [reloadEvent]);
+
+    const handleReloadSearch = () => {
+        if (reloadEvent) {
+          handleSearch();
+          resetReloadEvent();
+        }
+    };
+      
+    useEffect(() => {
+        handleReloadSearch();
+    }, [reloadEvent]);
+      
     const handleSearch = async () => {
         setInitialLoad(true);
         setIsLoading(true);
@@ -57,11 +97,10 @@ export default function SearchEvent() {
             calendarId: calendarId,
             status: status
         };
-
+      
         try {
             const response = await axiosClient.post('/events/search', payload);
             setEventList(response.data.data);
-            setReloadEvent(false);
             setIsLoading(false);
             setIsLoadingData(false);
             setCount(response.data.data.length);
@@ -69,10 +108,33 @@ export default function SearchEvent() {
             console.log(error);
             setIsLoading(false);
         }
-    }
+        
+        if (!reloadEvent) {
+          localStorage.setItem('searchKeyword', keyword);
+          localStorage.setItem('searchStartTime', startTime);
+          localStorage.setItem('searchEndTime', endTime);
+          localStorage.setItem('searchCalendarId', calendarId);
+          localStorage.setItem('searchStatus', status);
+        }
+    };
 
-    function handleExportEvent() {
-        axiosClient.post('/search-event/export', null, { responseType: 'blob' })
+    const handleReset = () => {
+        setKeyword('');
+        setStartTime('');
+        setEndTime('');
+        setCalendarId('');
+        setStatus('');
+    };
+
+    function handleExportEvent() 
+        {const payload = {
+            keyword: keyword,
+            startTime: startTime,
+            endTime: endTime,
+            calendarId: calendarId,
+            status: status
+        };
+        axiosClient.post('/search-event/export', payload, { responseType: 'blob' })
         .then(response => {
             const blobUrl = URL.createObjectURL(response.data);
             const downloadLink = document.createElement('a');
@@ -108,14 +170,19 @@ export default function SearchEvent() {
 
     return (
         <div>
+            {selectedEvent && showEventDetails && (
+                <EventDetailSub 
+                    selectedEvent={selectedEvent} 
+                />
+            )}
             {loading && <Loading />}
-            {success || deleted ? (
+            {updated || deleted ? (
                 <div className="loading-overlay-wrapper">
                     <div className="notification-content-overlay">
                         <div className="loading-box">
                             <div className="loading-content">
-                                {success ? (
-                                    <p>Phục hồi thành công.</p>
+                                {updated ? (
+                                    <p>Thành công.</p>
                                     ) : deleted ? (
                                     <p>Xóa thành công.</p>
                                 ) : null}
@@ -168,11 +235,11 @@ export default function SearchEvent() {
                     <div className="col">
                         <div className="d-flex mt-1 text-secondary ms-2 mt-3 mb-2">
                             <h4 className='mt-2 mb-2'>Search Event</h4>
-                            <div className="search-container ms-5 mt-1">
+                            <div className="search--container ms-5 mt-1">
                                 <div className="input-group search-input-container">
                                     <select
                                         className="form-control search-input custom-search-input"
-                                        style={{ width: "25%" }}
+                                        style={{ width: "200px" }}
                                         value={calendarId}
                                         onChange={(e) => setCalendarId(e.target.value)}
                                     >
@@ -225,6 +292,9 @@ export default function SearchEvent() {
                                     <button className="btn btn-primary search-button" onClick={handleSearch}>
                                         Search
                                     </button>
+                                    <button className="btn btn-primary search-button" onClick={handleReset}>
+                                        Reset
+                                    </button>
                                 </div>
                             </div>
                             <button className='clear-all-trash-button btn btn-outline-secondary rounded-2 border-0 mt-1 ms-1 mb-1'
@@ -265,7 +335,7 @@ export default function SearchEvent() {
                                         <div className='col-2'>Status</div>
                                         <div className='col-1'>Action</div>
                                     </div>
-                                    <div className="event-list-container">
+                                    <div className="search-event-list-container">
                                         {eventList.map(event => (
                                             <div key={event.id} className='row border align-items-center on-event-data'>
                                                 <div className='col-2 d-flex ps-4'>
@@ -292,6 +362,12 @@ export default function SearchEvent() {
                                                     <span className='ms-1'>{event.status}</span>
                                                 </div>
                                                 <div className='col-1'>
+                                                    <button
+                                                        title='See detail'
+                                                        className="delete-button btn btn-outline-secondary rounded-5 border-0 "
+                                                        onClick={() => handleSelectEvent(event)}>
+                                                        <FaEye />
+                                                    </button>
                                                     <button
                                                         title='Move to trash'
                                                         className="delete-button btn btn-outline-secondary rounded-5 border-0 "

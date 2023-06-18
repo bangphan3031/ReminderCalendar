@@ -12,9 +12,6 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CompletedEventExport;
 use App\Exports\InCompleteEventExport;
-use Illuminate\Support\Facades\Response;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
@@ -91,7 +88,7 @@ class EventController extends Controller
                 'message' => 'Calendar not found',
             ], 404);
         }
-        $events = Event::where('events.calendar_id', $calendar->id)
+        $events = Event::where('events.calendar_id', $calendar->id)->where('events.status', '=', 'incomplete')
                 ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
                 ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
                 ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
@@ -156,7 +153,7 @@ class EventController extends Controller
         $user = auth()->user();
         $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
         $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
-        $events_upcomming = Event::WhereIn('events.id', $event_id)    
+        $events_upcomming = Event::WhereIn('events.id', $event_id)->where('events.status', '=', 'incomplete')    
                 ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
                 ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
                 ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')

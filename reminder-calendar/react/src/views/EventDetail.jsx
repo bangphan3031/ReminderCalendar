@@ -18,16 +18,11 @@ export default function EventDetail(props) {
     handleCloseEventDetails()
   }  
 
-  const updateData = {
-    ...selectedEvent,
-    status: 'completed'
-  };
-
   const handleMarkCompletedEvent = async (eventId) => {
     handleCloseEventDetails()
     setLoading(true)
     try {
-      const response = await axiosClient.put(`/event/${eventId}`, updateData)
+      const response = await axiosClient.patch(`/event/mark-completed/${eventId}`)
       console.log(response.data)
       setLoading(false)
       setUpdated(true)

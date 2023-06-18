@@ -520,3 +520,8 @@ header .btn:hover {
     overflow-y: auto;
     overflow-x: hidden;
 }
+.search-event-list-container {
+    max-height: 71vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}

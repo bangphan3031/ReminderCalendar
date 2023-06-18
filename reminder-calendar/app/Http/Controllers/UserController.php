@@ -20,7 +20,7 @@ class UserController extends Controller
 
     public function getAllUser()
     {
-        $users = User::select('id', 'name', 'email')->where('id', '<>', auth()->user()->id)->get();
+        $users = User::select('id', 'name', 'email')->where('id', '<>', auth()->user()->id)->where('email_verified_at', '<>', null)->get();
         return response()->json($users);
     }
 

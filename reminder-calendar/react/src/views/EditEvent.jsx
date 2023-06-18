@@ -8,9 +8,11 @@ import { AppContext } from '../contexts/AppContext';
 
 export default function EditEvent(props) {
     const { 
+        handleEditSuccess,
         selectedEvent, 
         setUpdated, setLoading,
         handleCloseEventDetails,
+        setSuccess,
     } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -111,14 +113,17 @@ export default function EditEvent(props) {
     }, [selectedEvent]);  
 
     useEffect(() => {
-        axiosClient.get(`/user/${event_id}`)
+        const eventId = selectedEvent && selectedEvent.event_id !== null ? selectedEvent.event_id : event_id;
+        
+        axiosClient
+            .get(`/user/${eventId}`)
             .then(response => {
                 setAttendeeList(response.data);
             })
             .catch(error => {
                 console.log(error);
             });
-    }, [event_id]);
+    }, [selectedEvent, event_id]);
       
     useEffect(() => {
         axiosClient.get('/user')
@@ -188,7 +193,9 @@ export default function EditEvent(props) {
     };
 
     const handleCloseClick = () => {
-        navigate('/');
+        navigate(-1);
+        handleCloseEventDetails()
+        handleEditSuccess();
     };
     
     const handleInputClick = () => {
@@ -249,7 +256,7 @@ export default function EditEvent(props) {
 
     const onSubmit = async (ev) => {
         ev.preventDefault()
-        navigate('/');
+        navigate(-1);
         handleCloseEventDetails()
         setLoading(true);
         const startTime = moment(startTimeRef.current.value).format('YYYY-MM-DDTHH:mm:ss');
@@ -321,6 +328,7 @@ export default function EditEvent(props) {
             await Promise.all([...deleteReminderPromises, ...reminderPromises, ...deleteAttendeePromises, ...attendeePromises]);
             setUpdated(true)
             setLoading(false);
+            handleEditSuccess();
             setTimeout(() => {
                 setUpdated(false)
             }, 3000);
@@ -368,6 +376,7 @@ export default function EditEvent(props) {
                                         value={formData.title ? formData.title : ''}
                                         onChange={(event) => setFormData({...formData, title: event.target.value})}
                                         className='title-event-input form-control border-0 border-bottom'
+                                        disabled={selectedEvent && selectedEvent.event_id !== null}
                                     />
                                 </div>
                             </div>
@@ -383,6 +392,7 @@ export default function EditEvent(props) {
                                         style={{fontSize: 15.5, marginLeft: 10, marginRight: 5}}
                                         checked={isAllDay}
                                         onChange={handleAllDayChange}
+                                        disabled={selectedEvent && selectedEvent.event_id !== null}
                                     />
                                     <label className='form-check-label' htmlFor='all-day-checkbox'>
                                         All day
@@ -406,6 +416,7 @@ export default function EditEvent(props) {
                                         }
                                     }}
                                     className='event-input input-time form-control border-0 border-bottom'
+                                    disabled={selectedEvent && selectedEvent.event_id !== null}
                                 />
                                 <div>
                                     <p className='lable-to pt-2'>to</p>
@@ -415,6 +426,7 @@ export default function EditEvent(props) {
                                     onChange={(event) => setFormData({...formData, end_time: event.target.value})}
                                     min={formData.start_time}
                                     className='event-input input-time form-control border-0 border-bottom'
+                                    disabled={selectedEvent && selectedEvent.event_id !== null}
                                 />
                             </div>
                         </div>
@@ -436,6 +448,7 @@ export default function EditEvent(props) {
                                         value={formData.location ? formData.location : ''}
                                         onChange={(event) => setFormData({...formData, location: event.target.value})}
                                         className='event-input form-control border-0 border-bottom text-xl w-100'
+                                        disabled={selectedEvent && selectedEvent.event_id !== null}
                                     />
                                 </div>
                             </div>
@@ -555,6 +568,7 @@ export default function EditEvent(props) {
                                         value={formData.description ? formData.description : ''}
                                         onChange={(event) => setFormData({...formData, description: event.target.value})}
                                         className='event-input-area form-control border-0 border-bottom text-xl w-100'
+                                        disabled={selectedEvent && selectedEvent.event_id !== null}
                                     />
                                 </div>
                             </div>
@@ -574,17 +588,22 @@ export default function EditEvent(props) {
                         <div className="row">
                             <div className="col-11 pt-1 add-attendee">
                                 <div className='dropdown'>
-                                    <input type="text" placeholder='Add attendee' 
+                                    <input
+                                        type="text"
+                                        placeholder='Add attendee'
                                         className='form-control'
-                                        onClick={handleInputClick} 
-                                        value={searchKeyword} onChange={handleSearchChange}/>
+                                        onClick={handleInputClick}
+                                        value={searchKeyword}
+                                        onChange={handleSearchChange}
+                                        disabled={selectedEvent && selectedEvent.event_id !== null}
+                                    />
                                     {showUserList && (
                                         <div ref={userListRef} className='user-list'>
-                                        {filteredUsers.map((attendee) => (
-                                            <div key={attendee.id} onClick={() => handleUserClick(attendee)}>
+                                            {filteredUsers.map((attendee) => (
+                                                <div key={attendee.id} onClick={() => handleUserClick(attendee)}>
                                                 {attendee.name} - {attendee.email}
-                                            </div>
-                                        ))}
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                     {attendeeList.length > 0 && (
@@ -596,10 +615,13 @@ export default function EditEvent(props) {
                                                 {attendeeList.map((attendee) => (
                                                 <li key={attendee.id} title={attendee.email}>
                                                     {attendee.name}
-                                                    <button type='button' 
+                                                    <button
+                                                        type='button'
                                                         className='btn btn-outline-secondary border-0'
-                                                        onClick={() => handleDeleteClick(attendee)}>
-                                                        <FaTimes/>
+                                                        onClick={() => handleDeleteClick(attendee)}
+                                                        disabled={selectedEvent && selectedEvent.event_id !== null}
+                                                    >
+                                                        <FaTimes />
                                                     </button>
                                                 </li>
                                                 ))}

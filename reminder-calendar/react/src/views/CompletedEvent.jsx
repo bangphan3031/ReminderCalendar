@@ -227,9 +227,9 @@ export default function CompletedEvent() {
                                                 <div className='col-2'>
                                                     <span className='ms-1'>{moment(event.update_at).format('DD-MM-YYYY')}</span>
                                                 </div>
-                                                <div className='col-1 d-flex'>
+                                                <div className='col-1'>
                                                     <button
-                                                        title='Incomplete'
+                                                        title='Unmark completed'
                                                         className="restore-button btn btn-outline-secondary rounded-5 border-0 "
                                                         onClick={() => handleUnCompletedEvent(event.id)}>
                                                         <FaRedoAlt />
