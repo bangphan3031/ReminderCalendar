@@ -12,6 +12,7 @@ export default function CreateEvent(props) {
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
     const [addingEvent, setAddingEvent] = useState(false);
+    const [events, setEvents] = useState([]);
     const {
         reloadEvent, 
         handleCreateSuccess, 
@@ -49,7 +50,45 @@ export default function CreateEvent(props) {
             .catch(error => {
             console.log(error);
         });
-    }, []);    
+    }, []); 
+      
+    useEffect(() => {
+        axiosClient.get('/event')
+          .then(response => {
+            setEvents(response.data.data);
+          })
+          .catch(error => {
+            console.error(error);
+          });
+    }, []); 
+
+    const checkEventConflict = (start, end) => {
+        return events.some(event => {
+            if (event.is_all_day === 1) {
+                const eventDate = moment(event.start_time).format('YYYY-MM-DD');
+                const inputDate = moment(start).format('YYYY-MM-DD');
+                return inputDate === eventDate;
+            } else {
+                const eventStart = moment(event.start_time).format('YYYY-MM-DDTHH:mm:ss');
+                const eventEnd = moment(event.end_time).format('YYYY-MM-DDTHH:mm:ss');
+                let startTime, endTime;
+      
+                if (allDayRef.current.checked) {
+                    startTime = moment(start).startOf('day').format('YYYY-MM-DDTHH:mm:ss');
+                    endTime = moment(end).endOf('day').format('YYYY-MM-DDTHH:mm:ss');
+                } else {
+                    startTime = moment(start).format('YYYY-MM-DDTHH:mm:ss');
+                    endTime = moment(end).format('YYYY-MM-DDTHH:mm:ss');
+                }
+      
+                return (
+                    (startTime >= eventStart && startTime <= eventEnd) ||
+                    (endTime >= eventStart && endTime <= eventEnd) ||
+                    (startTime <= eventStart && endTime >= eventEnd)
+                );
+            }
+        });
+    };      
 
     const handleCloseClick = () => {
         props.onClose();
@@ -177,25 +216,40 @@ export default function CreateEvent(props) {
                         </label>
                     </div>
                 </div>
+                <div className='row ps-5'>
+                    {checkEventConflict(formData.start_time, formData.end_time) && (
+                    <span className="text-danger">
+                        Thời gian trùng với một sự kiện đã tồn tại!
+                    </span>
+                    )}
+                </div>
                 <div className="row p-3 pt-0">
                     <div className="col-1 pt-2"><FaClock/></div>
                     <div className="col d-flex">
-                        <input ref={startTimeRef} type='date' name='start_time' required
-                            value={formData.start_time}
-                            onChange={(event) => setFormData({...formData, start_time: event.target.value})}
-                            onBlur={() => {
-                                if (formData.end_time < formData.start_time) {
-                                  setFormData({ ...formData, end_time: formData.start_time });
-                                }
-                            }}
-                            className='input-time form-control border-0 border-bottom'
+                        <input
+                        ref={startTimeRef}
+                        type='date'
+                        name='start_time'
+                        required
+                        value={formData.start_time}
+                        onChange={(event) => setFormData({ ...formData, start_time: event.target.value })}
+                        onBlur={() => {
+                            if (formData.end_time < formData.start_time) {
+                            setFormData({ ...formData, end_time: formData.start_time });
+                            }
+                        }}
+                        className='input-time form-control border-0 border-bottom'
                         />
                         <p className='pt-1'>_</p>
-                        <input ref={endTimeRef} type='date' name='end_time' required
-                            value={formData.end_time}
-                            onChange={(event) => setFormData({...formData, end_time: event.target.value})}
-                            min={formData.start_time}
-                            className='input-time form-control border-0 border-bottom'
+                        <input
+                        ref={endTimeRef}
+                        type='date'
+                        name='end_time'
+                        required
+                        value={formData.end_time}
+                        onChange={(event) => setFormData({ ...formData, end_time: event.target.value })}
+                        min={formData.start_time}
+                        className='input-time form-control border-0 border-bottom'
                         />
                     </div>
                 </div>
@@ -248,7 +302,7 @@ export default function CreateEvent(props) {
                     <Link to={`/create-event?title=${formData.title}&allday=${formData.is_all_day}&start=${formData.start_time}&end=${formData.end_time}&location=${formData.location}&description=${formData.description}`}>
                         <button className='btn btn-secondary mx-2 fw-bold' type='button'>More option</button>
                     </Link>
-                        <button className='btn btn-secondary mx-2 fw-bold' type='submit'>Save</button>
+                    <button className='btn btn-secondary mx-2 fw-bold' type='submit' disabled={checkEventConflict(formData.start_time, formData.end_time)}>Save</button>
                     </div>
                 </div>
             </form>

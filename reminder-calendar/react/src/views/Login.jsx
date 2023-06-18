@@ -127,9 +127,9 @@ export default function Login() {
               <div className="input-group mb-3">
                 <button onClick={onSubmit} className="btn btn-lg btn-primary w-100 fs-6 fw-bold">Login</button>
               </div>
-              <div className="input-group mb-3">
+              {/* <div className="input-group mb-3">
                 <button type="button" onClick={handleGoogleLogin} className="btn btn-lg btn-outline-danger w-100 fs-6 fw-bold"><FaGoogle/><small> Login with Google</small></button>
-              </div>
+              </div> */}
               <div className="row">
                 <small>Don't have an account? <Link to="/signup" className="link-primary fw-bold text-decoration-none">Sign up</Link></small>
               </div>

@@ -18,6 +18,7 @@ export default function CreateEventDetail() {
     const [selectedUser, setSelectedUser] = useState([null]);
     const [selectedCalendar, setSelectedCalendar] = useState(null);
     const [selectedCalendarId, setSelectedCalendarId] = useState(null);
+    const [events, setEvents] = useState([]);
     const {
         calendarSelected,
         setCalendarSelected,
@@ -131,6 +132,16 @@ export default function CreateEventDetail() {
         };
     }, []);
 
+    useEffect(() => {
+        axiosClient.get('/event')
+          .then(response => {
+            setEvents(response.data.data);
+          })
+          .catch(error => {
+            console.error(error);
+          });
+    }, []);   
+
     const handleSearchChange = (event) => {
         setSearchKeyword(event.target.value);
     };
@@ -235,7 +246,45 @@ export default function CreateEventDetail() {
             setLoading(false);
             alert('Đã có lỗi xảy ra. Vui lòng thử lại sau!');
         }
-    };    
+    };   
+    
+    useEffect(() => {
+        axiosClient.get('/event')
+          .then(response => {
+            setEvents(response.data.data);
+          })
+          .catch(error => {
+            console.error(error);
+          });
+    }, []); 
+
+    const checkEventConflict = (start, end) => {
+        return events.some(event => {
+            if (event.is_all_day === 1) {
+                const eventDate = moment(event.start_time).format('YYYY-MM-DD');
+                const inputDate = moment(start).format('YYYY-MM-DD');
+                return inputDate === eventDate;
+            } else {
+                const eventStart = moment(event.start_time).format('YYYY-MM-DDTHH:mm:ss');
+                const eventEnd = moment(event.end_time).format('YYYY-MM-DDTHH:mm:ss');
+                let startTime, endTime;
+      
+                if (allDayRef.current.checked) {
+                    startTime = moment(start).startOf('day').format('YYYY-MM-DDTHH:mm:ss');
+                    endTime = moment(end).endOf('day').format('YYYY-MM-DDTHH:mm:ss');
+                } else {
+                    startTime = moment(start).format('YYYY-MM-DDTHH:mm:ss');
+                    endTime = moment(end).format('YYYY-MM-DDTHH:mm:ss');
+                }
+      
+                return (
+                    (startTime >= eventStart && startTime <= eventEnd) ||
+                    (endTime >= eventStart && endTime <= eventEnd) ||
+                    (startTime <= eventStart && endTime >= eventEnd)
+                );
+            }
+        });
+    };   
       
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {
@@ -289,6 +338,13 @@ export default function CreateEventDetail() {
                                     </label>
                                 </div>
                             </div>
+                        </div>
+                        <div className='row ps-5'>
+                            {checkEventConflict(formData.start_time, formData.end_time) && (
+                            <span className="text-danger">
+                                Thời gian trùng với một sự kiện đã tồn tại!
+                            </span>
+                            )}
                         </div>
                         <div className="row p-3 pt-0">
                             <div className="col-1 pt-2">
@@ -463,7 +519,12 @@ export default function CreateEventDetail() {
                     <div className='col-6'>
                         <div className="row p-1">
                             <div className="col-11">
-                                <button className='submit-event-button btn btn-primary fw-bold' type='submit'>Save</button>
+                                <button className='submit-event-button btn btn-primary fw-bold' 
+                                type='submit'
+                                disabled={checkEventConflict(formData.start_time, formData.end_time)}
+                                >
+                                    Save
+                                </button>
                             </div>
                         </div> 
                         <div className="row">

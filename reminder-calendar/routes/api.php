@@ -35,6 +35,11 @@ Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('logi
 Route::get('auth/google/callback', [GoogleAuthController::class, 'callbackGoogle']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
+Route::prefix('v2')->group(function ($router) {
+    Route::post('/login', 'App\Http\Controllers\v2\AuthController@login')->middleware('verified');
+    Route::post('/register', 'App\Http\Controllers\v2\AuthController@register');
+});
+
 Route::group(['middleware'=>'auth:api'], function($router){
     Route::apiResource('admin/user', 'App\Http\Controllers\Admin\UserController');
     Route::apiResource('admin/calendar', 'App\Http\Controllers\Admin\CalendarController');

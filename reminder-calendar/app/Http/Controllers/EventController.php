@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CompletedEventExport;
 use App\Exports\InCompleteEventExport;
+use App\Models\Reminder;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
@@ -300,20 +302,20 @@ class EventController extends Controller
     // Cap nhat event
     public function updateEvent(Request $request, string $id)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'title' => 'required|string',
             'is_all_day' => 'required',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after_or_equal:start_time'
         ]);
 
-        if($validator->fails()){
-            return response()->json($validator->errors(),400);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
         }
 
         $user = auth()->user();
         $calendar = Calendar::where('user_id', $user->id)->find($request->calendar_id);
-        if(!$calendar){
+        if (!$calendar) {
             return response()->json([
                 'message' => 'Calendar not found',
             ], 404);
@@ -337,6 +339,24 @@ class EventController extends Controller
             $event->status = $request->status;
         }
         $event->save();
+
+        $events = Event::where('event_id', $id);
+        if ($events) {
+            $events->each(function ($events) use ($request) {
+                $events->calendar_id = $events->calendar_id;
+                $events->title = $request->title;
+                $events->is_all_day = $request->is_all_day;
+                $events->start_time = $request->start_time;
+                $events->end_time = $request->end_time;
+                $events->location = $request->location;
+                $events->description = $request->description;
+                if ($request->status) {
+                    $events->status = $request->status;
+                }
+                $events->save();
+            });
+        }
+
         return response()->json([
             'message' => 'Event updated',
             'data' => $event,
@@ -396,16 +416,31 @@ class EventController extends Controller
         $attendee = Attendee::where('event_id',$id)->orWhereIn('event_id', $event_id)->get();
         if($attendee) {
             $attendee->each(function ($attendees) {
-                $attendees->delete();
+                $attendees->forceDelete();
             });
         }
         if($attendee_event){
             $attendee_event->each(function ($events) {
-                $events->delete();
+                $events->forceDelete();
             });
         }
+        $reminders = Reminder::where('event_id', $event->id)->get();
+
+        $jobIdsToDelete = [];
+
+        foreach ($reminders as $reminder) {
+            $reminder_id = "rmd" . $reminder->id;
+            $jobIds = DB::table('jobs')
+                ->where('payload', 'like', "%" . $reminder_id . "%")
+                ->pluck('id');
+            $jobIdsToDelete = array_merge($jobIdsToDelete, $jobIds->toArray());
+        }
+        DB::table('jobs')->whereIn('id', $jobIdsToDelete)->delete();
+        $reminders->each(function ($reminder) {
+            $reminder->delete();
+        });
         $event->delete();
-        return response()->json(['message' => 'Event deleted']);
+        return response()->json(['message' => 'Event deleted' , $jobIdsToDelete]);
     }
 
     public function restoreEvent(string $id)

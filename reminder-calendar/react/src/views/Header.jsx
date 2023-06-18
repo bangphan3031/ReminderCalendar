@@ -30,6 +30,11 @@ export default function Header() {
             localStorage.removeItem("selectedValue")
             localStorage.removeItem("selectedCalendars")
             localStorage.removeItem("checkedBoxes")
+            localStorage.removeItem("searchCalendarId")
+            localStorage.removeItem("searchKeyword")
+            localStorage.removeItem("searchStartTime")
+            localStorage.removeItem("searchEndTime")
+            localStorage.removeItem("searchStatus")
         })
         .catch(error => {
             alert('Đã có lỗi xảy ra! Vui lòng thử lại sau') 

@@ -114,6 +114,20 @@ class ReminderController extends Controller
                 'message' => 'Event not found',
             ], 404);
         }
+
+        $reminder = Reminder::where([
+            'event_id' => $event->id,
+            'method' => $request->method,
+            'time' => $request->time,
+            'kind_of_time' => $request->kind_of_time,
+        ])->first();
+        
+        if ($reminder) {
+            return response()->json([
+                'message' => 'Reminder already exists',
+                'data' => $reminder,
+            ], 200);
+        }
         
         $reminder = Reminder::create([
             'event_id' => $event->id,
@@ -201,7 +215,7 @@ class ReminderController extends Controller
 
         $reminder_id = "rmd".$id;
         $jobIds = DB::table('jobs')
-            ->where('payload', 'like', "%reminder_id%")
+            ->where('payload', 'like', "%".$reminder_id."%")
             ->pluck('id');
         foreach ($jobIds as $jobId) {
             DB::table('jobs')->where('id', $jobId)->delete();

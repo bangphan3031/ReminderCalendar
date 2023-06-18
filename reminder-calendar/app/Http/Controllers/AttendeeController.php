@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Attendee;
 use App\Models\Calendar;
 use App\Models\Event;
+use App\Models\Reminder;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class AttendeeController extends Controller
@@ -154,10 +156,25 @@ class AttendeeController extends Controller
         $event = Event::where('event_id', $attendee->event_id)
                     ->whereIn('calendar_id', $calendarIds)
                     ->first();
+        $reminders = Reminder::where('event_id', $event->id)->get();
+
+        $jobIdsToDelete = [];
+
+        foreach ($reminders as $reminder) {
+            $reminder_id = "rmd" . $reminder->id;
+            $jobIds = DB::table('jobs')
+                ->where('payload', 'like', "%" . $reminder_id . "%")
+                ->pluck('id');
+            $jobIdsToDelete = array_merge($jobIdsToDelete, $jobIds->toArray());
+        }
+        DB::table('jobs')->whereIn('id', $jobIdsToDelete)->delete();
+        $reminders->each(function ($reminder) {
+            $reminder->delete();
+        });
         if($event) {
-            $event->delete();
+            $event->forceDelete();
         }
         $attendee->delete();
-        return response()->json(['message' => 'Attendee deleted', 'data' => $attendee]);
+        return response()->json(['message' => 'Attendee deleted', 'data' => $jobIdsToDelete]);
     }
 }
