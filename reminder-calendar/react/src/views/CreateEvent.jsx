@@ -216,7 +216,7 @@ export default function CreateEvent(props) {
                         </label>
                     </div>
                 </div>
-                <div className='row ps-5'>
+                <div className='row ps-5' style={{marginLeft: "10px"}}>
                     {checkEventConflict(formData.start_time, formData.end_time) && (
                     <span className="text-danger">
                         Thời gian trùng với một sự kiện đã tồn tại!

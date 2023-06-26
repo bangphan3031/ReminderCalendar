@@ -34,6 +34,8 @@ export default function EditEvent(props) {
     const [timeStart, setTimeStart] = useState(null);
     const [timeEnd, setTimeEnd] = useState(null);
     const [events, setEvents] = useState([]);
+    const [eventEdit, setEventEdit] = useState(null);
+    const [attendeeEvents, setAttendeeEvents] = useState([]);
     const userListRef = useRef(null);
     const titleRef = useRef();
     const allDayRef = useRef();
@@ -344,16 +346,29 @@ export default function EditEvent(props) {
 
     useEffect(() => {
         axiosClient.get('/event')
-          .then(response => {
-            setEvents(response.data.data);
-          })
-          .catch(error => {
-            console.error(error);
-          });
-    }, []); 
+            .then(response => {
+                const filteredEvents = response.data.data.filter(event => event.id !== parseInt(event_id));
+                setEvents(filteredEvents);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, []);
+
+    useEffect(() => {
+        axiosClient.get(`/event/${event_id}`)
+            .then(response => {
+                console.log(response.data.data); 
+                const newEventEdit = response.data.data.event_id;
+                setEventEdit(newEventEdit);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, []);
 
     const checkEventConflict = (start, end) => {
-        return events.filter(event => event.id !== selectedEvent.id).some(event => {
+        return events.some(event => {
             if (event.is_all_day === 1) {
                 const eventDate = moment(event.start_time).format('YYYY-MM-DD');
                 const inputDate = moment(start).format('YYYY-MM-DD');
@@ -380,16 +395,109 @@ export default function EditEvent(props) {
         });
     }; 
 
+    const fetchAttendeeEvents = async () => {
+        try {
+            const promises = attendeeList.map((attendee) =>
+                axiosClient.get(`/event/user/${attendee.id}`)
+            );
+            const responses = await Promise.all(promises);
+            const attendeeEventData = responses.map((response) => response.data.data);
+
+            const filteredAttendeeEventData = attendeeEventData.map((events) => {
+                return events.filter((event) => {
+                    if (eventEdit != null) {
+                        return event.event_id != eventEdit;
+                    } else {
+                        return event.event_id != event_id;
+                    }
+                });
+            });
+
+            setAttendeeEvents(filteredAttendeeEventData);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAttendeeEvents();
+    }, [attendeeList, eventEdit]);
+
+    const renderAttendeeList = () => {
+        return attendeeList.map((attendee, index) => {
+            const attendeeEventData = attendeeEvents[index] || [];
+            const hasConflict =
+                formData.start_time &&
+                formData.end_time &&
+                attendeeEventData &&
+                checkAttendeeEventConflict(
+                    formData.start_time,
+                    formData.end_time,
+                    attendeeEventData
+                );
+            return (
+                <li key={attendee.id} title={attendee.email}>
+                    <div>
+                        {hasConflict && (
+                            <p className="text-danger m-0">Người dùng đã bận</p>
+                        )}
+                        <p className="attendee-name m-0">{attendee.name}</p>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-outline-secondary border-0"
+                        onClick={() => handleDeleteClick(attendee)}
+                        disabled={selectedEvent && selectedEvent.event_id !== null}
+                    >
+                        <FaTimes />
+                    </button>
+                </li>
+            );
+        });
+    };
+
+    const checkAttendeeEventConflict = (start, end, attendeeEvents) => {
+        return attendeeEvents.some(event => {
+            if (event.is_all_day === 1) {
+                const eventDate = moment(event.start_time).format('YYYY-MM-DD');
+                const inputDate = moment(start).format('YYYY-MM-DD');
+                return inputDate === eventDate;
+            } else {
+                const eventStart = moment(event.start_time).format('YYYY-MM-DDTHH:mm:ss');
+                const eventEnd = moment(event.end_time).format('YYYY-MM-DDTHH:mm:ss');
+                let startTime, endTime;
+        
+                if (allDayRef.current.checked) {
+                    startTime = moment(start).startOf('day').format('YYYY-MM-DDTHH:mm:ss');
+                    endTime = moment(end).endOf('day').format('YYYY-MM-DDTHH:mm:ss');
+                } else {
+                    startTime = moment(start).format('YYYY-MM-DDTHH:mm:ss');
+                    endTime = moment(end).format('YYYY-MM-DDTHH:mm:ss');
+                }
+        
+                const isConflict =
+                (startTime >= eventStart && startTime <= eventEnd) ||
+                (endTime >= eventStart && endTime <= eventEnd) ||
+                (startTime <= eventStart && endTime >= eventEnd);
+        
+                return isConflict;
+            }
+        });
+    };
+      
+    const hasAttendeeConflict = () => {
+        return attendeeList.some((attendee, index) => {
+            const attendeeEventData = attendeeEvents[index] || [];
+            return checkAttendeeEventConflict(formData.start_time, formData.end_time, attendeeEventData);
+        });
+    };
+
     const handleKeyDown = (ev) => {
         if (ev.keyCode === 13) {
           ev.preventDefault();
           handleSubmit(ev);
         }
     };
-
-    useEffect(()=>{
-        console.log(isAllDay)
-    },[isAllDay])
 
     return (
         <div className="">
@@ -439,9 +547,9 @@ export default function EditEvent(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className='row ps-5'>
+                        <div className='row ps-5'  style={{marginLeft: "10px"}}>
                             {checkEventConflict(formData.start_time, formData.end_time) && (
-                            <span className="text-danger">
+                            <span className="text-danger ps-3">
                                 Thời gian trùng với một sự kiện đã tồn tại!
                             </span>
                             )}
@@ -625,7 +733,7 @@ export default function EditEvent(props) {
                             <div className="col-11">
                                 <button className='submit-event-button btn btn-primary fw-bold' 
                                     type='submit'
-                                    disabled={checkEventConflict(formData.start_time, formData.end_time)}
+                                    disabled={checkEventConflict(formData.start_time, formData.end_time) || hasAttendeeConflict()}
                                 >
                                     Save
                                 </button>
@@ -663,19 +771,7 @@ export default function EditEvent(props) {
                                                 <p className='pt-3'>Attendee List:</p>
                                             </div>
                                             <ul className='attendee-list'>
-                                                {attendeeList.map((attendee) => (
-                                                <li key={attendee.id} title={attendee.email}>
-                                                    {attendee.name}
-                                                    <button
-                                                        type='button'
-                                                        className='btn btn-outline-secondary border-0'
-                                                        onClick={() => handleDeleteClick(attendee)}
-                                                        disabled={selectedEvent && selectedEvent.event_id !== null}
-                                                    >
-                                                        <FaTimes />
-                                                    </button>
-                                                </li>
-                                                ))}
+                                                {renderAttendeeList()}
                                             </ul>
                                         </div>
                                     )}

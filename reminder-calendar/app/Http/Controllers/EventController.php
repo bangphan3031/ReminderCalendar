@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CompletedEventExport;
 use App\Exports\InCompleteEventExport;
 use App\Models\Reminder;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
@@ -91,6 +92,31 @@ class EventController extends Controller
             ], 404);
         }
         $events = Event::where('events.calendar_id', $calendar->id)->where('events.status', '=', 'incomplete')
+                ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+                ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+                ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+                ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+                ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+                ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+                ->orderBy('events.start_time')
+                ->get();
+        return response()->json([
+            'message' => 'Get events successful',
+            'data' => $events,
+        ], 200);
+    }
+
+    //Lay danh sach cac su kien theo id user
+    public function getEventWithUser(string $user_id)
+    {
+        $user = User::find($user_id);
+        $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
+        if (!$calendar_id) {
+            return response()->json([
+                'message' => 'Calendar not found',
+            ], 404);
+        }
+        $events = Event::whereIn('events.calendar_id', $calendar_id)->where('events.status', '=', 'incomplete')
                 ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
                 ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
                 ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
@@ -208,7 +234,6 @@ class EventController extends Controller
             ->whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
         $events = Event::onlyTrashed() // Thêm withTrashed() để lấy cả sự kiện đã bị xóa
             ->whereIn('events.id', $event_id)
-            ->where('events.status', '=', 'incomplete')
             ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
             ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
             ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
@@ -267,27 +292,16 @@ class EventController extends Controller
     {
         $user = auth()->user();
         $calendar_id = Calendar::where('user_id', $user->id)->pluck('id')->toArray();
-        if (!$calendar_id) {
-            return response()->json([
-                'message' => 'Calendar not found',
-            ], 404);
-        }
-        $events = Event::find($id);
-        if(!$events->event_id){
-            $event = Event::whereIn('calendar_id', $calendar_id)
-                ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
-                ->select('events.*', 'calendars.color', 'calendars.name')
-                ->find($id);
-        } else {
-            $creator = Event::find($events->event_id)->calendar->user->email;
-            $creator_calendar = Event::find($events->event_id)->calendar->name;
-            $event = Event::whereIn('calendar_id', $calendar_id)
-                ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
-                ->select('events.*', 'calendars.color', 'calendars.name')
-                ->find($id);
-            $event->creator_calendar = $creator_calendar;
-            $event->creator = $creator;
-        }
+        $event_id = Event::whereIn('calendar_id', $calendar_id)->pluck('id')->toArray();
+        $event = Event::whereIn('events.id', $event_id)->where('events.status', '=', 'incomplete')
+            ->join('calendars', 'calendars.id', '=', 'events.calendar_id')
+            ->leftJoin('users', 'users.id', '=', 'calendars.user_id')
+            ->leftJoin('events as parent_event', 'parent_event.id', '=', 'events.event_id')
+            ->leftJoin('calendars as parent_calendar', 'parent_calendar.id', '=', 'parent_event.calendar_id')
+            ->leftJoin('users as parent_user', 'parent_user.id', '=', 'parent_calendar.user_id')
+            ->select('events.*', 'calendars.color', 'calendars.name', 'parent_calendar.name AS creator_calendar', 'parent_user.email AS creator')
+            ->find($id);
+            
         if(!$event) {
             return response()->json([
                 'message' => 'Event not found',

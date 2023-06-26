@@ -7,6 +7,7 @@ import '../css/example.css'
 import { FaGoogle } from "react-icons/fa";
 import { Oval } from 'react-loader-spinner'
 import ForgotPassword from "./ForgotPassword.jsx";
+import logo from "../assets/TamNhuLogo.jpg"
 
 export default function Login() {
   const emailRef = createRef()
@@ -94,10 +95,11 @@ export default function Login() {
           </div>
           <div className="col-6 right-box">
             <div className="row align-items-center">
-              <div className="header-text mb-5 text-center">
+              <div className="header-text mb-3 text-center">
+                <img src={logo} className="img-fluid" width={100}/>
                 <h2>Sign In</h2>
               </div>
-              <div className="input-group">
+              <div className="input-group mt-0">
                 <input ref={emailRef} type="email" className="form-control form-control-lg bg-light fs-6" placeholder="Email" required/>
               </div>
               <div className="error-message-login mt-0">

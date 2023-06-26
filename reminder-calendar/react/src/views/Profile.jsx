@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useEffect } from "react";
 import axiosClient from '../axios-client';
 import { useNavigate } from 'react-router-dom';
 import { FaHome, FaBackward } from "react-icons/fa";
 import { Watch } from 'react-loader-spinner'
+import { AppContext } from '../contexts/AppContext';
 
 export default function Profile() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null); // Thêm state mới để lưu trữ URL của ảnh được chọn
+  const [previewImage, setPreviewImage] = useState(null);
+  const { 
+    setUpdated, setLoading,
+  } = useContext(AppContext); // Thêm state mới để lưu trữ URL của ảnh được chọn
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -54,6 +58,8 @@ export default function Profile() {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
+    navigate(-1);
+    setLoading(true);
   
     const payload = {
       name: name,
@@ -64,21 +70,28 @@ export default function Profile() {
   
     try {
       const editResponse = await axiosClient.put('/profile', payload);
+        setUpdated(true)
+        setLoading(false);
+        setTimeout(() => {
+          setUpdated(false)
+        }, 3000);
   
       if (selectedImage) {
         const formData = new FormData();
         formData.append('image', selectedImage);
         const uploadResponse = await axiosClient.post('/profile/upload', formData);
         console.log(editResponse, uploadResponse);
-  
         // Cập nhật đường dẫn ảnh sau khi upload thành công
         setImage(uploadResponse.data.image);
+        setUpdated(true)
+        setLoading(false);
+        setTimeout(() => {
+          setUpdated(false)
+        }, 3000);
       }
-      alert('Cập nhật thông tin thành công');
-      navigate('/');
     } catch (error) {
       console.error(error);
-      alert('Cập nhật thất bại!');
+      setLoading(false);
     }
   }
 

@@ -71,6 +71,7 @@ Route::group(['middleware'=>'auth:api'], function($router){
     Route::get('/event/week/{date}', [EventController::class, 'getEventInWeek']);
     Route::get('/event/day/{date}', [EventController::class, 'getEventInDay']);
     Route::get('/event/calendar/{calendar_id}', [EventController::class, 'getEventWithCalendar']);
+    Route::get('/event/user/{user_id}', [EventController::class, 'getEventWithUser']);
     Route::get('event', [EventController::class, 'getAllEvent']);
     Route::get('event/completed', [EventController::class, 'getCompletedEvent']);
     Route::get('event/upcoming', [EventController::class, 'getUpcomingEvent']);

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import {useRef, useState} from "react";
 import axiosClient from "../axios-client"
 import {useStateContext} from "../contexts/ContextProvider"
+import logo from "../assets/TamNhuLogo.jpg"
 
 export default function Register() {
 
@@ -14,11 +15,13 @@ export default function Register() {
     const [erEmail, setErEmail] = useState('');
     const [erPassword, setErPassword] = useState('');
     const [erPhone, setErPhone] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const {setUser, setToken} = useStateContext()
 
     const onSubmit = (ev) => {
         ev.preventDefault()
+        setLoading(true);
         const payload = {
             name: nameRef.current.value,
             email: emailRef.current.value, 
@@ -28,9 +31,11 @@ export default function Register() {
         }
         axiosClient.post('/register', payload)
             .then(({data}) => {
+                setLoading(false);
                 alert('Đăng ký thành công! Vui lòng xác thực tài khoản email để có thể đăng nhập.')
             })
             .catch(error => {
+                setLoading(false);
                 setErName(error.response.data.name);
                 setErEmail(error.response.data.email);
                 setErPhone(error.response.data.phone);
@@ -45,7 +50,7 @@ export default function Register() {
                 <div className="col-6 right-box-register">
                     <div className="row align-items-center">
                     <div className="header-text mb-3 text-center">
-                        {/* <img src={logo} className="img-fluid" width={100}/> */}
+                        <img src={logo} className="img-fluid" width={100}/>
                         <h2>Sign Up</h2>
                     </div>
                     <div className="input-group">
@@ -88,7 +93,13 @@ export default function Register() {
                         </div>
                     </div>
                     <div className="input-group mb-3">
-                        <button onClick={onSubmit} className="btn btn-lg btn-primary w-100 fs-6 fw-bold">Register</button>
+                        <button 
+                            onClick={onSubmit}
+                            className="btn btn-lg btn-primary w-100 fs-6 fw-bold"
+                            disabled={loading}
+                        >
+                            {loading ? 'Đang xử lý...' : 'Register'}
+                        </button>
                     </div>
                     <div className="row">
                         <small>Have already an account? <Link to="/login" className="link-primary fw-bold text-decoration-none">Sign in</Link></small>

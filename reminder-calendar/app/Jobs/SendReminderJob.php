@@ -60,7 +60,7 @@ class SendReminderJob implements ShouldQueue
             ];
             Mail::send('emails.reminder', $data, function($message) {
                 $message->to($this->recipient)
-                    ->subject($this->title);
+                    ->subject("Remider email");
             });
         } elseif ($this->method === 'Sms') {
             if (substr($this->recipient, 0, 1) === "0") {
